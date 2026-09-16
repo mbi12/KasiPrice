@@ -1,7 +1,149 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#f4f8fc"><title>KasiPrice — Better prices. A brighter Botswana.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css">
-</head>
-<body><div class="app-shell"><header class="topbar"><a class="brand" href="#deals"><span>Kasi</span>Price</a><p>Better prices. A brighter Botswana.</p><div class="top-actions"><button class="icon-button">♧</button><button class="icon-button">⋮</button></div></header><main id="app" class="view" aria-live="polite"></main><nav class="bottom-nav"><button data-route="deals" class="nav-item active"><span>◆</span><small>Deals</small></button><button data-route="search" class="nav-item"><span>⌕</span><small>Search</small></button><button data-route="watchlist" class="nav-item"><span>♥</span><small>Watchlist</small></button><button data-route="profile" class="nav-item"><span>♙</span><small>Profile</small></button></nav></div><div id="toast" class="toast" role="status"></div><script src="app.js"></script></body></html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#edf5ff" />
+    <title>KasiPrice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-mark">K</div>
+          <div class="brand-copy">
+            <h1>Kasi<span>Price</span></h1>
+            <p>Better prices. A brighter Botswana.</p>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="location-pill" type="button">
+            <span class="location-dot"></span>
+            <span id="selectedLocation">Gaborone</span>
+          </button>
+          <button class="icon-btn" type="button" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4v2.08c0 .7.2 1.38.59 1.96L17.5 12a1 1 0 0 1-.84 1.55H7.34A1 1 0 0 1 6.5 12l1.9-1.96A3.9 3.9 0 0 0 9 9.08V7a3 3 0 1 1 6 0v2.08c0 .18.03.37.09.55l.74 2.4H11.5a.75.75 0 0 0 0 1.5h3.75a.75.75 0 0 0 0-1.5H16l-.74-2.4a3.4 3.4 0 0 1-.09-.55V7a2 2 0 1 0-4 0v2.08a3.3 3.3 0 0 1-.2.97l-.92 2.39h9.3l-.93-2.39a3.3 3.3 0 0 1-.2-.97V7a4.02 4.02 0 0 1 4-4Zm-4 15.5a2 2 0 0 0 4 0h-4Z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-grid">
+        <aside class="left-rail">
+          <section class="panel hero-panel">
+            <div class="eyebrow">Botswana market</div>
+            <h2>Live local pricing</h2>
+            <p>Compare electronics, home gear, and essentials across Choppies, Game, Shoprite, and local retailers.</p>
+            <div class="mini-metrics">
+              <div>
+                <strong>24</strong>
+                <span>Stores</span>
+              </div>
+              <div>
+                <strong>1.2k</strong>
+                <span>Items</span>
+              </div>
+              <div>
+                <strong>0.9%</strong>
+                <span>Avg. drop</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel compact-panel">
+            <div class="section-header">
+              <span>Saved items</span>
+              <button type="button" class="text-btn">View all</button>
+            </div>
+            <div id="savedItemsList" class="saved-list"></div>
+          </section>
+        </aside>
+
+        <section class="content-panel">
+          <div class="search-card panel">
+            <div class="search-row">
+              <div class="search-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 1 0 15a7.5 7.5 0 0 1 0-15Zm0 2a5.5 5.5 0 1 0 0 11a5.5 5.5 0 0 0 0-11Zm7.1 17.4 2.6 2.6-1.4 1.4-2.6-2.6 1.4-1.4Z"/></svg>
+                <input id="searchInput" type="search" placeholder="Search products, brands or deals" aria-label="Search products" />
+              </div>
+              <button id="alertTrigger" class="primary-btn" type="button">Set price alert</button>
+            </div>
+
+            <div class="filter-row">
+              <div class="chip-group" id="categoryFilters"></div>
+              <div class="sort-wrap">
+                <label for="sortBy">Sort</label>
+                <select id="sortBy">
+                  <option value="best">Best price</option>
+                  <option value="cheapest">Lowest total</option>
+                  <option value="rating">Seller rating</option>
+                  <option value="shipping">Fast delivery</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-header top-header">
+            <div>
+              <span class="eyebrow subtle">Today</span>
+              <h2>Top deals in BWP</h2>
+            </div>
+            <button type="button" class="text-btn" id="toggleListView">Grid view</button>
+          </div>
+
+          <div id="productGrid" class="product-grid"></div>
+        </section>
+
+        <aside class="right-rail">
+          <section class="panel deal-panel">
+            <div class="section-header">
+              <span>Deal spotlight</span>
+              <span class="badge success">-22%</span>
+            </div>
+            <div id="dealSpotlight" class="deal-spotlight"></div>
+          </section>
+
+          <section class="panel compact-panel">
+            <div class="section-header">
+              <span>Price alerts</span>
+              <button type="button" class="text-btn">Manage</button>
+            </div>
+            <div id="alertList" class="alert-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <div id="productModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-backdrop" data-close="true"></div>
+      <div class="modal-panel">
+        <button type="button" class="close-modal" aria-label="Close product details">×</button>
+        <div id="modalContent" class="modal-content"></div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-item active" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3.7a1 1 0 0 1 2 0v.9l6.1 4.3A1.7 1.7 0 0 1 20 10.4V18a2 2 0 0 1-2 2h-3v-7H9v7H6a2 2 0 0 1-2-2v-7.6a1.7 1.7 0 0 1 .9-1.5L11 4.6v-.9Zm1 3.9L6 10.9v6.1h12v-6.1l-6-3.3Z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 1 0 15a7.5 7.5 0 0 1 0-15Zm0 2a5.5 5.5 0 1 0 0 11a5.5 5.5 0 0 0 0-11Zm7.1 17.4 2.6 2.6-1.4 1.4-2.6-2.6 1.4-1.4Z"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4c1.74 0 3.41.81 4.5 2.09A6.15 6.15 0 0 1 15.5 4A4.5 4.5 0 0 1 20 8.5c0 3.78-3.4 6.86-8.55 11.5L12 21.35Z"/></svg>
+        <span>Watchlist</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0v1H5v-1Zm18 0v1h-3v-1a5 5 0 0 0-2.48-4.34A4.63 4.63 0 0 0 19 12.5a2.5 2.5 0 0 0 0-5c-.3 0-.6.05-.9.14A5 5 0 0 1 21 12v8Z"/></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+  </body>
+  <script src="app.js"></script>
+</html>
