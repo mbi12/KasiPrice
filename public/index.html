@@ -162,12 +162,10 @@
                   <span>Gaborone, Botswana</span>
                   <span>•</span>
                   <span>+267 72 517 904</span>
-                  <span>•</span>
-                  <span>★ 4.9 Salon Rating</span>
                 </div>
                 <h1>Knotless, Box Braids, Twists &amp; Softdread</h1>
                 <p>
-                  Transparent official BWP pricing from <strong>P130</strong>, tension-free parting, and real-time chair booking with instant confirmation.
+                  Transparent official BWP pricing, tension-free parting, and real-time chair booking with instant confirmation.
                 </p>
               </div>
             </div>
@@ -271,8 +269,8 @@
                   <p class="muted-text">Standard Midback &amp; Butt Length (+P50 for extra-long Knee Length).</p>
                 </div>
                 <div class="flat-rate-right">
-                  <strong class="price-big">P250</strong>
-                  <button type="button" class="btn btn-primary btn-sm" id="bookFlatSpecialtyBtn">Book P250</button>
+                  <strong class="price-big"></strong>
+                  <button type="button" class="btn btn-primary btn-sm" id="bookFlatSpecialtyBtn">Book Specialty</button>
                 </div>
               </div>
             </div>
@@ -412,7 +410,7 @@
                     type="text"
                     id="bookPromoInput"
                     class="input-text"
-                    placeholder="Promo code (e.g. SLAY15)"
+                    placeholder="Promo code"
                     autocomplete="off"
                   />
                   <button type="button" class="btn btn-secondary" id="applyPromoBtn">Apply</button>
@@ -445,11 +443,11 @@
                 <div class="field mt-12">
                   <label for="paymentMethodSelect">Deposit / Payment Method</label>
                   <select id="paymentMethodSelect" class="input-select">
-                    <option value="Orange Money (72517904)">Orange Money → 72517904</option>
-                    <option value="MyZaka (72517904)">MyZaka → 72517904</option>
-                    <option value="Smega (72517904)">Smega → 72517904</option>
-                    <option value="FNB eWallet (72517904)">FNB eWallet → 72517904</option>
-                    <option value="Pay at Parlour (Cash / Card)">Pay at Salon (Cash / Card)</option>
+                    <option value="Orange Money">Orange Money</option>
+                    <option value="MyZaka">MyZaka</option>
+                    <option value="Smega">Smega</option>
+                    <option value="FNB eWallet">FNB eWallet</option>
+                    <option value="Pay at Salon (Cash / Card)">Pay at Salon (Cash / Card)</option>
                   </select>
                 </div>
 
@@ -504,7 +502,7 @@
                     <h3>Nicole Beauty Parlour Desk</h3>
                     <span id="chatOwnerModeTag" class="tag-badge hidden">Replying as Salon</span>
                   </div>
-                  <span class="muted-text">Typical reply: Instant • Direct line: +267 72 517 904</span>
+                  <span class="muted-text">Direct line: +267 72 517 904</span>
                 </div>
               </div>
 
@@ -527,12 +525,7 @@
 
             <div class="chat-messages" id="chatMessagesStream"></div>
 
-            <div class="quick-questions" id="chatQuickChips">
-              <button type="button" data-quick-msg="Hi Nicole! Please share your official BWP braid price list.">Price List</button>
-              <button type="button" data-quick-msg="Do you have an open slot tomorrow morning?">Open Slots</button>
-              <button type="button" data-quick-msg="How many hair packs do I need for Medium Butt-Length Knotless?">Hair Packs Needed</button>
-              <button type="button" data-quick-msg="Do you offer house-calls in Gaborone?">House-Calls</button>
-            </div>
+            <div class="quick-questions" id="chatQuickChips"></div>
 
             <div id="chatAttachmentBar" class="attachment-bar hidden"></div>
 
@@ -813,7 +806,7 @@
                   <form id="adminCredentialsForm" class="form-stack">
                     <div class="field">
                       <label for="credOwnerNameInput">Owner Name</label>
-                      <input type="text" id="credOwnerNameInput" class="input-text" placeholder="Nicole • Parlour Owner" />
+                      <input type="text" id="credOwnerNameInput" class="input-text" placeholder="Owner name" />
                     </div>
                     <div class="field">
                       <label for="credNewPhoneInput">Login Phone Number *</label>
@@ -916,7 +909,7 @@
         <h3 class="mb-12">Add New Hairstyle Service</h3>
         <form id="addStyleForm" class="form-stack">
           <div class="photo-upload-box">
-            <img id="newStylePreviewImg" src="/images/style-01-honey-curly-knotless.jpg" alt="Preview" />
+            <img id="newStylePreviewImg" src="" alt="Preview" />
             <label class="btn btn-secondary btn-sm">
               <input type="file" id="newStylePhotoInput" accept="image/*" hidden />
               Choose Hairstyle Photo
@@ -925,7 +918,7 @@
 
           <div class="field">
             <label for="newStyleName">Service Name *</label>
-            <input type="text" id="newStyleName" class="input-text" required placeholder="e.g. Waist-Length Boho Knotless" />
+            <input type="text" id="newStyleName" class="input-text" required placeholder="Service name" />
           </div>
 
           <div class="form-row-2">
@@ -1133,16 +1126,16 @@
           <form id="addPromoForm" class="form-stack">
             <div class="field">
               <label for="promoTitleInput">Offer Headline *</label>
-              <input type="text" id="promoTitleInput" class="input-text" required value="Month-End Knotless Special" />
+              <input type="text" id="promoTitleInput" class="input-text" required value="" />
             </div>
             <div class="field">
               <label for="promoSubtitleInput">Details</label>
-              <input type="text" id="promoSubtitleInput" class="input-text" value="15% OFF all Medium & Small Knotless Braids" />
+              <input type="text" id="promoSubtitleInput" class="input-text" value="" />
             </div>
             <div class="form-row-2">
               <div class="field">
                 <label for="promoCodeInput">Promo Code *</label>
-                <input type="text" id="promoCodeInput" class="input-text" required value="NICOLE15" />
+                <input type="text" id="promoCodeInput" class="input-text" required value="" />
               </div>
               <div class="field">
                 <label for="promoDiscountInput">Discount (%)</label>
@@ -1152,7 +1145,7 @@
             <div class="form-row-2">
               <div class="field">
                 <label for="promoPriceHighlight">Price Callout</label>
-                <input type="text" id="promoPriceHighlight" class="input-text" value="From P180" />
+                <input type="text" id="promoPriceHighlight" class="input-text" value="" />
               </div>
               <div class="field">
                 <label for="promoThemeSelect">Flyer Style</label>

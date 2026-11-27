@@ -17,21 +17,9 @@ import { renderPromoFlyerToCanvas, renderPromoFlyerBlob, compressImageFile } fro
 
 const store = new SalonStore();
 
-const PACKS_BY_SIZE = {
-  jumbo: '4 packs',
-  large: '4–5 packs',
-  medium: '5–6 packs',
-  s_medium: '6–7 packs',
-  small: '7–8 packs'
-};
+const PACKS_BY_SIZE = {};
 
-const DURATION_BY_SIZE = {
-  jumbo: '2.5 – 3.5 hrs',
-  large: '3 – 4 hrs',
-  medium: '4 – 5 hrs',
-  s_medium: '5 – 6 hrs',
-  small: '6 – 7.5 hrs'
-};
+const DURATION_BY_SIZE = {};
 
 const ui = {
   activeTab: 'services',
@@ -47,11 +35,11 @@ const ui = {
   detailSize: 'medium',
   detailLength: 'midback',
   // Booking form state
-  bookStyleId: 'style-01',
+  bookStyleId: '',
   bookSize: 'medium',
   bookLength: 'midback',
-  bookColorId: '1b',
-  bookStylistId: 'nicole',
+  bookColorId: '',
+  bookStylistId: '',
   bookDate: getUpcomingDates(14)[1]?.iso || getUpcomingDates(14)[0]?.iso,
   bookTime: '09:00',
   bookAddOnIds: new Set(),
@@ -67,7 +55,7 @@ const ui = {
   adminStyleQuery: '',
   pendingAdminCallback: null,
   // Studio uploads & flyers
-  newStyleImage: '/images/style-01-honey-curly-knotless.jpg',
+  newStyleImage: '',
   lastFlyerBlob: null,
   lastFlyerPromo: null
 };
@@ -133,7 +121,7 @@ function switchTab(tabId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (tabId === 'messages') {
-    store.markThreadRead('thread-nicole');
+    store.markThreadRead('');
     renderMessenger();
     scrollChatBottom();
   }
@@ -393,7 +381,7 @@ function renderServiceDetailModal() {
     closeModal('styleDetailModal');
     const msg = `Hi Nicole! I would like to ask about "${s.name}" (${ui.detailSize}, ${ui.detailLength} — ${formatPula(price)}).`;
     store.sendMessage({
-      threadId: 'thread-nicole',
+      threadId: '',
       sender: 'client',
       senderName: 'Client',
       text: msg,
@@ -417,14 +405,14 @@ function renderPricesView() {
           <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:midback">${formatPula(row.midback)}</button></td>
           <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:butt">${formatPula(row.butt)}</button></td>
           <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:knee">${formatPula(row.knee)}</button></td>
-          <td class="hide-xs muted-text">${esc(PACKS_BY_SIZE[sz.id] || '5–6 packs')}</td>
+          <td class="hide-xs muted-text">${esc(PACKS_BY_SIZE[sz.id] || '')}</td>
         </tr>`;
     }).join('');
 
     tbody.querySelectorAll('[data-matrix-book]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const [sizeId, lengthId] = btn.dataset.matrixBook.split(':');
-        jumpToBook('style-01', sizeId, lengthId);
+        jumpToBook('', sizeId, lengthId);
       });
     });
   }
@@ -440,13 +428,13 @@ function renderPricesView() {
   if (estSizeSel) estSizeSel.value = ui.estSize;
   if (estLenSel) estLenSel.value = ui.estLength;
 
-  const estPrice = OFFICIAL_PRICE_MATRIX[ui.estSize]?.[ui.estLength] ?? 180;
+  const estPrice = OFFICIAL_PRICE_MATRIX[ui.estSize]?.[ui.estLength] ?? 0;
   const estDeposit = Math.round(estPrice * 0.3);
   const estBox = document.getElementById('estimatorSummaryBox');
   if (estBox) {
     estBox.innerHTML = `
-      <div class="est-row"><span>Estimated Duration</span><strong>${DURATION_BY_SIZE[ui.estSize]}</strong></div>
-      <div class="est-row"><span>Hair Packs to Bring</span><strong>${PACKS_BY_SIZE[ui.estSize]}</strong></div>
+      <div class="est-row"><span>Estimated Duration</span><strong>${DURATION_BY_SIZE[ui.estSize] || ''}</strong></div>
+      <div class="est-row"><span>Hair Packs to Bring</span><strong>${PACKS_BY_SIZE[ui.estSize] || ''}</strong></div>
       <div class="est-row"><span>30% Chair Deposit</span><strong>${formatPula(estDeposit)}</strong></div>
       <div class="est-row highlight"><span>Official Salon Price</span><strong>${formatPula(estPrice)}</strong></div>
     `;
@@ -467,7 +455,8 @@ function getBookingCalculation() {
   const style =
     availableStyles.find((s) => s.id === ui.bookStyleId) ||
     availableStyles[0] ||
-    store.state.styles[0];
+    store.state.styles[0] ||
+    { id: ui.bookStyleId || '', name: 'Custom Style', image: '' };
   const basePrice = calculateStylePrice(style, ui.bookSize, ui.bookLength);
   const selectedAddOns = ADD_ONS.filter((a) => ui.bookAddOnIds.has(a.id));
   const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + a.price, 0);
@@ -767,7 +756,7 @@ function triggerAutoSalonAssistant(userText, styleName = '') {
   setTimeout(() => {
     const reply = store.generateLocalSalonReply(userText, styleName);
     store.sendMessage({
-      threadId: 'thread-nicole',
+      threadId: '',
       sender: 'salon',
       senderName: 'Nicole',
       text: reply
@@ -794,7 +783,7 @@ function renderMessenger() {
   }
 
   const thread =
-    store.state.threads.find((t) => t.id === 'thread-nicole') || store.state.threads[0];
+    store.state.threads.find((t) => t.id === '') || store.state.threads[0];
   const stream = document.getElementById('chatMessagesStream');
   if (stream && thread) {
     stream.innerHTML = thread.messages
@@ -852,7 +841,7 @@ function syncAdminAuthUi() {
     if (badge) badge.textContent = `${adm.name || 'Nicole'} • +267 ${adm.phone}`;
     const nm = document.getElementById('credOwnerNameInput');
     const ph = document.getElementById('credNewPhoneInput');
-    if (nm && !nm.value) nm.value = adm.name || 'Nicole • Parlour Owner';
+    if (nm && !nm.value) nm.value = adm.name || '';
     if (ph && !ph.value) ph.value = adm.phone || '72517904';
   }
 }
@@ -928,7 +917,7 @@ function renderAdminView() {
             (bk) => `
         <div class="admin-row">
           <div class="admin-row-main">
-            <img src="${esc(bk.styleImage || '/images/style-01-honey-curly-knotless.jpg')}" alt="${esc(bk.styleName)}" />
+            <img src="${esc(bk.styleImage || '')}" alt="${esc(bk.styleName)}" />
             <div>
               <strong>${esc(bk.clientName)} • ${esc(bk.date)} at ${esc(bk.time)}</strong>
               <span>${esc(bk.styleName)} • ${esc(bk.stylistName)} • ${formatPula(bk.total)}</span>
@@ -991,7 +980,7 @@ function renderAdminView() {
             return `
           <div class="admin-row">
             <div class="admin-row-main">
-              <img src="${esc(bk.styleImage || '/images/style-01-honey-curly-knotless.jpg')}" alt="${esc(bk.styleName)}" />
+              <img src="${esc(bk.styleImage || '')}" alt="${esc(bk.styleName)}" />
               <div>
                 <strong>${esc(bk.clientName)} (${esc(bk.clientPhone || 'Walk-in')}) • ${esc(bk.id)}</strong>
                 <span>${esc(bk.styleName)} • ${esc(bk.date)} ${esc(bk.time)} • ${esc(bk.stylistName)} • <strong>${formatPula(bk.total)}</strong></span>
@@ -1141,7 +1130,7 @@ function renderAdminView() {
 
   const inboxEl = document.getElementById('adminInboxSummary');
   if (inboxEl) {
-    const thread = store.state.threads.find((t) => t.id === 'thread-nicole') || store.state.threads[0];
+    const thread = store.state.threads.find((t) => t.id === '') || store.state.threads[0];
     const recentMsgs = (thread?.messages || []).slice(-4).reverse();
     inboxEl.innerHTML = recentMsgs
       .map(
@@ -1255,22 +1244,20 @@ function openWalkInModal() {
 }
 
 function getDraftPromo() {
-  const styleId = document.getElementById('promoStyleSelect')?.value || 'style-01';
+  const styleId = document.getElementById('promoStyleSelect')?.value || '';
   const st = store.state.styles.find((s) => s.id === styleId) || store.state.styles[0];
   const pct = Number(document.getElementById('promoDiscountInput')?.value || 15);
   return {
-    title: document.getElementById('promoTitleInput')?.value.trim() || 'Special Salon Offer',
-    subtitle:
-      document.getElementById('promoSubtitleInput')?.value.trim() ||
-      'Book your appointment at Nicole Beauty Parlour.',
+    title: document.getElementById('promoTitleInput')?.value.trim() || '',
+    subtitle: document.getElementById('promoSubtitleInput')?.value.trim() || '',
     discountPercent: pct,
-    code: (document.getElementById('promoCodeInput')?.value.trim() || 'NICOLE15').toUpperCase(),
+    code: (document.getElementById('promoCodeInput')?.value.trim() || '').toUpperCase(),
     priceHighlight: document.getElementById('promoPriceHighlight')?.value.trim() || `${pct}% OFF`,
-    theme: document.getElementById('promoThemeSelect')?.value || 'obsidian-sapphire',
-    styleId: st?.id || 'style-01',
-    image: st?.image || '/images/style-01-honey-curly-knotless.jpg',
-    validUntil: '2026-12-31',
-    badge: 'LIMITED OFFER'
+    theme: document.getElementById('promoThemeSelect')?.value || '',
+    styleId: st?.id || '',
+    image: st?.image || '',
+    validUntil: '',
+    badge: ''
   };
 }
 
@@ -1340,7 +1327,7 @@ function bindEvents() {
     openModal('priceSheetModal')
   );
   document.getElementById('bookFlatSpecialtyBtn')?.addEventListener('click', () =>
-    jumpToBook('style-13', 'medium', 'midback')
+    jumpToBook('', 'medium', 'midback')
   );
   document.getElementById('estSizeSelect')?.addEventListener('change', (e) => {
     ui.estSize = e.target.value;
@@ -1351,7 +1338,7 @@ function bindEvents() {
     renderPricesView();
   });
   document.getElementById('estBookBtn')?.addEventListener('click', () =>
-    jumpToBook('style-01', ui.estSize, ui.estLength)
+    jumpToBook('', ui.estSize, ui.estLength)
   );
 
   // Booking form controls
@@ -1409,8 +1396,8 @@ function bindEvents() {
     const { style, selectedAddOns, subtotal, discount, total, deposit } = getBookingCalculation();
     const sz = SIZE_OPTIONS.find((x) => x.id === ui.bookSize);
     const ln = LENGTH_OPTIONS.find((x) => x.id === ui.bookLength);
-    const col = HAIR_COLORS.find((x) => x.id === ui.bookColorId) || HAIR_COLORS[0];
-    const stylist = STYLISTS.find((x) => x.id === ui.bookStylistId) || STYLISTS[0];
+    const col = HAIR_COLORS.find((x) => x.id === ui.bookColorId) || HAIR_COLORS[0] || { code: '', name: '' };
+    const stylist = STYLISTS.find((x) => x.id === ui.bookStylistId) || STYLISTS[0] || { id: ui.bookStylistId || '', name: 'Salon' };
 
     try {
       const created = await store.createBooking({
@@ -1423,7 +1410,7 @@ function bindEvents() {
         sizeLabel: sz?.label || 'Medium',
         length: ui.bookLength,
         lengthLabel: ln?.label || 'Midback',
-        hairColor: `${col.code} ${col.name}`,
+        hairColor: `${col.code || ''} ${col.name || ''}`.trim(),
         stylistId: stylist.id,
         stylistName: stylist.name,
         date: ui.bookDate,
@@ -1435,7 +1422,7 @@ function bindEvents() {
         total,
         deposit,
         paymentMethod:
-          document.getElementById('paymentMethodSelect')?.value || 'Orange Money (72517904)',
+          document.getElementById('paymentMethodSelect')?.value || 'Orange Money',
         notes: document.getElementById('bookingNotesInput')?.value.trim() || ''
       });
 
@@ -1472,7 +1459,7 @@ function bindEvents() {
     btn.addEventListener('click', () => {
       const text = btn.dataset.quickMsg;
       store.sendMessage({
-        threadId: 'thread-nicole',
+        threadId: '',
         sender: 'client',
         senderName: 'Client',
         text
@@ -1511,7 +1498,7 @@ function bindEvents() {
 
     const isClient = ui.senderMode === 'client';
     store.sendMessage({
-      threadId: 'thread-nicole',
+      threadId: '',
       sender: ui.senderMode,
       senderName: isClient ? 'Client' : 'Nicole',
       text: text || 'Sent a hairstyle reference photo',
@@ -1708,8 +1695,11 @@ function bindEvents() {
     const status = document.getElementById('walkInStatusSelect')?.value || 'In Chair';
     const depositPaid = Boolean(document.getElementById('walkInDepositPaidCheck')?.checked);
 
-    const style = store.state.styles.find((s) => s.id === styleId) || store.state.styles[0];
-    const stylist = STYLISTS.find((s) => s.id === stylistId) || STYLISTS[0];
+    const style =
+      store.state.styles.find((s) => s.id === styleId) ||
+      store.state.styles[0] ||
+      { id: styleId || '', name: 'Walk-In', image: '' };
+    const stylist = STYLISTS.find((s) => s.id === stylistId) || STYLISTS[0] || { id: stylistId || '', name: 'Salon' };
 
     try {
       await store.createBooking({
@@ -1786,7 +1776,7 @@ function bindEvents() {
   document.getElementById('shareFlyerBtn')?.addEventListener('click', () => {
     const p = ui.lastFlyerPromo;
     const text = encodeURIComponent(
-      `${p?.title || 'Special Offer'} at Nicole Beauty Parlour! Use code ${p?.code || 'SLAY15'} — Book or WhatsApp ${SALON_INFO.phoneDisplay}`
+      `${p?.title || 'Special Offer'} at Nicole Beauty Parlour! Use code ${p?.code || ''} — Book or WhatsApp ${SALON_INFO.phoneDisplay}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener');
   });

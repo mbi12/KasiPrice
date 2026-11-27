@@ -132,7 +132,7 @@ export async function renderPromoFlyerToCanvas(canvas, promo) {
   }
 
   // 3. Featured Hairstyle Editorial Frame
-  const styleImg = await loadImg(promo.image || '/images/style-01-honey-curly-knotless.jpg');
+  const styleImg = await loadImg(promo.image || '');
   const cardX = 78;
   const cardY = 345;
   const cardW = W - 156;
@@ -211,7 +211,7 @@ export async function renderPromoFlyerToCanvas(canvas, promo) {
   ctx.fill();
   ctx.fillStyle = '#FFFFFF';
   ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText(`CODE: ${promo.code || 'SLAY15'}`, cardX + cardW - 308, cardY + cardH - 54);
+  ctx.fillText(`CODE: ${promo.code || ''}`, cardX + cardW - 308, cardY + cardH - 54);
 
   // 4. Campaign Copy Block
   ctx.fillStyle = isLightTheme ? '#050B16' : '#FFFFFF';

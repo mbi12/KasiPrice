@@ -59,7 +59,7 @@ create table if not exists public.nbp_bookings (
 
 create table if not exists public.nbp_messages (
   id text primary key,
-  thread_id text not null default 'thread-nicole',
+  thread_id text not null default '',
   sender text not null check (sender in ('client', 'salon')),
   sender_name text not null,
   text text,
@@ -71,7 +71,7 @@ create table if not exists public.nbp_messages (
 create table if not exists public.nbp_admins (
   id uuid primary key default gen_random_uuid(),
   phone text unique not null,
-  owner_name text not null default 'Nicole • Parlour Owner',
+  owner_name text not null default '',
   password_hash text not null,
   updated_at timestamptz not null default now()
 );

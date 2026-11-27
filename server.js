@@ -80,7 +80,7 @@ function createInitialDb() {
     admin: {
       phone: normalizePhone(DEFAULT_ADMIN_PHONE),
       displayPhone: SALON_INFO.phoneDisplay,
-      name: 'Nicole • Parlour Owner',
+      name: '',
       passwordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
       updatedAt: new Date().toISOString()
     },
@@ -129,31 +129,11 @@ function publicStatePayload() {
 }
 
 export function generateSmartSalonReply(userText = '', context = {}) {
-  const q = String(userText).toLowerCase();
-  const activePromo = db.promotions.find((p) => p.active);
-  const promoHint = activePromo
-    ? ` Also use code ${activePromo.code} for ${activePromo.discountPercent}% OFF!`
-    : '';
-
-  if (q.includes('price') || q.includes('how much') || q.includes('cost') || q.includes('pula')) {
-    return `Our official Knotless, Box Braids & Twists prices are:\n• Jumbo: P130 (Midback) | P160 (Butt) | P200 (Knee)\n• Large: P160 | P200 | P250\n• Medium: P180 | P250 | P300\n• S-Medium: P200 | P300 | P400\n• Small: P250 | P350 | P500\n• Pick n' Drop / Switch / Softdread: Flat P250!${promoHint}`;
-  }
-  if (q.includes('location') || q.includes('where') || q.includes('address') || q.includes('gaborone') || q.includes('house')) {
-    return `We are based in ${SALON_INFO.location} (${SALON_INFO.hours})! Need us to come to you? Select "VIP Private House-Call (+P80)" when booking, or WhatsApp/call us on ${SALON_INFO.phoneDisplay}.`;
-  }
-  if (q.includes('pack') || q.includes('hair') || q.includes('expression') || q.includes('bring')) {
-    return `Packs guide:\n• Jumbo/Large: 4–5 packs\n• Medium: 5–6 packs\n• S-Medium/Small: 6–8 packs.\nWant us to supply the hair for you? Tick "Premium Braiding Packs Supplied (+P120)" in Reserve!`;
-  }
-  if (q.includes('deposit') || q.includes('pay') || q.includes('orange') || q.includes('myzaka') || q.includes('smega')) {
-    return `You can secure your chair with a 30% deposit via Orange Money, MyZaka, or Smega to ${SALON_INFO.phoneRaw} (${SALON_INFO.name}), or choose Pay at Parlour!`;
-  }
-  if (q.includes('available') || q.includes('slot') || q.includes('today') || q.includes('tomorrow') || q.includes('book')) {
-    return `We have open chairs from 07:30 to 16:30! Tap "Reserve" below to lock in your exact style, size, length & stylist — you'll receive an instant Holographic VIP Pass!${promoHint}`;
-  }
+  // Demo/mockup replies have been cleared. Return a neutral acknowledgment.
   if (context.styleName) {
-    return `Gorgeous choice! "${context.styleName}" is one of our signature looks. Would you like Midback, Butt Length, or Knee Length? Tap "Reserve" anytime to lock your chair!`;
+    return `Thanks for your interest in "${context.styleName}". Add your braid details and tap Reserve to book your chair.`;
   }
-  return `Thank you! We've received your message at Nicole Beauty Parlour (${SALON_INFO.phoneDisplay}). Let us know your preferred braid style, size & date — or tap "Reserve" anytime!`;
+  return 'Thanks for your message! Add your salon details and we will be happy to help you book your chair.';
 }
 
 export function createApp() {
@@ -202,7 +182,7 @@ export function createApp() {
       ok: true,
       token,
       admin: {
-        name: db.admin?.name || 'Nicole • Parlour Owner',
+        name: db.admin?.name || '',
         phone: expectedPhone,
         displayPhone: `+267 ${expectedPhone}`
       }
@@ -219,7 +199,7 @@ export function createApp() {
     return res.json({
       authenticated: true,
       admin: {
-        name: db.admin?.name || 'Nicole • Parlour Owner',
+        name: db.admin?.name || '',
         phone: decoded.phone,
         displayPhone: `+267 ${decoded.phone}`
       }
@@ -289,8 +269,8 @@ export function createApp() {
     const newStyle = {
       id: body.id || `style-custom-${Date.now()}`,
       name: String(body.name).trim(),
-      category: body.category || 'Knotless',
-      image: body.image || '/images/style-01-honey-curly-knotless.jpg',
+      category: body.category || '',
+      image: body.image || '',
       defaultSize: body.defaultSize || 'medium',
       defaultLength: body.defaultLength || 'midback',
       pricingMode: body.pricingMode === 'flat' ? 'flat' : 'matrix',
@@ -298,16 +278,14 @@ export function createApp() {
       priceOffset: Number(body.priceOffset || 0),
       rating: Number(body.rating || 5.0),
       reviewsCount: Number(body.reviewsCount || 1),
-      badge: body.badge || 'New Drop',
+      badge: body.badge || '',
       featured: Boolean(body.featured ?? true),
       saved: Boolean(body.saved ?? false),
       isCustom: true,
-      duration: body.duration || '4 – 5 hrs',
-      packs: body.packs || '5–6 packs',
-      description:
-        body.description ||
-        'Fresh custom salon look crafted with tension-free parting at Nicole Beauty Parlour.',
-      tags: Array.isArray(body.tags) && body.tags.length ? body.tags : ['New Arrival', 'Custom Look']
+      duration: body.duration || '',
+      packs: body.packs || '',
+      description: body.description || '',
+      tags: Array.isArray(body.tags) && body.tags.length ? body.tags : []
     };
 
     newStyle.computedStartingPrice = calculateStylePrice(
@@ -366,26 +344,24 @@ export function createApp() {
       return res.status(400).json({ error: 'Promotion title is required' });
     }
 
-    const code = String(body.code || `NICOLE${Math.floor(10 + Math.random() * 89)}`)
+    const code = String(body.code || `PROMO${Math.floor(10 + Math.random() * 89)}`)
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '');
 
     const promo = {
       id: body.id || `promo-${Date.now()}`,
       title: String(body.title).trim(),
-      subtitle:
-        body.subtitle ||
-        'Limited-time salon promotion at Nicole Beauty Parlour — Look Good, Feel Good, Be You!',
+      subtitle: body.subtitle || '',
       discountPercent: Math.min(80, Math.max(5, Number(body.discountPercent || 15))),
       code,
-      styleId: body.styleId || 'style-01',
-      image: body.image || '/images/style-01-honey-curly-knotless.jpg',
+      styleId: body.styleId || '',
+      image: body.image || '',
       priceHighlight: body.priceHighlight || `${Number(body.discountPercent || 15)}% OFF`,
-      originalPrice: body.originalPrice || 'Limited Slots',
-      validUntil: body.validUntil || '2026-12-31',
-      theme: body.theme || 'obsidian-sapphire',
+      originalPrice: body.originalPrice || '',
+      validUntil: body.validUntil || '',
+      theme: body.theme || '',
       active: true,
-      badge: body.badge || 'NEW CAMPAIGN',
+      badge: body.badge || '',
       createdAt: new Date().toISOString()
     };
 
@@ -396,7 +372,7 @@ export function createApp() {
       promoThread.messages.push({
         id: `m-promo-${Date.now()}`,
         sender: 'salon',
-        senderName: 'Nicole Promo Studio',
+        senderName: 'Salon',
         text: `${promo.title.toUpperCase()}! ${promo.subtitle} — Use code ${promo.code} (${promo.discountPercent}% OFF) before ${promo.validUntil}!`,
         image: promo.image,
         badge: `CODE: ${promo.code}`,
@@ -434,7 +410,7 @@ export function createApp() {
       return res.status(400).json({ error: 'Missing required booking fields' });
     }
 
-    const stylistId = body.stylistId || 'nicole';
+    const stylistId = body.stylistId || '';
     const conflict = db.bookings.find(
       (b) =>
         b.status !== 'Cancelled' &&
@@ -453,26 +429,26 @@ export function createApp() {
       id: body.id || `NBP-${Math.floor(1000 + Math.random() * 9000)}`,
       clientName: String(body.clientName).trim(),
       clientPhone: String(body.clientPhone || '').trim(),
-      styleId: body.styleId || 'style-01',
+      styleId: body.styleId || '',
       styleName: body.styleName,
-      styleImage: body.styleImage || '/images/style-01-honey-curly-knotless.jpg',
+      styleImage: body.styleImage || '',
       size: body.size || 'medium',
       sizeLabel: body.sizeLabel || 'Medium',
       length: body.length || 'midback',
       lengthLabel: body.lengthLabel || 'Midback',
-      hairColor: body.hairColor || '#1B Natural Jet Black',
+      hairColor: body.hairColor || '',
       stylistId,
-      stylistName: body.stylistName || 'Nicole',
+      stylistName: body.stylistName || '',
       date: body.date,
       time: body.time,
       addOns: Array.isArray(body.addOns) ? body.addOns : [],
       promoCode: body.promoCode || '',
-      subtotal: Number(body.subtotal || 180),
+      subtotal: Number(body.subtotal || 0),
       discount: Number(body.discount || 0),
-      total: Number(body.total || 180),
-      deposit: Number(body.deposit || Math.round(Number(body.total || 180) * 0.3)),
+      total: Number(body.total || 0),
+      deposit: Number(body.deposit || Math.round(Number(body.total || 0) * 0.3)),
       depositPaid: Boolean(body.depositPaid ?? false),
-      paymentMethod: body.paymentMethod || 'Orange Money (72517904)',
+      paymentMethod: body.paymentMethod || 'Orange Money',
       notes: body.notes || '',
       status: body.status || 'Confirmed',
       createdAt: new Date().toISOString()
@@ -498,7 +474,7 @@ export function createApp() {
 
   app.post('/api/messages', (req, res) => {
     const {
-      threadId = 'thread-nicole',
+      threadId = '',
       sender = 'client',
       senderName,
       text,
@@ -517,7 +493,7 @@ export function createApp() {
         id: threadId,
         title: senderName || 'Client Inquiry',
         subtitle: 'Direct Salon Chat',
-        avatar: '/images/nicole-logo.jpg',
+        avatar: '',
         online: true,
         pinned: false,
         unread: 0,
@@ -531,7 +507,7 @@ export function createApp() {
     const message = {
       id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       sender,
-      senderName: senderName || (sender === 'salon' ? 'Nicole' : 'You'),
+      senderName: senderName || (sender === 'salon' ? 'Salon' : 'You'),
       text: String(text || '').trim(),
       image: image || null,
       badge: badge || null,
@@ -546,7 +522,7 @@ export function createApp() {
       replyMessage = {
         id: `msg-reply-${Date.now()}`,
         sender: 'salon',
-        senderName: threadId === 'thread-care' ? 'Nicky • Stylist' : 'Nicole',
+        senderName: threadId === 'thread-care' ? 'Stylist' : 'Salon',
         text: generateSmartSalonReply(message.text, { styleName }),
         timestamp: nowTime,
         status: 'read'

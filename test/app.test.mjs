@@ -4,25 +4,30 @@ import {
   OFFICIAL_PRICE_MATRIX,
   SPECIALTY_FLAT_PRICE,
   INITIAL_HAIRSTYLES,
+  INITIAL_PROMOTIONS,
+  INITIAL_BOOKINGS,
+  INITIAL_THREADS,
   calculateStylePrice
 } from '../public/js/data.js';
 import { createApp } from '../server.js';
 
-test('Official @NICOLE_BEAUTY_PARLOUR BWP pricing matrix matches poster', () => {
-  assert.deepEqual(OFFICIAL_PRICE_MATRIX.jumbo, { midback: 130, butt: 160, knee: 200 });
-  assert.deepEqual(OFFICIAL_PRICE_MATRIX.large, { midback: 160, butt: 200, knee: 250 });
-  assert.deepEqual(OFFICIAL_PRICE_MATRIX.medium, { midback: 180, butt: 250, knee: 300 });
-  assert.deepEqual(OFFICIAL_PRICE_MATRIX.s_medium, { midback: 200, butt: 300, knee: 400 });
-  assert.deepEqual(OFFICIAL_PRICE_MATRIX.small, { midback: 250, butt: 350, knee: 500 });
+test('Catalog & pricing data layer is cleared (empty shell, ready for real data)', () => {
+  // All demo/mockup records have been removed; the data layer starts empty.
+  assert.deepEqual(OFFICIAL_PRICE_MATRIX, {});
+  assert.equal(INITIAL_HAIRSTYLES.length, 0);
+  assert.equal(INITIAL_PROMOTIONS.length, 0);
+  assert.equal(INITIAL_BOOKINGS.length, 0);
+  assert.equal(INITIAL_THREADS.length, 0);
   assert.equal(SPECIALTY_FLAT_PRICE, 250);
-  assert.equal(INITIAL_HAIRSTYLES.length, 16);
 
-  const knotless = INITIAL_HAIRSTYLES.find((s) => s.id === 'style-01');
-  assert.equal(calculateStylePrice(knotless, 'jumbo', 'midback'), 130);
-  assert.equal(calculateStylePrice(knotless, 'small', 'knee'), 500);
+  // Price calculation degrades gracefully with no data.
+  assert.equal(calculateStylePrice(null, 'medium', 'midback'), 0);
+  assert.equal(calculateStylePrice({}, 'medium', 'midback'), 0);
 
-  const softdread = INITIAL_HAIRSTYLES.find((s) => s.id === 'style-13');
-  assert.equal(calculateStylePrice(softdread, 'medium', 'midback'), 250);
+  // A flat-price style still resolves without a price matrix.
+  const flat = { pricingMode: 'flat', flatPrice: 250 };
+  assert.equal(calculateStylePrice(flat, 'medium', 'midback'), 250);
+  assert.equal(calculateStylePrice(flat, 'small', 'knee'), 300);
 });
 
 test('REST API endpoints support styles, bookings, promotions & two-way messaging', async () => {
@@ -33,20 +38,24 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
   const base = `http://127.0.0.1:${port}`;
 
   try {
-    // 1. Health check
+    // 1. Health check reflects an empty catalog
     const healthRes = await fetch(`${base}/api/health`);
     assert.equal(healthRes.status, 200);
     const health = await healthRes.json();
     assert.equal(health.ok, true);
-    assert.equal(health.salon, 'Nicole Beauty Parlour');
+    assert.equal(health.stylesCount, 0);
+    assert.equal(health.promotionsCount, 0);
+    assert.equal(health.bookingsCount, 0);
 
-    // 2. Add new hairstyle
+    // 2. Add a new hairstyle (flat-priced so it resolves without a matrix)
     const styleRes = await fetch(`${base}/api/styles`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: 'Test Waist Boho Twists',
         category: 'Twists',
+        pricingMode: 'flat',
+        flatPrice: 250,
         defaultSize: 'medium',
         defaultLength: 'butt'
       })
@@ -56,28 +65,28 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
     assert.equal(createdStyle.name, 'Test Waist Boho Twists');
     assert.equal(createdStyle.computedStartingPrice, 250);
 
-    // 3. Launch new advertisement
+    // 3. Launch a new advertisement
     const promoRes = await fetch(`${base}/api/promotions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+        body: JSON.stringify({
         title: 'Festive Braids Flash Deal',
         discountPercent: 20,
-        code: 'festive20'
+        code: 'test20'
       })
     });
     assert.equal(promoRes.status, 201);
     const createdPromo = await promoRes.json();
-    assert.equal(createdPromo.code, 'FESTIVE20');
+    assert.equal(createdPromo.code, 'TEST20');
 
     // 4. Create booking & verify double-booking conflict protection + depositPaid toggle
     const bkRes = await fetch(`${base}/api/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        clientName: 'Mpho K.',
+        body: JSON.stringify({
+        clientName: 'Test Client',
         clientPhone: '+267 72 000 111',
-        styleName: 'Honey Blonde Curly-Ends Knotless',
+        styleName: 'Test Waist Boho Twists',
         stylistId: 'nicole',
         date: '2026-12-19',
         time: '14:30',
@@ -114,12 +123,12 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
     const updatedBooking = await depRes.json();
     assert.equal(updatedBooking.depositPaid, true);
 
-    // 5. Two-way messaging with smart salon reply
+    // 5. Two-way messaging with a smart salon reply
     const msgRes = await fetch(`${base}/api/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        threadId: 'thread-nicole',
+        threadId: 'test-thread',
         sender: 'client',
         text: 'How much are your prices in pula?',
         autoReply: true
@@ -128,7 +137,7 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
     assert.equal(msgRes.status, 201);
     const msgPayload = await msgRes.json();
     assert.ok(msgPayload.replyMessage);
-    assert.match(msgPayload.replyMessage.text, /P130/);
+    assert.equal(typeof msgPayload.replyMessage.text, 'string');
 
     // Clean up test items
     await fetch(`${base}/api/styles/${createdStyle.id}`, { method: 'DELETE' });
@@ -179,8 +188,19 @@ test('Admin Phone + Password authentication, session token, style editing & cred
     const sesBody = await sesRes.json();
     assert.equal(sesBody.authenticated, true);
 
-    // 5. Edit a hairstyle via PATCH /api/styles/:id
-    const editRes = await fetch(`${base}/api/styles/style-01`, {
+    // 5. Edit a hairstyle via PATCH /api/styles/:id (create one first on the empty shell)
+    const createRes = await fetch(`${base}/api/styles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${loginBody.token}`
+      },
+      body: JSON.stringify({ name: 'Admin Edit Target', category: 'Knotless' })
+    });
+    assert.equal(createRes.status, 201);
+    const editTarget = await createRes.json();
+
+    const editRes = await fetch(`${base}/api/styles/${editTarget.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -192,14 +212,10 @@ test('Admin Phone + Password authentication, session token, style editing & cred
     const edited = await editRes.json();
     assert.equal(edited.badge, 'VIP Favorite');
 
-    // Restore original badge
-    await fetch(`${base}/api/styles/style-01`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${loginBody.token}`
-      },
-      body: JSON.stringify({ badge: 'Best Seller' })
+    // Clean up the edit target
+    await fetch(`${base}/api/styles/${editTarget.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${loginBody.token}` }
     });
 
     // 6. Rotate admin credentials and restore back to defaults
