@@ -1,13 +1,13 @@
 {
   "name": "Nicole Beauty Parlour — Look Good • Feel Good • Be You",
   "short_name": "Nicole Parlour",
-  "description": "Couture Hair Braiding Marketplace, Virtual Style Mirror, Instant VIP Chair Booking, Salon Chat & Ad Studio in Gaborone, Botswana.",
+  "description": "Nicole Beauty Parlour Gaborone — Official BWP braid & twist price list, real-time appointment booking, client messaging & salon management.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#040914",
-  "theme_color": "#040914",
+  "background_color": "#0b0d11",
+  "theme_color": "#0b0d11",
   "categories": ["beauty", "lifestyle", "shopping"],
   "icons": [
     {

@@ -70,7 +70,7 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
     const createdPromo = await promoRes.json();
     assert.equal(createdPromo.code, 'FESTIVE20');
 
-    // 4. Create booking
+    // 4. Create booking & verify double-booking conflict protection + depositPaid toggle
     const bkRes = await fetch(`${base}/api/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,14 +78,41 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
         clientName: 'Mpho K.',
         clientPhone: '+267 72 000 111',
         styleName: 'Honey Blonde Curly-Ends Knotless',
-        date: '2026-12-05',
-        time: '10:30',
+        stylistId: 'nicole',
+        date: '2026-12-19',
+        time: '14:30',
         total: 240
       })
     });
     assert.equal(bkRes.status, 201);
     const createdBooking = await bkRes.json();
     assert.match(createdBooking.id, /^NBP-/);
+    assert.equal(createdBooking.depositPaid, false);
+
+    // Same braider + date + time must reject with 409 Conflict
+    const conflictRes = await fetch(`${base}/api/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientName: 'Second Client',
+        styleName: 'Box Braids',
+        stylistId: 'nicole',
+        date: '2026-12-19',
+        time: '14:30',
+        total: 180
+      })
+    });
+    assert.equal(conflictRes.status, 409);
+
+    // Mark deposit paid & cancel test booking so slot frees up cleanly
+    const depRes = await fetch(`${base}/api/bookings/${createdBooking.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ depositPaid: true, status: 'Cancelled' })
+    });
+    assert.equal(depRes.status, 200);
+    const updatedBooking = await depRes.json();
+    assert.equal(updatedBooking.depositPaid, true);
 
     // 5. Two-way messaging with smart salon reply
     const msgRes = await fetch(`${base}/api/messages`, {

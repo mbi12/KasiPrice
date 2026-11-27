@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nicole-beauty-parlour-v4';
+const CACHE_NAME = 'nicole-beauty-parlour-v5';
 const CORE_ASSETS = [
   '/',
   '/index.html',

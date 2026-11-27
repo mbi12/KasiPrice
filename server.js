@@ -329,6 +329,7 @@ export function createApp() {
       'category',
       'badge',
       'featured',
+      'active',
       'pricingMode',
       'flatPrice',
       'priceOffset',
@@ -433,6 +434,21 @@ export function createApp() {
       return res.status(400).json({ error: 'Missing required booking fields' });
     }
 
+    const stylistId = body.stylistId || 'nicole';
+    const conflict = db.bookings.find(
+      (b) =>
+        b.status !== 'Cancelled' &&
+        b.stylistId === stylistId &&
+        b.date === body.date &&
+        b.time === body.time &&
+        b.id !== body.id
+    );
+    if (conflict) {
+      return res.status(409).json({
+        error: `${body.stylistName || 'This braider'} is already booked on ${body.date} at ${body.time}. Please select another time or braider.`
+      });
+    }
+
     const booking = {
       id: body.id || `NBP-${Math.floor(1000 + Math.random() * 9000)}`,
       clientName: String(body.clientName).trim(),
@@ -445,7 +461,7 @@ export function createApp() {
       length: body.length || 'midback',
       lengthLabel: body.lengthLabel || 'Midback',
       hairColor: body.hairColor || '#1B Natural Jet Black',
-      stylistId: body.stylistId || 'nicole',
+      stylistId,
       stylistName: body.stylistName || 'Nicole',
       date: body.date,
       time: body.time,
@@ -455,6 +471,7 @@ export function createApp() {
       discount: Number(body.discount || 0),
       total: Number(body.total || 180),
       deposit: Number(body.deposit || Math.round(Number(body.total || 180) * 0.3)),
+      depositPaid: Boolean(body.depositPaid ?? false),
       paymentMethod: body.paymentMethod || 'Orange Money (72517904)',
       notes: body.notes || '',
       status: body.status || 'Confirmed',
@@ -472,6 +489,9 @@ export function createApp() {
     if (req.body.status) booking.status = req.body.status;
     if (req.body.date) booking.date = req.body.date;
     if (req.body.time) booking.time = req.body.time;
+    if (typeof req.body.depositPaid === 'boolean') booking.depositPaid = req.body.depositPaid;
+    if (req.body.paymentMethod) booking.paymentMethod = req.body.paymentMethod;
+    if (req.body.notes !== undefined) booking.notes = req.body.notes;
     saveDb();
     res.json(booking);
   });

@@ -542,13 +542,51 @@ export class SalonStore {
     }
   }
 
+  isSlotBooked(stylistId, date, time) {
+    return this.state.bookings.some(
+      (b) =>
+        b.status !== 'Cancelled' &&
+        b.stylistId === stylistId &&
+        b.date === date &&
+        b.time === time
+    );
+  }
+
+  getSavedClientPhone() {
+    try {
+      return localStorage.getItem('nbp_client_phone_v3') || '';
+    } catch {
+      return '';
+    }
+  }
+
+  saveClientPhone(phone) {
+    try {
+      if (phone) localStorage.setItem('nbp_client_phone_v3', String(phone).trim());
+    } catch {
+      // Ignore
+    }
+  }
+
   async createBooking(bookingPayload) {
+    const stylistId = bookingPayload.stylistId || 'nicole';
+    if (this.isSlotBooked(stylistId, bookingPayload.date, bookingPayload.time)) {
+      throw new Error(
+        `${bookingPayload.stylistName || 'This braider'} is already booked on ${bookingPayload.date} at ${bookingPayload.time}. Please choose another time or braider.`
+      );
+    }
+
     const booking = {
       id: `NBP-${Math.floor(1000 + Math.random() * 9000)}`,
       status: 'Confirmed',
+      depositPaid: false,
       createdAt: new Date().toISOString(),
       ...bookingPayload
     };
+
+    if (booking.clientPhone) {
+      this.saveClientPhone(booking.clientPhone);
+    }
 
     this.state.bookings.unshift(booking);
 
@@ -559,9 +597,9 @@ export class SalonStore {
         id: `m-bk-client-${Date.now()}`,
         sender: 'client',
         senderName: booking.clientName,
-        text: `Reserved VIP Chair: ${booking.styleName} (${booking.sizeLabel} • ${booking.lengthLabel}${booking.hairColor ? ` • ${booking.hairColor}` : ''}) on ${booking.date} at ${booking.time} — Total P${booking.total} (Pass ${booking.id})`,
+        text: `New Booking (${booking.id}): ${booking.styleName} (${booking.sizeLabel} • ${booking.lengthLabel}${booking.hairColor ? ` • ${booking.hairColor}` : ''}) on ${booking.date} at ${booking.time} — Total P${booking.total}`,
         image: booking.styleImage,
-        badge: `VIP PASS ${booking.id}`,
+        badge: `BOOKING ${booking.id}`,
         timestamp: nowTime,
         status: 'read'
       });
@@ -569,7 +607,7 @@ export class SalonStore {
         id: `m-bk-salon-${Date.now() + 1}`,
         sender: 'salon',
         senderName: 'Nicole',
-        text: `Confirmed, ${booking.clientName}! Your chair with ${booking.stylistName} is locked in for ${booking.date} at ${booking.time} (Pass ${booking.id}). 30% Deposit: P${booking.deposit} via ${booking.paymentMethod}. Get ready to Look Good, Feel Good, Be You!`,
+        text: `Thank you ${booking.clientName}! Your appointment with ${booking.stylistName} on ${booking.date} at ${booking.time} is confirmed (Ref: ${booking.id}). 30% Deposit: P${booking.deposit} via ${booking.paymentMethod}.`,
         timestamp: nowTime,
         status: 'unread'
       });
@@ -577,7 +615,7 @@ export class SalonStore {
     }
 
     this.addNotification({
-      title: `VIP Pass Issued (${booking.id})`,
+      title: `Booking Confirmed (${booking.id})`,
       body: `${booking.styleName} • ${booking.date} at ${booking.time} • P${booking.total}`,
       type: 'booking'
     });
