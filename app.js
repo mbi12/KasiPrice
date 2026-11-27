@@ -1,450 +1,85 @@
-const products = [
-  {
-    id: 1,
-    name: 'Samsung Galaxy A15',
-    short: 'Samsung A15',
-    price: 2199,
-    target: 2000,
-    store: 'Game',
-    storeShort: 'G',
-    category: 'Electronics',
-    image:
-      'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=900&q=80',
-    rating: 4.8,
-    shipping: 0,
-    stock: 'In stock',
-    condition: 'New',
-    drop: '-8%',
-    badge: 'Best price',
-    saved: true,
-    description: '128GB Android smartphone with 6.5" display, 50MP camera, and 5G connectivity.',
-    history: [2399, 2299, 2199, 2249, 2199, 2149, 2199],
-    variants: ['128GB', '256GB', 'Blue', 'Black']
-  },
-  {
-    id: 2,
-    name: 'Sony WH-CH720N',
-    short: 'Sony Headphones',
-    price: 1899,
-    target: 1700,
-    store: 'HiFi Corp',
-    storeShort: 'H',
-    category: 'Audio',
-    image:
-      'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=900&q=80',
-    rating: 4.7,
-    shipping: 75,
-    stock: 'Limited stock',
-    condition: 'New',
-    drop: '-12%',
-    badge: 'Top rated',
-    saved: false,
-    description: 'Wireless over-ear headphones with noise cancelling and up to 35-hour battery life.',
-    history: [2099, 2050, 1999, 1950, 1899, 1919, 1899],
-    variants: ['Black', 'White', 'Case bundle']
-  },
-  {
-    id: 3,
-    name: 'Apple AirPods Pro 2',
-    short: 'AirPods Pro 2',
-    price: 3299,
-    target: 2999,
-    store: 'Incredible Connection',
-    storeShort: 'I',
-    category: 'Audio',
-    image:
-      'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=900&q=80',
-    rating: 4.9,
-    shipping: 0,
-    stock: 'In stock',
-    condition: 'New',
-    drop: '-6%',
-    badge: 'Trending',
-    saved: true,
-    description: 'Active Noise Cancellation with USB-C charging case and Bluetooth connectivity.',
-    history: [3499, 3450, 3399, 3349, 3299, 3299, 3299],
-    variants: ['USB-C', 'MagSafe case', 'Refurbished']
-  },
-  {
-    id: 4,
-    name: 'LG 55" 4K Smart TV',
-    short: 'LG 55" TV',
-    price: 5899,
-    target: 5400,
-    store: 'Game',
-    storeShort: 'G',
-    category: 'Home',
-    image:
-      'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=900&q=80',
-    rating: 4.6,
-    shipping: 180,
-    stock: 'Warehouse stock',
-    condition: 'New',
-    drop: '-14%',
-    badge: 'Delivery available',
-    saved: false,
-    description: '55-inch 4K UHD smart television with HDR, voice control, and slim bezel design.',
-    history: [6299, 6199, 6099, 5999, 5949, 5899, 5899],
-    variants: ['55"', '65"', 'Wall mount']
-  },
-  {
-    id: 5,
-    name: 'Dell XPS 13',
-    short: 'Dell XPS 13',
-    price: 12999,
-    target: 11800,
-    store: 'Square Mart',
-    storeShort: 'S',
-    category: 'Computing',
-    image:
-      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=80',
-    rating: 4.8,
-    shipping: 150,
-    stock: 'In stock',
-    condition: 'New',
-    drop: '-9%',
-    badge: 'Premium pick',
-    saved: false,
-    description: '13-inch ultrabook with Intel Core i7, 16GB RAM, and 1TB SSD storage.',
-    history: [14999, 14499, 13999, 13599, 13199, 12999, 12999],
-    variants: ['13" Touch', '16GB RAM', '1TB SSD']
-  },
-  {
-    id: 6,
-    name: 'Philips Air Fryer',
-    short: 'Air Fryer',
-    price: 1499,
-    target: 1300,
-    store: 'Shoprite',
-    storeShort: 'S',
-    category: 'Home',
-    image:
-      'https://images.unsplash.com/photo-1585518419759-7fe2e0fbf8a6?auto=format&fit=crop&w=900&q=80',
-    rating: 4.5,
-    shipping: 80,
-    stock: 'In stock',
-    condition: 'New',
-    drop: '-10%',
-    badge: 'Household deal',
-    saved: true,
-    description: 'Energy-efficient kitchen appliance for frying, roasting, and reheating with low oil.',
-    history: [1799, 1699, 1599, 1549, 1499, 1499, 1499],
-    variants: ['4.1L', '5.2L', 'Black']
-  }
+const A='assets/';
+const stockStyles=[
+ {id:'s1',name:'Goddess Box Braids',category:'Box braids',image:A+'1795787085453.jpg',description:'Braids with a soft curly finish',badge:'CLIENT FAVOURITE',price:130},
+ {id:'s2',name:'Braided Ponytail',category:'Ponytails',image:A+'1795787018611.jpg',description:'A sleek, elevated everyday look',badge:'THE LOOK',price:130},
+ {id:'s3',name:'Knotless Braids',category:'Knotless',image:A+'1795786939083.jpg',description:'Lightweight and beautifully versatile',badge:'POPULAR',price:130},
+ {id:'s4',name:'Classic Box Braids',category:'Box braids',image:A+'1795786946917.jpg',description:'A timeless protective style',badge:'BEAUTIFUL BASICS',price:130},
+ {id:'s5',name:'Braided Updo',category:'Updos',image:A+'1795787043790.jpg',description:'A statement look for every occasion',badge:'INSPIRATION',price:130},
+ {id:'s6',name:'Twists',category:'Twists',image:A+'1795787004347.jpg',description:'Effortless texture, endless charm',badge:'INSPIRATION',price:130},
+ {id:'s7',name:'Long Braided Ponytail',category:'Ponytails',image:A+'1795787029841.jpg',description:'Beautiful length and movement',badge:'INSPIRATION',price:130},
+ {id:'s8',name:'Curly Finish Braids',category:'Box braids',image:A+'1795786931038.jpg',description:'A little extra bounce and beauty',badge:'INSPIRATION',price:130},
+ {id:'s9',name:'Burgundy Twists',category:'Twists',image:A+'1795786986521.jpg',description:'A bold and beautiful pop of colour',badge:'INSPIRATION',price:130},
+ {id:'s10',name:'Braids with Beads',category:'Box braids',image:A+'1795787062643.jpg',description:'Playful details, made for you',badge:'INSPIRATION',price:130},
+ {id:'s11',name:'Long Boho Braids',category:'Box braids',image:A+'1795786977439.jpg',description:'Long braids with a carefree finish',badge:'INSPIRATION',price:130},
+ {id:'s12',name:'Jumbo Braided Updo',category:'Updos',image:A+'1795786994254.jpg',description:'A statement protective style',badge:'INSPIRATION',price:130}
 ];
-
-const savedItems = [
-  { id: 1, name: 'Samsung A15', price: 2199, store: 'Game' },
-  { id: 3, name: 'AirPods Pro 2', price: 3299, store: 'Incredible Connection' },
-  { id: 6, name: 'Philips Air Fryer', price: 1499, store: 'Shoprite' }
-];
-
-const alerts = [
-  { item: 'Sony WH-CH720N', target: 'P1,700', status: 'Watching' },
-  { item: 'LG 55" TV', target: 'P5,400', status: 'Triggered' },
-  { item: 'Dell XPS 13', target: 'P11,800', status: 'Watching' }
-];
-
-const categories = ['All', 'Electronics', 'Audio', 'Home', 'Computing'];
-
-const state = {
-  query: '',
-  category: 'All',
-  sort: 'best',
-  listView: 'grid'
-};
-
-const money = new Intl.NumberFormat('en-BW', {
-  style: 'currency',
-  currency: 'BWP',
-  maximumFractionDigits: 0
+const prices={Jumbo:{Midback:130,'Butt length':160,'Knee length':200},Large:{Midback:160,'Butt length':200,'Knee length':250},Medium:{Midback:180,'Butt length':250,'Knee length':300},'Small medium':{Midback:200,'Butt length':300,'Knee length':400},Small:{Midback:250,'Butt length':350,'Knee length':500}};
+const phone='26772517904';
+const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('nicole_'+key))??fallback}catch{return fallback}};
+const save=(key,value)=>{try{localStorage.setItem('nicole_'+key,JSON.stringify(value));return true}catch{toast('Could not save on this device. Please try a smaller photo.');return false}};
+let favorites=read('favorites',[]),customStyles=read('styles',[]),bookings=read('bookings',[]),ads=read('ads',[]);
+let page='home',filter='All',query='';
+const $=s=>document.querySelector(s);
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const styles=()=>[...customStyles,...stockStyles];
+const wa=text=>'https://wa.me/'+phone+'?text='+encodeURIComponent(text);
+const dateMin=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+function toast(message){let t=$('#toast');t.textContent=message;t.style.cssText='position:fixed;z-index:50;bottom:90px;left:50%;transform:translateX(-50%);background:#304a37;color:white;padding:12px 18px;border-radius:6px;font-size:12px;box-shadow:0 8px 20px #0002';clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display='none',3200);t.style.display='block'}
+function styleCard(s){return `<article class="style-card"><div class="image-wrap"><img src="${esc(s.image)}" alt="${esc(s.name)} hairstyle" loading="lazy"><span class="pill">${esc(s.badge||'YOUR STYLE')}</span><button class="heart ${favorites.includes(s.id)?'saved':''}" data-favorite="${esc(s.id)}" aria-label="${favorites.includes(s.id)?'Remove from':'Add to'} saved styles">${favorites.includes(s.id)?'♥':'♡'}</button></div><div class="style-info"><span class="tag">${esc(s.category)}</span><h3>${esc(s.name)}</h3><p class="desc">${esc(s.description||'Made with care, just for you')}</p><div class="card-bottom"><span class="price">${s.custom?'Price':'Braids from'} <strong>P${Number(s.price)||0}</strong></span><button data-detail="${esc(s.id)}">View style ↗</button></div></div></article>`}
+function sectionHeader(kicker,title,sub,link,pageName){return `<div class="section-head"><div><div class="eyebrow">${kicker}</div><h2>${title}</h2>${sub?`<p>${sub}</p>`:''}</div>${link?`<button class="text-link" data-page="${pageName}">${link} <span>↗</span></button>`:''}</div>`}
+function home(){return `<div class="welcome"><div><div class="eyebrow">HELLO, BEAUTIFUL ✦</div><h1>Beauty begins <em>with you.</em></h1><p>Find your next look, book your moment, feel your best.</p></div><div class="date-label">✳ &nbsp; A LITTLE SELF-CARE GOES A LONG WAY</div></div>
+<section class="hero"><div class="hero-image"></div><div class="hero-content"><div class="hero-kicker">✦ &nbsp; WELCOME TO NICOLE BEAUTY PARLOUR</div><h2>Good hair.<br>Even <em>better energy.</em></h2><p>Beautiful styles, made for the beautiful you. Let’s bring your next look to life.</p><button class="primary-btn" data-action="book">Book your appointment <span>↗</span></button></div><div class="hero-note"><span>✧</span> &nbsp; Your moment to shine</div></section>
+<div class="quick-row"><div class="quick-item"><span class="quick-icon">✧</span><div><strong>Styles you'll love</strong><small>Find your next look</small></div></div><div class="quick-item"><span class="quick-icon">▦</span><div><strong>Easy booking</strong><small>Request in a few taps</small></div></div><div class="quick-item"><span class="quick-icon">♡</span><div><strong>Made for you</strong><small>Beauty on your terms</small></div></div></div>
+<section class="section">${sectionHeader('FIND YOUR FAVOURITE','Explore by style','A little inspiration for your next appointment.','View all styles','explore')}<div class="category-grid"><button class="category" data-filter="Box braids"><span class="category-icon">✺</span><span><strong>Box braids</strong><small>Timeless & versatile</small></span><span class="category-arrow">↗</span></button><button class="category" data-filter="Knotless"><span class="category-icon">✧</span><span><strong>Knotless</strong><small>Light & effortless</small></span><span class="category-arrow">↗</span></button><button class="category" data-filter="Twists"><span class="category-icon">❋</span><span><strong>Twists</strong><small>Texture you'll love</small></span><span class="category-arrow">↗</span></button><button class="category" data-filter="Ponytails"><span class="category-icon">♧</span><span><strong>Ponytails</strong><small>Lovely & lifted</small></span><span class="category-arrow">↗</span></button></div></section>
+<section class="section">${sectionHeader('A LITTLE HAIR INSPIRATION','Looks we love','Beautifully done, just for you.','Explore all','explore')}<div class="style-grid">${styles().slice(0,4).map(styleCard).join('')}</div></section>
+<section class="promo"><div><div class="eyebrow">YOUR NEXT GOOD HAIR DAY AWAITS</div><h3>Ready for a little <em>you time?</em></h3><p>Choose your style and let's make something beautiful happen.</p></div><button class="primary-btn" data-action="book">Make a booking <span>↗</span></button></section>`}
+function explore(){let found=styles().filter(s=>(filter==='All'||filter==='Saved'&&favorites.includes(s.id)||s.category===filter)&&(`${s.name} ${s.category}`.toLowerCase().includes(query.toLowerCase())));return `<div class="page-heading"><div class="eyebrow">FIND YOUR NEXT LOOK ✦</div><h1>Explore <em>beautiful styles.</em></h1><p>Find a look you love and make it your own.</p></div><div class="toolbar"><input class="search" id="search" type="search" value="${esc(query)}" placeholder="⌕  Search hairstyles" aria-label="Search hairstyles">${['All','Box braids','Knotless','Twists','Ponytails','Updos','Saved'].map(x=>`<button class="filter ${filter===x?'active':''}" data-filter="${x}">${x}</button>`).join('')}</div><div class="style-grid" id="results">${found.length?found.map(styleCard).join(''):'<div class="empty"><div class="empty-icon">✧</div><h3>No styles found</h3><p>Try another search or explore a different category.</p></div>'}</div>`}
+function bookingPage(){return `<div class="page-heading"><div class="eyebrow">A LITTLE TIME FOR YOU ✦</div><h1>My <em>bookings.</em></h1><p>Keep track of the appointment requests saved on this device.</p></div><div class="notice">Requests are saved on this device only. Please send each request on WhatsApp and wait for the salon to confirm your appointment.</div>${bookings.length?bookings.map(b=>`<div class="list-card"><div><h3>${esc(b.style)}</h3><p>${esc(b.date)} at ${esc(b.time)} · ${esc(b.size)} / ${esc(b.length)}</p><p>${esc(b.name)} · Estimated P${esc(b.price)}</p></div><div><span class="status">Awaiting confirmation</span><p><button class="text-link" data-resend="${esc(b.id)}">Send via WhatsApp ↗</button></p><button class="text-link" data-delete-booking="${esc(b.id)}">Remove from device</button></div></div>`).join(''):`<div class="empty"><div class="empty-icon">▦</div><h3>Your beauty plans start here</h3><p>No booking requests yet. Find a look you love and request your appointment.</p><button class="primary-btn" data-action="book">Request an appointment ↗</button></div>`}`}
+function messages(){return `<div class="page-heading"><div class="eyebrow">LET'S CHAT ✦</div><h1>A little <em>conversation.</em></h1><p>Have a question? Start a conversation with Nicole Beauty Parlour.</p></div><div class="notice">Messages are sent through WhatsApp, not stored in this app. You’ll review and send your message there.</div><div class="chat-box"><div class="chat-head"><div class="chat-avatar">N</div><div><strong>Nicole Beauty Parlour</strong><small>Chat with us on WhatsApp · +267 72 517 904</small></div></div><div class="chat-body"><div class="bubble">Hello, beautiful! ✨ Have a question about a style or appointment? We'd love to hear from you.</div></div><form class="chat-compose" id="message-form"><input name="message" required maxlength="1000" placeholder="Write your message..." aria-label="Your message"><button class="primary-btn">Open WhatsApp ↗</button></form><div class="chat-foot">WhatsApp opens separately. No message is sent until you press send there.</div></div>`}
+function studio(){return `<div class="page-heading"><div class="eyebrow">YOUR CREATIVE SPACE ✦</div><h1>Welcome to <em>your studio.</em></h1><p>A little space for your ideas, favourites and inspiration.</p></div><div class="notice">Studio additions are private to this browser and device. They are not published to other customers.</div><div class="studio-grid"><div class="studio-card"><span class="quick-icon">✧</span><h3>Add a hairstyle</h3><p>Add a new look and photo to your personal style collection.</p><button class="primary-btn" data-action="add-style">Add a hairstyle ↗</button></div><div class="studio-card"><span class="quick-icon">✺</span><h3>Create an advertisement</h3><p>Save a promotion idea on this device and share it with the salon via WhatsApp.</p><button class="primary-btn" data-action="add-ad">Create an ad ↗</button></div><div class="studio-card"><span class="quick-icon">♡</span><h3>Your saved looks</h3><p>All the hairstyles you've fallen in love with, in one place.</p><button class="secondary-btn" data-filter="Saved">View saved styles ↗</button></div><div class="studio-card"><span class="quick-icon">≡</span><h3>Our price guide</h3><p>See the braid sizes and lengths from the salon’s price list.</p><button class="secondary-btn" data-action="prices">View price guide ↗</button></div></div>${ads.length?`<section class="section">${sectionHeader('SAVED ON THIS DEVICE','Your promotion ideas','','','')} ${ads.map(ad=>`<div class="list-card"><div><h3>${esc(ad.title)}</h3><p>${esc(ad.description)}</p></div><div><a class="text-link" target="_blank" rel="noopener" href="${wa('Hello Nicole Beauty Parlour! I would like to discuss this promotion: '+ad.title+' — '+ad.description)}">Share via WhatsApp ↗</a><br><button class="text-link" data-delete-ad="${esc(ad.id)}">Remove</button></div></div>`).join('')}</section>`:''}`}
+function render(){const content=$('#content');content.innerHTML=page==='home'?home():page==='explore'?explore():page==='bookings'?bookingPage():page==='messages'?messages():studio();document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));}
+function navigate(next){page=next;render();window.scrollTo({top:0,behavior:'smooth'})}
+function modal(title,kicker,body){$('#modal-root').innerHTML=`<div class="modal-overlay" data-overlay><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><div><div class="eyebrow">${kicker}</div><h2 id="modal-title">${title}</h2></div><button class="close" data-close aria-label="Close">×</button></div><div class="modal-body">${body}</div></section></div>`;document.body.style.overflow='hidden';setTimeout(()=>$('#modal-root input, #modal-root select, #modal-root button')?.focus(),10)}
+function closeModal(){$('#modal-root').innerHTML='';document.body.style.overflow=''}
+function bookingModal(selected=''){const opts=styles().map(s=>`<option value="${esc(s.name)}" ${s.name===selected?'selected':''}>${esc(s.name)}</option>`).join('');modal('Request an appointment','YOUR MOMENT STARTS HERE ✦',`<p>Tell us what you're dreaming of. Your appointment is confirmed only when the salon replies.</p><form id="booking-form"><div class="form-grid"><div class="field full"><label for="b-style">Hairstyle</label><select id="b-style" name="style" required><option value="">Choose a style</option>${opts}<option>Other / ask Nicole</option></select></div><div class="field"><label for="b-size">Braid size</label><select id="b-size" name="size">${Object.keys(prices).map(s=>`<option>${s}</option>`).join('')}</select></div><div class="field"><label for="b-length">Length</label><select id="b-length" name="length"><option>Midback</option><option>Butt length</option><option>Knee length</option></select></div><div class="field"><label for="b-date">Preferred date</label><input id="b-date" name="date" type="date" min="${dateMin()}" required></div><div class="field"><label for="b-time">Preferred time</label><input id="b-time" name="time" type="time" required></div><div class="field"><label for="b-name">Your name</label><input id="b-name" name="name" maxlength="100" required placeholder="Your name"></div><div class="field"><label for="b-phone">Your phone number</label><input id="b-phone" name="phone" type="tel" maxlength="30" required placeholder="Your phone number"></div><div class="field full"><label for="b-notes">Anything else? (optional)</label><textarea id="b-notes" name="notes" maxlength="500" placeholder="Tell us about your desired look"></textarea></div></div><div class="notice" style="margin-top:18px;margin-bottom:0">Braid guide estimate: <strong id="estimate">P130</strong>. Applies to knotless, box braids and twists; other styles and final prices must be confirmed with the salon.</div><div class="modal-actions"><button class="secondary-btn" type="button" data-close>Cancel</button><button class="primary-btn" type="submit">Continue to WhatsApp ↗</button></div><p class="form-note">A request is saved on this device and WhatsApp opens for you to send it. This is not a confirmed booking.</p></form>`)}
+function bookingText(b){return `Hello Nicole Beauty Parlour! I would like to request an appointment.\n\nStyle: ${b.style}\nBraid size: ${b.size}\nLength: ${b.length}\nPreferred date: ${b.date}\nPreferred time: ${b.time}\nName: ${b.name}\nPhone: ${b.phone}${b.notes?'\nNotes: '+b.notes:''}\n\nPlease let me know the price and availability. Thank you!`}
+function showDetail(id){let s=styles().find(x=>x.id===id);if(!s)return;modal(esc(s.name),'A LOOK YOU’LL LOVE ✦',`<img class="detail-img" src="${esc(s.image)}" alt="${esc(s.name)}"><p>${esc(s.description)}. Save this look for later or ask about making it yours.</p><div class="detail-price">${s.custom?'P'+Number(s.price):'Braids from P130'}</div><p class="form-note">Prices vary by size and length. Please confirm your exact style and price with the salon.</p><div class="modal-actions"><button class="secondary-btn" data-action="prices">Price guide</button><button class="primary-btn" data-book-style="${esc(s.id)}">Request this look ↗</button></div>`)}
+function showPrices(){modal('The price guide','BEAUTY, YOUR WAY ✦',`<p>For knotless, box braids and twists. Please confirm all prices with the salon.</p><table class="price-table"><thead><tr><th>Size</th><th>Midback</th><th>Butt length</th><th>Knee length</th></tr></thead><tbody>${Object.entries(prices).map(([size,p])=>`<tr><td>${size}</td><td>P${p.Midback}</td><td>P${p['Butt length']}</td><td>P${p['Knee length']}</td></tr>`).join('')}</tbody></table><p>Pick n’ drop, switch, hard dread and soft dread: <strong>P250</strong>.</p><div class="modal-actions"><button class="primary-btn" data-action="book">Request an appointment ↗</button></div>`)}
+function addStyleModal(){modal('Add a hairstyle','YOUR PERSONAL COLLECTION ✦',`<p>Add your own inspiration. This style will only appear on this device.</p><form id="style-form"><div class="field"><label for="s-name">Style name</label><input id="s-name" name="name" maxlength="60" required placeholder="e.g. Boho braids"></div><div class="form-grid"><div class="field"><label for="s-category">Category</label><select id="s-category" name="category"><option>Box braids</option><option>Knotless</option><option>Twists</option><option>Ponytails</option><option>Updos</option></select></div><div class="field"><label for="s-price">Price (P)</label><input id="s-price" name="price" type="number" min="0" max="100000" required placeholder="e.g. 200"></div></div><div class="field"><label for="s-description">Description</label><input id="s-description" name="description" maxlength="100" placeholder="A few words about this look"></div><div class="field"><label for="s-image">Photo (up to 2 MB)</label><input id="s-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" required></div><div class="modal-actions"><button type="button" class="secondary-btn" data-close>Cancel</button><button class="primary-btn">Save style ↗</button></div></form>`)}
+function addAdModal(){modal('Create an advertisement','A LITTLE IDEA ✦',`<p>Save a promotion idea on this device. It won't be publicly advertised or submitted automatically.</p><form id="ad-form"><div class="field"><label for="a-title">Promotion title</label><input id="a-title" name="title" required maxlength="70" placeholder="e.g. Braids special"></div><div class="field"><label for="a-desc">Tell us about it</label><textarea id="a-desc" name="description" required maxlength="500" placeholder="Describe your offer"></textarea></div><div class="modal-actions"><button type="button" class="secondary-btn" data-close>Cancel</button><button class="primary-btn">Save idea ↗</button></div></form>`)}
+document.addEventListener('click',e=>{
+ const el=e.target.closest('button,a');
+ if(e.target.matches('[data-overlay]')){closeModal();return}
+ if(!el)return;
+ if(el.hasAttribute('data-close')){closeModal();return}
+ if(el.dataset.nav){e.preventDefault();navigate(el.dataset.nav);return}
+ if(el.dataset.page){navigate(el.dataset.page);return}
+ if(el.dataset.filter){filter=el.dataset.filter;query='';navigate('explore');return}
+ if(el.dataset.favorite){const id=el.dataset.favorite;const next=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];if(save('favorites',next)){favorites=next;render();toast(favorites.includes(id)?'Saved to your favourite looks ♡':'Removed from your favourites')}return}
+ if(el.dataset.detail){showDetail(el.dataset.detail);return}
+ if(el.dataset.bookStyle){const s=styles().find(x=>x.id===el.dataset.bookStyle);bookingModal(s?.name||'');return}
+ if(el.dataset.resend){const b=bookings.find(x=>x.id===el.dataset.resend);if(b)window.open(wa(bookingText(b)),'_blank','noopener');return}
+ if(el.dataset.deleteBooking){bookings=bookings.filter(x=>x.id!==el.dataset.deleteBooking);save('bookings',bookings);render();toast('Request removed from this device');return}
+ if(el.dataset.deleteAd){ads=ads.filter(x=>x.id!==el.dataset.deleteAd);save('ads',ads);render();toast('Promotion idea removed');return}
+ if(el.dataset.action==='book')bookingModal();
+ if(el.dataset.action==='prices')showPrices();
+ if(el.dataset.action==='add-style')addStyleModal();
+ if(el.dataset.action==='add-ad')addAdModal();
 });
-
-const escapeHtml = (value) =>
-  String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-
-function getFilteredProducts() {
-  const query = state.query.trim().toLowerCase();
-
-  let filtered = [...products].filter((item) => {
-    const matchesCategory = state.category === 'All' || item.category === state.category;
-    const matchesQuery =
-      !query ||
-      item.name.toLowerCase().includes(query) ||
-      item.store.toLowerCase().includes(query) ||
-      item.short.toLowerCase().includes(query);
-
-    return matchesCategory && matchesQuery;
-  });
-
-  filtered.sort((a, b) => {
-    if (state.sort === 'cheapest') return a.price - b.price;
-    if (state.sort === 'rating') return b.rating - a.rating;
-    if (state.sort === 'shipping') return (a.shipping || 0) - (b.shipping || 0);
-    return a.price - b.price;
-  });
-
-  return filtered;
-}
-
-function renderCategories() {
-  const container = document.getElementById('categoryFilters');
-  container.innerHTML = categories
-    .map(
-      (category) => `
-        <button
-          type="button"
-          class="chip ${state.category === category ? 'active' : ''}"
-          data-category="${category}"
-        >
-          ${category}
-        </button>
-      `
-    )
-    .join('');
-
-  container.querySelectorAll('.chip').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.category = button.dataset.category;
-      render();
-    });
-  });
-}
-
-function renderSavedItems() {
-  const list = document.getElementById('savedItemsList');
-  list.innerHTML = savedItems
-    .map(
-      (item) => `
-        <div class="saved-item">
-          <div class="saved-copy">
-            <strong>${escapeHtml(item.name)}</strong>
-            <span>${escapeHtml(item.store)}</span>
-          </div>
-          <span class="saved-price">${money.format(item.price)}</span>
-        </div>
-      `
-    )
-    .join('');
-}
-
-function renderAlerts() {
-  const list = document.getElementById('alertList');
-  list.innerHTML = alerts
-    .map(
-      (alert) => `
-        <div class="alert-item">
-          <div>
-            <strong>${escapeHtml(alert.item)}</strong>
-            <span>${escapeHtml(alert.target)}</span>
-          </div>
-          <span class="status-pill ${alert.status === 'Triggered' ? 'danger' : 'success'}">
-            ${alert.status}
-          </span>
-        </div>
-      `
-    )
-    .join('');
-}
-
-function renderDealSpotlight() {
-  const item = products[0];
-  const spotlight = document.getElementById('dealSpotlight');
-
-  spotlight.innerHTML = `
-    <div class="deal-visual">
-      <img src="${item.image}" alt="${escapeHtml(item.name)}" />
-    </div>
-    <div class="deal-copy">
-      <h3>${escapeHtml(item.name)}</h3>
-      <p>${escapeHtml(item.description)}</p>
-      <div class="deal-meta">
-        <strong>${money.format(item.price)}</strong>
-        <span>${item.drop} this week</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderProducts() {
-  const productGrid = document.getElementById('productGrid');
-  const items = getFilteredProducts();
-
-  if (!items.length) {
-    productGrid.innerHTML = `
-      <div class="empty-state panel">
-        <h3>No matches found</h3>
-        <p>Try another keyword or switch to a different category.</p>
-      </div>
-    `;
-    return;
-  }
-
-  productGrid.classList.toggle('list-view', state.listView === 'list');
-
-  productGrid.innerHTML = items
-    .map(
-      (item) => `
-        <article class="product-card ${state.listView === 'list' ? 'list-item' : ''}" data-id="${item.id}">
-          <div class="product-image-wrap">
-            <img src="${item.image}" alt="${escapeHtml(item.name)}" />
-            <div class="image-badges">
-              <span class="badge badge-blue">${item.badge}</span>
-              <button type="button" class="save-button ${item.saved ? 'saved' : ''}" aria-label="Save item">
-                ♥
-              </button>
-            </div>
-          </div>
-
-          <div class="product-body">
-            <div class="store-row">
-              <span class="store-pill">${escapeHtml(item.storeShort)}</span>
-              <span class="rating">★ ${item.rating}</span>
-            </div>
-
-            <h3>${escapeHtml(item.name)}</h3>
-            <p>${escapeHtml(item.condition)} • ${escapeHtml(item.stock)}</p>
-
-            <div class="price-row">
-              <div>
-                <span class="amount">${money.format(item.price)}</span>
-                <small>Target ${money.format(item.target)}</small>
-              </div>
-              <span class="drop-tag">${item.drop}</span>
-            </div>
-
-            <div class="meta-row">
-              <span>${escapeHtml(item.category)}</span>
-              <span>${item.shipping === 0 ? 'Free delivery' : `${money.format(item.shipping)} shipping`}</span>
-            </div>
-          </div>
-        </article>
-      `
-    )
-    .join('');
-
-  productGrid.querySelectorAll('.product-card').forEach((card) => {
-    card.addEventListener('click', (event) => {
-      const target = event.target;
-      if (target.closest('.save-button')) {
-        event.stopPropagation();
-        return;
-      }
-
-      const id = Number(card.dataset.id);
-      openModal(id);
-    });
-  });
-}
-
-function openModal(productId) {
-  const product = products.find((item) => item.id === productId);
-  if (!product) return;
-
-  const modal = document.getElementById('productModal');
-  const modalContent = document.getElementById('modalContent');
-
-  const historyBars = product.history
-    .map(
-      (value, index) => `
-        <div class="bar-group" title="${money.format(value)}">
-          <span class="bar" style="height: ${(value / Math.max(...product.history)) * 100}%"></span>
-          <small>${['W', 'M', 'T', 'F', 'S', 'S', 'N'][index]}</small>
-        </div>
-      `
-    )
-    .join('');
-
-  modalContent.innerHTML = `
-    <div class="modal-hero">
-      <img src="${product.image}" alt="${escapeHtml(product.name)}" />
-    </div>
-    <div class="modal-header">
-      <div>
-        <span class="eyebrow">${escapeHtml(product.store)}</span>
-        <h3 id="modalTitle">${escapeHtml(product.name)}</h3>
-      </div>
-      <span class="badge success">${product.badge}</span>
-    </div>
-
-    <div class="modal-price">
-      <div>
-        <strong>${money.format(product.price)}</strong>
-        <span>Price in BWP</span>
-      </div>
-      <button type="button" class="primary-btn small">Buy now</button>
-    </div>
-
-    <p class="modal-description">${escapeHtml(product.description)}</p>
-
-    <div class="variant-row">
-      ${product.variants.map((variant) => `<span>${escapeHtml(variant)}</span>`).join('')}
-    </div>
-
-    <div class="history-panel">
-      <div class="panel-header">
-        <span>Price history</span>
-        <span>${product.drop}</span>
-      </div>
-      <div class="history-bars">
-        ${historyBars}
-      </div>
-    </div>
-  `;
-
-  modal.classList.remove('hidden');
-}
-
-function closeModal() {
-  document.getElementById('productModal').classList.add('hidden');
-}
-
-function render() {
-  renderCategories();
-  renderSavedItems();
-  renderAlerts();
-  renderDealSpotlight();
-  renderProducts();
-}
-
-function attachGlobalEvents() {
-  document.getElementById('searchInput').addEventListener('input', (event) => {
-    state.query = event.target.value;
-    renderProducts();
-  });
-
-  document.getElementById('sortBy').addEventListener('change', (event) => {
-    state.sort = event.target.value;
-    renderProducts();
-  });
-
-  document.getElementById('toggleListView').addEventListener('click', () => {
-    state.listView = state.listView === 'grid' ? 'list' : 'grid';
-    document.getElementById('toggleListView').textContent = state.listView === 'grid' ? 'Grid view' : 'Card view';
-    renderProducts();
-  });
-
-  document.getElementById('alertTrigger').addEventListener('click', () => {
-    const item = products[0];
-    alerts.unshift({ item: item.name, target: `${money.format(item.target)}`, status: 'Watching' });
-    renderAlerts();
-  });
-
-  document.querySelector('.close-modal').addEventListener('click', closeModal);
-
-  document.querySelectorAll('[data-close="true"]').forEach((el) => {
-    el.addEventListener('click', closeModal);
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeModal();
-  });
-}
-
+document.addEventListener('input',e=>{if(e.target.id==='search'){query=e.target.value;const found=styles().filter(s=>(filter==='All'||filter==='Saved'&&favorites.includes(s.id)||s.category===filter)&&(`${s.name} ${s.category}`.toLowerCase().includes(query.toLowerCase())));$('#results').innerHTML=found.length?found.map(styleCard).join(''):'<div class="empty"><div class="empty-icon">✧</div><h3>No styles found</h3><p>Try another search or explore a different category.</p></div>'}});
+document.addEventListener('change',e=>{if(e.target.id==='b-size'||e.target.id==='b-length')$('#estimate').textContent='P'+prices[$('#b-size').value][$('#b-length').value]});
+document.addEventListener('submit',e=>{e.preventDefault();const form=e.target;const data=Object.fromEntries(new FormData(form).entries());
+ if(form.id==='message-form'){window.open(wa(data.message),'_blank','noopener');return}
+ if(form.id==='booking-form'){
+  if(data.date<dateMin()){toast('Please choose today or a future date');return}
+  const b={...data,id:crypto.randomUUID(),price:prices[data.size][data.length]};const next=[b,...bookings];if(!save('bookings',next))return;bookings=next;window.open(wa(bookingText(b)),'_blank','noopener');closeModal();navigate('bookings');toast('Request saved. Please send it in WhatsApp.');return;
+ }
+ if(form.id==='ad-form'){const next=[{...data,id:crypto.randomUUID()},...ads];if(!save('ads',next))return;ads=next;closeModal();navigate('studio');toast('Promotion idea saved on this device');return}
+ if(form.id==='style-form'){
+  const file=data.image;if(!file||!file.type.startsWith('image/')){toast('Please choose an image');return}if(file.size>2*1024*1024){toast('Please choose a photo smaller than 2 MB');return}
+  const reader=new FileReader();reader.onload=()=>{const s={...data,id:crypto.randomUUID(),image:reader.result,custom:true,badge:'YOUR STYLE'};const next=[s,...customStyles];if(!save('styles',next))return;customStyles=next;closeModal();filter='All';query='';navigate('explore');toast('Style saved on this device')};reader.onerror=()=>toast('Could not read that photo');reader.readAsDataURL(file);
+ }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#modal-root').innerHTML)closeModal()});
 render();
-attachGlobalEvents();
+if('serviceWorker'in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
