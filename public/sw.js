@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nicole-beauty-parlour-v1';
+const CACHE_NAME = 'nicole-beauty-parlour-v3';
 const CORE_ASSETS = [
   '/',
   '/index.html',
@@ -9,6 +9,10 @@ const CORE_ASSETS = [
   '/js/store.js',
   '/js/flyer.js',
   '/images/nicole-logo.jpg',
+  '/images/nicole-logo-transparent.png',
+  '/images/nicole-logo-light.png',
+  '/images/nicole-wordmark-dark.png',
+  '/images/nicole-wordmark-light.png',
   '/images/price-menu-card.jpg',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
@@ -40,18 +44,35 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.pathname.startsWith('/api/')) return;
 
+  // Network-first for HTML/CSS/JS so updates appear immediately; cache-first with background refresh for images
+  const isImage = url.pathname.startsWith('/images/') || url.pathname.startsWith('/icons/');
+  if (isImage) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const net = fetch(request)
+          .then((res) => {
+            if (res && res.status === 200) {
+              const copy = res.clone();
+              caches.open(CACHE_NAME).then((c) => c.put(request, copy));
+            }
+            return res;
+          })
+          .catch(() => cached);
+        return cached || net;
+      })
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(request).then((cached) => {
-      const networkFetch = fetch(request)
-        .then((response) => {
-          if (response && response.status === 200 && response.type === 'basic') {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
-    })
+    fetch(request)
+      .then((res) => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(request, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(request))
   );
 });

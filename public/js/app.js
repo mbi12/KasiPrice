@@ -2,6 +2,7 @@ import {
   SALON_INFO,
   SIZE_OPTIONS,
   LENGTH_OPTIONS,
+  HAIR_COLORS,
   OFFICIAL_PRICE_MATRIX,
   SPECIALTY_FLAT_PRICE,
   CATEGORIES,
@@ -11,45 +12,58 @@ import {
   calculateStylePrice
 } from './data.js';
 import { SalonStore } from './store.js';
-import { compressImageFile, renderPromoFlyerBlob } from './flyer.js';
+import {
+  compressImageFile,
+  renderPromoFlyerToCanvas,
+  renderPromoFlyerBlob
+} from './flyer.js';
 
 const store = new SalonStore();
 
-// UI State
 const ui = {
+  theme: localStorage.getItem('nbp_theme_v2') || 'dark',
   activeTab: 'discover',
-  // Calculator state
+  coverflowIndex: 0,
+  // Architect calculator state
   calcMode: 'matrix',
   calcSize: 'medium',
   calcLength: 'midback',
-  // Market filters
+  lastDisplayedPrice: 180,
+  // Gallery filters
   searchQuery: '',
   selectedCategory: 'all',
   savedOnly: false,
   sortBy: 'featured',
-  // Booking form state
+  // Booking state
   bookStyleId: 'style-01',
   bookSize: 'medium',
   bookLength: 'midback',
+  bookColorId: '27',
   bookStylistId: 'nicole',
   bookDate: getUpcomingDates(14)[1]?.iso || getUpcomingDates(14)[0].iso,
   bookTime: '09:00',
   bookAddOnIds: new Set(),
   appliedPromo: null,
-  // Messaging state
+  // Virtual Style Mirror state
+  mirrorTab: 'selfie',
+  mirrorStyleId: 'style-01',
+  mirrorColorId: '27',
+  mirrorSelfieSrc: '/images/style-06-golden-velvet-updo.jpg',
+  quizBudget: 300,
+  quizVibe: 'all',
+  // Concierge chat state
   activeThreadId: 'thread-nicole',
   mobileConvOpen: true,
   senderMode: 'client',
   pendingChatAttachment: null,
-  // Modals & transient state
+  // Studio & modals
   newStyleImage: '/images/style-01-honey-curly-knotless.jpg',
-  newPromoImage: '/images/style-14-burgundy-french-curl.jpg',
+  newPromoCustomImage: null,
   lastFlyerBlob: null,
   lastFlyerPromo: null,
   deferredInstallPrompt: null,
   storyIndex: 0,
-  storyTimer: null,
-  promoSlideIndex: 0
+  storyTimer: null
 };
 
 function esc(value) {
@@ -102,6 +116,64 @@ export function showToast(message) {
   }, 2900);
 }
 
+/* ================= ICE-CYAN CONFETTI CELEBRATION ================= */
+function launchIceConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const palette = ['#29ABE2', '#56CCF2', '#DFF3FE', '#FFFFFF', '#0B7BC1'];
+  const pieces = Array.from({ length: 68 }, () => ({
+    x: canvas.width * (0.25 + Math.random() * 0.5),
+    y: canvas.height * 0.35,
+    vx: (Math.random() - 0.5) * 13,
+    vy: -Math.random() * 12 - 4,
+    size: 5 + Math.random() * 6,
+    rot: Math.random() * Math.PI,
+    vr: (Math.random() - 0.5) * 0.25,
+    color: palette[Math.floor(Math.random() * palette.length)],
+    alpha: 1
+  }));
+
+  let frame = 0;
+  function tick() {
+    frame++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const p of pieces) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.34;
+      p.rot += p.vr;
+      if (frame > 42) p.alpha -= 0.025;
+      if (p.alpha > 0 && p.y < canvas.height + 20) {
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      }
+    }
+    if (alive && frame < 110) requestAnimationFrame(tick);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ================= THEME MANAGEMENT ================= */
+function applyTheme(theme) {
+  ui.theme = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', ui.theme);
+  localStorage.setItem('nbp_theme_v2', ui.theme);
+  const meta = document.getElementById('metaThemeColor');
+  if (meta) meta.setAttribute('content', ui.theme === 'light' ? '#EAF6FE' : '#040914');
+}
+
 /* ================= MODAL HELPERS ================= */
 function openModal(id) {
   const el = document.getElementById(id);
@@ -118,364 +190,528 @@ function closeModal(id) {
     clearTimeout(ui.storyTimer);
     ui.storyTimer = null;
   }
-  const anyOpen = document.querySelector('.modal-overlay:not(.hidden)');
+  const anyOpen = Array.from(document.querySelectorAll('.modal-backdrop')).some(
+    (m) => !m.classList.contains('hidden')
+  );
   if (!anyOpen) document.body.style.overflow = '';
 }
 
-function closeAllModals() {
-  document.querySelectorAll('.modal-overlay').forEach((m) => m.classList.add('hidden'));
-  if (ui.storyTimer) {
-    clearTimeout(ui.storyTimer);
-    ui.storyTimer = null;
-  }
-  document.body.style.overflow = '';
-}
-
-/* ================= ANIMATED SPLASH SCREEN ================= */
-function runSplashSequence(fast = false) {
+/* ================= 3D SPLASH CANVAS & CHOREOGRAPHY ================= */
+function initSplashExperience() {
   const splash = document.getElementById('splashScreen');
+  const canvas = document.getElementById('splashCanvas');
   const fill = document.getElementById('splashProgressFill');
-  const pct = document.getElementById('splashPercent');
-  const status = document.getElementById('splashStatusText');
-  if (!splash || !fill || !pct || !status) return;
+  const pctEl = document.getElementById('splashPercent');
+  const statusEl = document.getElementById('splashStatusText');
+  const skipBtn = document.getElementById('skipSplashBtn');
 
-  splash.classList.remove('exit');
-  const steps = [
-    { p: 24, text: 'Sectioning crisp knotless parts...' },
-    { p: 54, text: 'Prepping luxury braids & French curls...' },
-    { p: 82, text: 'Syncing BWP rates & salon schedule...' },
-    { p: 100, text: 'Look Good 💙 Feel Good 💙 Be You ✨' }
+  if (!splash) return;
+
+  let animActive = true;
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    const motes = Array.from({ length: 42 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: 1 + Math.random() * 2.6,
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: -0.25 - Math.random() * 0.55,
+      alpha: 0.2 + Math.random() * 0.65
+    }));
+
+    const renderCanvas = () => {
+      if (!animActive) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const m of motes) {
+        m.x += m.vx;
+        m.y += m.vy;
+        if (m.y < -10) m.y = canvas.height + 10;
+        if (m.x < -10) m.x = canvas.width + 10;
+        if (m.x > canvas.width + 10) m.x = -10;
+
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(86, 204, 242, ${m.alpha})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(renderCanvas);
+    };
+    requestAnimationFrame(renderCanvas);
+  }
+
+  const lines = [
+    'Illuminating the Gaborone Crown Runway...',
+    'Preparing tension-free Knotless & French Curls...',
+    'Calibrating official BWP Parlour Price Architect...',
+    'Look Good • Feel Good • Be You'
   ];
 
-  let idx = 0;
-  fill.style.width = '8%';
-  pct.textContent = '8%';
+  let pct = 0;
+  let dismissed = false;
 
-  const stepMs = fast ? 260 : 480;
-  const interval = setInterval(() => {
-    if (idx >= steps.length) {
-      clearInterval(interval);
-      setTimeout(() => splash.classList.add('exit'), 260);
-      return;
+  const finishSplash = () => {
+    if (dismissed) return;
+    dismissed = true;
+    animActive = false;
+    splash.classList.add('exit');
+  };
+
+  skipBtn?.addEventListener('click', finishSplash);
+
+  const timer = setInterval(() => {
+    pct = Math.min(100, pct + 5);
+    if (fill) fill.style.width = `${pct}%`;
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    if (statusEl) {
+      const idx = Math.min(lines.length - 1, Math.floor((pct / 100) * lines.length));
+      statusEl.textContent = lines[idx];
     }
-    const cur = steps[idx++];
-    fill.style.width = `${cur.p}%`;
-    pct.textContent = `${cur.p}%`;
-    status.textContent = cur.text;
-  }, stepMs);
-
-  document.getElementById('skipSplashBtn')?.addEventListener(
-    'click',
-    () => {
-      clearInterval(interval);
-      splash.classList.add('exit');
-    },
-    { once: true }
-  );
+    if (pct >= 100) {
+      clearInterval(timer);
+      setTimeout(finishSplash, 240);
+    }
+  }, 85);
 }
 
-/* ================= NAVIGATION ================= */
+/* ================= TAB NAVIGATION ================= */
 function switchTab(tabId) {
   ui.activeTab = tabId;
-  document.querySelectorAll('.app-view').forEach((view) => {
-    view.classList.toggle('active', view.id === `view-${tabId}`);
+  document.querySelectorAll('.app-view').forEach((sec) => {
+    sec.classList.toggle('active', sec.id === `view-${tabId}`);
   });
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
+  document.querySelectorAll('.dock-item').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.tab === tabId);
   });
-
   if (tabId === 'messages') {
     store.markThreadRead(ui.activeThreadId);
-    scrollMessagesBottom();
+    scrollChatBottom();
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ================= STORIES ================= */
-function getStoriesData() {
+/* ================= STORIES LOOKBOOK ================= */
+function getStoryItems() {
+  const styles = store.state.styles.slice(0, 6);
   return [
     {
-      label: 'Price Menu',
-      img: '/images/price-menu-card.jpg',
-      price: 'P130 – P500',
-      caption: 'Official @NICOLE_BEAUTY_PARLOUR BWP Price List — Jumbo from P130 & Softdread flat P250!',
-      styleId: 'style-01'
+      title: 'Official BWP Price Menu',
+      sub: 'Jumbo P130 → Small P500 • Softdread P250',
+      image: SALON_INFO.priceSheetImage,
+      caption: 'Exact @NICOLE_BEAUTY_PARLOUR Gaborone rates — zero hidden charges.',
+      cta: 'Open Full Price Table',
+      action: () => openModal('priceSheetModal')
     },
-    {
-      label: 'Honey Curls',
-      img: '/images/style-01-honey-curly-knotless.jpg',
-      price: 'From P180',
-      caption: 'Signature Honey Blonde (#27/#30) Knotless with bouncy spiral curly ends 💙',
-      styleId: 'style-01'
-    },
-    {
-      label: 'French Curl',
-      img: '/images/style-14-burgundy-french-curl.jpg',
-      price: 'From P250',
-      caption: 'Burgundy Wine Ombre French Curl Knotless — ultra-glossy & lightweight!',
-      styleId: 'style-14'
-    },
-    {
-      label: 'Softdread',
-      img: '/images/style-13-passion-curly-twists.jpg',
-      price: 'Flat P250',
-      caption: "Pick n' Drop, Switch & Passion Softdread Twists — official flat P250 deal!",
-      styleId: 'style-13'
-    },
-    {
-      label: 'High Pony',
-      img: '/images/style-05-caramel-high-pony.jpg',
-      price: 'From P180',
-      caption: 'Pain-free sleek Caramel #30 High-Ponytail Knotless with crisp geometric parts.',
-      styleId: 'style-05'
-    },
-    {
-      label: 'Glam Updo',
-      img: '/images/style-06-golden-velvet-updo.jpg',
-      price: 'From P180',
-      caption: 'Golden #27 Velvet Scrunchie Crown Updo — ready for birthdays & graduations 👑',
-      styleId: 'style-06'
-    },
-    {
-      label: 'Boho Knee',
-      img: '/images/style-11-goddess-boho-knee.jpg',
-      price: 'P400 Knee',
-      caption: 'Show-stopping S-Medium Knee-Length Goddess Boho Knotless with lush curls.',
-      styleId: 'style-11'
-    }
+    ...styles.map((s) => ({
+      title: s.name,
+      sub: `${s.category} • From ${formatPula(calculateStylePrice(s, s.defaultSize, s.defaultLength))}`,
+      image: s.image,
+      caption: `${s.description} (${s.duration} • ${s.packs})`,
+      cta: `Reserve ${s.name.split(' ')[0]} Look`,
+      action: () => jumpToBookingWithStyle(s.id, s.defaultSize, s.defaultLength)
+    }))
   ];
 }
 
-function renderStories() {
-  const container = document.getElementById('storiesStrip');
-  if (!container) return;
-  const stories = getStoriesData();
-  container.innerHTML = stories
+function renderStoriesBar() {
+  const bar = document.getElementById('storiesBar');
+  if (!bar) return;
+  const stories = getStoryItems();
+  bar.innerHTML = stories
     .map(
-      (s, idx) => `
-      <button type="button" class="story-bubble" data-story-idx="${idx}">
+      (item, idx) => `
+      <button type="button" class="story-orb-item" data-story-idx="${idx}">
         <div class="story-ring">
-          <img src="${esc(s.img)}" alt="${esc(s.label)}" loading="lazy" />
+          <div class="story-ring-inner">
+            <img src="${esc(item.image)}" alt="${esc(item.title)}" loading="lazy" />
+          </div>
         </div>
-        <span>${esc(s.label)}</span>
+        <span>${esc(idx === 0 ? 'Price Menu' : item.title.split(' ').slice(0, 2).join(' '))}</span>
       </button>
     `
     )
     .join('');
 
-  container.querySelectorAll('.story-bubble').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      openStoryAt(Number(btn.dataset.storyIdx));
-    });
+  bar.querySelectorAll('[data-story-idx]').forEach((btn) => {
+    btn.addEventListener('click', () => openStoryAt(Number(btn.dataset.storyIdx)));
   });
 }
 
 function openStoryAt(index) {
-  const stories = getStoriesData();
+  const stories = getStoryItems();
   if (!stories.length) return;
-  ui.storyIndex = ((index % stories.length) + stories.length) % stories.length;
-  const cur = stories[ui.storyIndex];
+  ui.storyIndex = (index + stories.length) % stories.length;
+  const item = stories[ui.storyIndex];
 
-  const bars = document.getElementById('storyProgressBars');
-  bars.innerHTML = stories
-    .map(
-      (_, i) =>
-        `<div class="story-seg ${i < ui.storyIndex ? 'done' : i === ui.storyIndex ? 'current' : ''}"></div>`
-    )
-    .join('');
+  const track = document.getElementById('storyProgressTrack');
+  const titleEl = document.getElementById('storyTitleText');
+  const subEl = document.getElementById('storySubText');
+  const imgEl = document.getElementById('storyMainImage');
+  const capEl = document.getElementById('storyCaptionText');
+  const actBtn = document.getElementById('storyActionBtn');
 
-  document.getElementById('storyMainImg').src = cur.img;
-  document.getElementById('storyPriceBadge').textContent = cur.price;
-  document.getElementById('storyCaptionText').textContent = cur.caption;
+  if (track) {
+    track.innerHTML = stories
+      .map(
+        (_, i) => `
+        <div class="story-seg">
+          <div class="story-seg-fill" style="width:${i < ui.storyIndex ? '100%' : '0%'};${
+          i === ui.storyIndex ? 'transition: width 4600ms linear;' : ''
+        }"></div>
+        </div>`
+      )
+      .join('');
+    requestAnimationFrame(() => {
+      const fills = track.querySelectorAll('.story-seg-fill');
+      if (fills[ui.storyIndex]) fills[ui.storyIndex].style.width = '100%';
+    });
+  }
 
-  const bookBtn = document.getElementById('storyBookBtn');
-  bookBtn.onclick = () => {
-    closeModal('storyModal');
-    startBookingForStyle(cur.styleId);
-  };
+  if (titleEl) titleEl.textContent = item.title;
+  if (subEl) subEl.textContent = item.sub;
+  if (imgEl) imgEl.src = item.image;
+  if (capEl) capEl.textContent = item.caption;
+  if (actBtn) {
+    actBtn.textContent = item.cta;
+    actBtn.onclick = () => {
+      closeModal('storyModal');
+      item.action();
+    };
+  }
 
   openModal('storyModal');
-
   if (ui.storyTimer) clearTimeout(ui.storyTimer);
   ui.storyTimer = setTimeout(() => {
     if (ui.storyIndex < stories.length - 1) openStoryAt(ui.storyIndex + 1);
     else closeModal('storyModal');
-  }, 4500);
+  }, 4600);
 }
 
-/* ================= PROMO / ADVERT CAROUSEL ================= */
-function renderPromoCarousel() {
+/* ================= INTERACTIVE 3D COVERFLOW HERO ================= */
+function getCoverflowStyles() {
+  const featured = store.state.styles.filter((s) => s.featured);
+  return (featured.length >= 5 ? featured : store.state.styles).slice(0, 7);
+}
+
+function renderCoverflow() {
+  const list = getCoverflowStyles();
+  const stage = document.getElementById('coverflowStage');
+  const titleEl = document.getElementById('coverflowActiveTitle');
+  const spotBar = document.getElementById('coverflowSpotlightBar');
+  const aura = document.getElementById('heroDynamicAura');
+
+  if (!stage || !list.length) return;
+  ui.coverflowIndex = ((ui.coverflowIndex % list.length) + list.length) % list.length;
+  const activeStyle = list[ui.coverflowIndex];
+
+  if (aura) aura.style.backgroundImage = `url('${activeStyle.image}')`;
+  if (titleEl) titleEl.textContent = activeStyle.name;
+
+  stage.innerHTML = list
+    .map((style, idx) => {
+      let diff = idx - ui.coverflowIndex;
+      const half = Math.floor(list.length / 2);
+      if (diff > half) diff -= list.length;
+      if (diff < -half) diff += list.length;
+
+      const abs = Math.abs(diff);
+      const visible = abs <= 2;
+      const tx = diff * 148;
+      const tz = -abs * 115;
+      const ry = -diff * 26;
+      const scale = diff === 0 ? 1 : abs === 1 ? 0.86 : 0.74;
+      const opacity = !visible ? 0 : diff === 0 ? 1 : abs === 1 ? 0.78 : 0.42;
+      const zIdx = 20 - abs * 4;
+      const startPrice = calculateStylePrice(style, style.defaultSize, style.defaultLength);
+
+      return `
+        <article
+          class="cf-card ${diff === 0 ? 'is-active' : ''}"
+          data-cf-idx="${idx}"
+          data-style-id="${esc(style.id)}"
+          style="transform: translate3d(${tx}px, 0, ${tz}px) rotateY(${ry}deg) scale(${scale}); opacity: ${opacity}; z-index: ${zIdx}; pointer-events: ${visible ? 'auto' : 'none'};"
+        >
+          <img src="${esc(style.image)}" alt="${esc(style.name)}" />
+          <div class="cf-card-overlay">
+            <span>${esc(style.badge || style.category)}</span>
+            <strong class="cf-price-pill">${formatPula(startPrice)}</strong>
+          </div>
+        </article>
+      `;
+    })
+    .join('');
+
+  stage.querySelectorAll('.cf-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const idx = Number(card.dataset.cfIdx);
+      if (idx === ui.coverflowIndex) {
+        openStyleConfigurator(card.dataset.styleId);
+      } else {
+        ui.coverflowIndex = idx;
+        renderCoverflow();
+      }
+    });
+  });
+
+  if (spotBar) {
+    const price = calculateStylePrice(activeStyle, activeStyle.defaultSize, activeStyle.defaultLength);
+    spotBar.innerHTML = `
+      <div class="cf-spot-meta">
+        <strong>${formatPula(price)}</strong>
+        <span>${esc(activeStyle.category)} • ${esc(activeStyle.duration)} • ${esc(activeStyle.packs)}</span>
+      </div>
+      <div class="cf-spot-actions">
+        <button type="button" class="lux-pill-btn" id="cfMirrorQuickBtn">Try in Mirror</button>
+        <button type="button" class="lux-pill-btn" id="cfCustomizeQuickBtn">Customize</button>
+        <button type="button" class="btn-couture-primary sm" id="cfBookQuickBtn">Book Look</button>
+      </div>
+    `;
+    document.getElementById('cfMirrorQuickBtn')?.addEventListener('click', () => {
+      ui.mirrorStyleId = activeStyle.id;
+      openMirrorModal('selfie');
+    });
+    document.getElementById('cfCustomizeQuickBtn')?.addEventListener('click', () => {
+      openStyleConfigurator(activeStyle.id);
+    });
+    document.getElementById('cfBookQuickBtn')?.addEventListener('click', () => {
+      jumpToBookingWithStyle(activeStyle.id, activeStyle.defaultSize, activeStyle.defaultLength);
+    });
+  }
+}
+
+/* ================= VISUAL SILHOUETTE BRAID ARCHITECT ================= */
+function animatePriceOdometer(el, fromVal, toVal) {
+  if (!el) return;
+  if (fromVal === toVal) {
+    el.textContent = formatPula(toVal);
+    return;
+  }
+  const start = performance.now();
+  const dur = 320;
+  function step(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const cur = Math.round(fromVal + (toVal - fromVal) * eased);
+    el.textContent = formatPula(cur);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function renderArchitect() {
+  const modeMatrixBtn = document.getElementById('calcModeMatrixBtn');
+  const modeFlatBtn = document.getElementById('calcModeFlatBtn');
+  const matrixWrap = document.getElementById('calcMatrixControls');
+  const flatWrap = document.getElementById('calcFlatBanner');
+  const sizeRow = document.getElementById('calcSizeRow');
+  const lenRow = document.getElementById('calcLengthRow');
+  const sizeHint = document.getElementById('calcSizeHint');
+  const lenHint = document.getElementById('calcLengthHint');
+  const priceEl = document.getElementById('calcPriceOutput');
+  const metaEl = document.getElementById('calcMetaOutput');
+  const gaugeEl = document.getElementById('strandGaugeLabel');
+
+  const isMatrix = ui.calcMode === 'matrix';
+  modeMatrixBtn?.classList.toggle('active', isMatrix);
+  modeFlatBtn?.classList.toggle('active', !isMatrix);
+  matrixWrap?.classList.toggle('hidden', !isMatrix);
+  flatWrap?.classList.toggle('hidden', isMatrix);
+
+  if (sizeRow) {
+    sizeRow.innerHTML = SIZE_OPTIONS.map(
+      (s) => `
+      <button type="button" class="choice-chip ${ui.calcSize === s.id ? 'active' : ''}" data-calc-size="${s.id}">
+        ${esc(s.short)}
+      </button>`
+    ).join('');
+    sizeRow.querySelectorAll('[data-calc-size]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        ui.calcSize = btn.dataset.calcSize;
+        renderArchitect();
+      });
+    });
+  }
+
+  if (lenRow) {
+    lenRow.innerHTML = LENGTH_OPTIONS.map(
+      (l) => `
+      <button type="button" class="choice-chip ${ui.calcLength === l.id ? 'active' : ''}" data-calc-len="${l.id}">
+        ${esc(l.label)}
+      </button>`
+    ).join('');
+    lenRow.querySelectorAll('[data-calc-len]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        ui.calcLength = btn.dataset.calcLen;
+        renderArchitect();
+      });
+    });
+  }
+
+  const sizeObj = SIZE_OPTIONS.find((s) => s.id === ui.calcSize) || SIZE_OPTIONS[2];
+  const lenObj = LENGTH_OPTIONS.find((l) => l.id === ui.calcLength) || LENGTH_OPTIONS[0];
+  if (sizeHint) sizeHint.textContent = sizeObj.label;
+  if (lenHint) lenHint.textContent = lenObj.label;
+
+  const computedPrice = isMatrix
+    ? OFFICIAL_PRICE_MATRIX[ui.calcSize]?.[ui.calcLength] ?? 180
+    : SPECIALTY_FLAT_PRICE;
+  const deposit = Math.round(computedPrice * 0.3);
+
+  animatePriceOdometer(priceEl, ui.lastDisplayedPrice, computedPrice);
+  ui.lastDisplayedPrice = computedPrice;
+
+  if (metaEl) {
+    metaEl.textContent = isMatrix
+      ? `${sizeObj.durationHrs} • ${sizeObj.packs} • 30% Deposit ${formatPula(deposit)}`
+      : `3.5 – 4.5 hrs • 5 packs • 30% Deposit ${formatPula(deposit)}`;
+  }
+
+  if (gaugeEl) {
+    gaugeEl.textContent = isMatrix
+      ? `${sizeObj.label} Strands • ${lenObj.label} • ${sizeObj.packs}`
+      : `Pick n' Drop / Softdread • Official Flat P250`;
+  }
+
+  // Update SVG Silhouette Braids & Laser Marker!
+  const endY = !isMatrix ? 210 : ui.calcLength === 'midback' ? 152 : ui.calcLength === 'butt' ? 230 : 304;
+  const sw = !isMatrix ? 6.8 : sizeObj.strandWidth;
+  const strandDefs = [
+    ['strand1', `M122 46 Q114 ${(46 + endY) / 2} 116 ${endY}`],
+    ['strand2', `M131 42 Q127 ${(42 + endY) / 2} 128 ${endY}`],
+    ['strand3', `M140 40 Q140 ${(40 + endY) / 2} 140 ${endY}`],
+    ['strand4', `M149 42 Q153 ${(42 + endY) / 2} 152 ${endY}`],
+    ['strand5', `M158 46 Q166 ${(46 + endY) / 2} 164 ${endY}`]
+  ];
+  for (const [id, d] of strandDefs) {
+    const pathEl = document.getElementById(id);
+    if (pathEl) {
+      pathEl.setAttribute('d', d);
+      pathEl.setAttribute('stroke-width', String(sw));
+    }
+  }
+
+  const laserGroup = document.getElementById('svgLaserGroup');
+  const laserPrice = document.getElementById('svgLaserPrice');
+  if (laserGroup) {
+    laserGroup.style.transform = `translateY(${endY - 152}px)`;
+  }
+  if (laserPrice) {
+    laserPrice.textContent = formatPula(computedPrice);
+  }
+}
+
+/* ================= CAMPAIGNS & HAIRSTYLE CARDS ================= */
+function renderCampaigns() {
   const wrap = document.getElementById('promoCarousel');
-  const dots = document.getElementById('promoDots');
-  if (!wrap || !dots) return;
-
+  if (!wrap) return;
   const activePromos = store.state.promotions.filter((p) => p.active);
-  const list = activePromos.length ? activePromos : store.state.promotions.slice(0, 1);
 
-  wrap.innerHTML = list
+  if (!activePromos.length) {
+    wrap.innerHTML = `<div class="studio-panel-card"><p>No active campaigns yet — launch your first promo poster from Studio!</p></div>`;
+    return;
+  }
+
+  wrap.innerHTML = activePromos
     .map(
       (p) => `
-      <article class="promo-slide ${esc(p.theme || 'royal-sky')}">
-        <div class="promo-slide-copy">
-          <div class="promo-top-tags">
-            <span class="promo-pill-gold">${esc(p.badge || `${p.discountPercent}% OFF`)}</span>
-            <span class="promo-pill-code">CODE: ${esc(p.code)}</span>
+      <article class="campaign-card">
+        <div class="campaign-photo-head">
+          <img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" />
+          <div class="campaign-top-tags">
+            <span class="camp-badge">${esc(p.badge || 'VIP CAMPAIGN')}</span>
+            <span class="camp-code-pill">CODE: ${esc(p.code)}</span>
           </div>
-          <div>
-            <h2>${esc(p.title)}</h2>
-            <p>${esc(p.subtitle)}</p>
-          </div>
-          <div class="promo-actions-row">
-            <button type="button" class="promo-book-btn" data-apply-promo="${esc(p.id)}">
-              Claim ${p.discountPercent}% Off &amp; Book ›
-            </button>
-            <button type="button" class="promo-flyer-btn" data-open-flyer="${esc(p.id)}">
-              🎨 Flyer
-            </button>
-          </div>
+          <div class="campaign-price-float">${esc(p.priceHighlight || `${p.discountPercent}% OFF`)}</div>
         </div>
-        <div class="promo-slide-media">
-          <img src="${esc(p.image)}" alt="${esc(p.title)}" />
-          <span class="promo-price-float">${esc(p.priceHighlight || `${p.discountPercent}% OFF`)}</span>
+        <div class="campaign-body">
+          <h3>${esc(p.title)}</h3>
+          <p>${esc(p.subtitle)}</p>
+          <div class="campaign-actions">
+            <button type="button" class="btn-couture-primary sm" style="flex:1" data-claim-promo="${esc(p.id)}">
+              Claim ${Number(p.discountPercent || 15)}% Off
+            </button>
+            <button type="button" class="btn-couture-glass sm" data-export-flyer="${esc(p.id)}">
+              HD Poster
+            </button>
+          </div>
         </div>
       </article>
     `
     )
     .join('');
 
-  dots.innerHTML = list
-    .map(
-      (_, idx) =>
-        `<button type="button" class="promo-dot ${idx === 0 ? 'active' : ''}" data-dot="${idx}" aria-label="Slide ${idx + 1}"></button>`
-    )
-    .join('');
-
-  wrap.querySelectorAll('[data-apply-promo]').forEach((btn) => {
+  wrap.querySelectorAll('[data-claim-promo]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const promo = store.state.promotions.find((p) => p.id === btn.dataset.applyPromo);
+      const promo = store.state.promotions.find((x) => x.id === btn.dataset.claimPromo);
       if (!promo) return;
       ui.appliedPromo = promo;
       if (promo.styleId) ui.bookStyleId = promo.styleId;
       const input = document.getElementById('bookPromoInput');
       if (input) input.value = promo.code;
-      renderBookingWizard();
+      showToast(`Applied ${promo.code} (${promo.discountPercent}% OFF)!`);
       switchTab('book');
-      showToast(`Promo code ${promo.code} (${promo.discountPercent}% OFF) applied! 🎉`);
+      renderBookingView();
     });
   });
 
-  wrap.querySelectorAll('[data-open-flyer]').forEach((btn) => {
+  wrap.querySelectorAll('[data-export-flyer]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const promo = store.state.promotions.find((p) => p.id === btn.dataset.openFlyer);
-      if (promo) openFlyerGeneratorModal(promo);
-    });
-  });
-
-  dots.querySelectorAll('.promo-dot').forEach((dot) => {
-    dot.addEventListener('click', () => {
-      const idx = Number(dot.dataset.dot);
-      const slideWidth = wrap.clientWidth;
-      wrap.scrollTo({ left: slideWidth * idx, behavior: 'smooth' });
-      dots.querySelectorAll('.promo-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+      const promo = store.state.promotions.find((x) => x.id === btn.dataset.exportFlyer);
+      if (promo) openFlyerPreviewModal(promo);
     });
   });
 }
 
-/* ================= PRICE CALCULATOR ================= */
-function renderCalculator() {
-  const sizeWrap = document.getElementById('calcSizePills');
-  const lenWrap = document.getElementById('calcLengthPills');
-  const matrixWrap = document.getElementById('calcMatrixControls');
-  const priceDisplay = document.getElementById('calcPriceDisplay');
-  const metaDisplay = document.getElementById('calcMetaDisplay');
-  if (!sizeWrap || !lenWrap) return;
-
-  document.querySelectorAll('#calcTypeToggle .seg-btn').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.mode === ui.calcMode);
-  });
-
-  matrixWrap.classList.toggle('hidden', ui.calcMode === 'flat');
-
-  sizeWrap.innerHTML = SIZE_OPTIONS.map(
-    (s) => `
-    <button type="button" class="choice-pill ${ui.calcSize === s.id ? 'active' : ''}" data-size="${s.id}">
-      ${esc(s.short)}
-    </button>
-  `
-  ).join('');
-
-  lenWrap.innerHTML = LENGTH_OPTIONS.map(
-    (l) => `
-    <button type="button" class="choice-pill ${ui.calcLength === l.id ? 'active' : ''}" data-len="${l.id}">
-      ${esc(l.label)}
-    </button>
-  `
-  ).join('');
-
-  sizeWrap.querySelectorAll('.choice-pill').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      ui.calcSize = btn.dataset.size;
-      renderCalculator();
-    });
-  });
-
-  lenWrap.querySelectorAll('.choice-pill').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      ui.calcLength = btn.dataset.len;
-      renderCalculator();
-    });
-  });
-
-  if (ui.calcMode === 'flat') {
-    priceDisplay.textContent = formatPula(SPECIALTY_FLAT_PRICE);
-    metaDisplay.textContent = "Pick n' Drop / Switch / Softdread • 3.5–4.5 hrs";
-  } else {
-    const price = OFFICIAL_PRICE_MATRIX[ui.calcSize]?.[ui.calcLength] ?? 180;
-    const sizeInfo = SIZE_OPTIONS.find((s) => s.id === ui.calcSize) || SIZE_OPTIONS[2];
-    priceDisplay.textContent = formatPula(price);
-    metaDisplay.textContent = `${sizeInfo.durationHrs} • ${sizeInfo.packs}`;
-  }
-}
-
-/* ================= HAIRSTYLE CARDS & MARKETPLACE ================= */
-function buildStyleCardHtml(style) {
-  const price = calculateStylePrice(style, style.defaultSize, style.defaultLength);
+function buildStyleCardHtml(style, matchScore = null) {
+  const startPrice = calculateStylePrice(style, style.defaultSize, style.defaultLength);
   const sizeObj = SIZE_OPTIONS.find((s) => s.id === style.defaultSize);
   const lenObj = LENGTH_OPTIONS.find((l) => l.id === style.defaultLength);
-  const rateLabel =
+  const subtitle =
     style.pricingMode === 'flat'
       ? 'Official Flat Rate'
-      : `${sizeObj?.short || 'Med'} • ${lenObj?.label || 'Midback'}`;
+      : `${sizeObj?.short || 'Medium'} • ${lenObj?.label || 'Midback'}`;
 
   return `
-    <article class="style-card" data-style-id="${esc(style.id)}">
-      <div class="style-img-box">
+    <article class="style-couture-card" data-card-style="${esc(style.id)}">
+      <div class="style-media-wrap" data-open-detail="${esc(style.id)}">
         <img src="${esc(style.image)}" alt="${esc(style.name)}" loading="lazy" />
-        <div class="style-card-top-badges">
-          <span class="style-badge-tag">${esc(style.badge || style.category)}</span>
-          <button
-            type="button"
-            class="heart-btn ${style.saved ? 'saved' : ''}"
-            data-save-id="${esc(style.id)}"
-            aria-label="Save hairstyle"
-          >
-            ♥
-          </button>
+        <span class="card-badge-pill">${esc(matchScore ? `${matchScore}% Match` : style.badge || style.category)}</span>
+        <button
+          type="button"
+          class="heart-orb-btn ${style.saved ? 'saved' : ''}"
+          data-save-style="${esc(style.id)}"
+          aria-label="Save hairstyle"
+        >
+          <svg viewBox="0 0 20 20" fill="${style.saved ? 'currentColor' : 'none'}">
+            <path d="M10 16.8L3.8 10.7A4.2 4.2 0 0 1 9.8 4.8L10 5L10.2 4.8A4.2 4.2 0 0 1 16.2 10.7L10 16.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="card-floating-price">
+          <span>${esc(subtitle)}</span>
+          <strong>${formatPula(startPrice)}</strong>
         </div>
       </div>
+
       <div class="style-card-body">
-        <div class="style-cat-row">
+        <div class="style-cat-rating">
           <span>${esc(style.category)}</span>
-          <span class="style-rating">★ ${Number(style.rating || 5).toFixed(1)}</span>
+          <span>★ ${Number(style.rating || 5).toFixed(1)} (${style.reviewsCount || 12})</span>
         </div>
-        <h3>${esc(style.name)}</h3>
-        <p class="style-meta-line">⏱ ${esc(style.duration || '4 hrs')} • ${esc(style.packs || '5 packs')}</p>
+        <h3 data-open-detail="${esc(style.id)}">${esc(style.name)}</h3>
+        <div class="style-specs-line">${esc(style.duration || '4 hrs')} • ${esc(style.packs || '5 packs')}</div>
         <div class="style-card-footer">
-          <div class="style-price-block">
-            <small>${esc(rateLabel)}</small>
-            <strong>${formatPula(price)}</strong>
-          </div>
-          <span class="card-book-mini">Options ›</span>
+          <button type="button" class="btn-couture-glass sm" style="flex:1" data-open-detail="${esc(style.id)}">
+            Customize
+          </button>
+          <button type="button" class="btn-couture-primary sm" style="flex:1" data-direct-book="${esc(style.id)}">
+            Reserve
+          </button>
         </div>
       </div>
     </article>
@@ -484,39 +720,46 @@ function buildStyleCardHtml(style) {
 
 function wireStyleCards(container) {
   if (!container) return;
-  container.querySelectorAll('.style-card').forEach((card) => {
-    card.addEventListener('click', (e) => {
-      const saveBtn = e.target.closest('[data-save-id]');
-      if (saveBtn) {
-        e.stopPropagation();
-        const saved = store.toggleSaveStyle(saveBtn.dataset.saveId);
-        showToast(saved ? 'Saved to your wishlist ♥' : 'Removed from wishlist');
-        return;
-      }
-      openStyleDetailModal(card.dataset.styleId);
+  container.querySelectorAll('[data-save-style]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const saved = store.toggleSaveStyle(btn.dataset.saveStyle);
+      showToast(saved ? 'Saved to your Crown Wishlist' : 'Removed from Saved');
+    });
+  });
+  container.querySelectorAll('[data-open-detail]').forEach((el) => {
+    el.addEventListener('click', () => openStyleConfigurator(el.dataset.openDetail));
+  });
+  container.querySelectorAll('[data-direct-book]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const st = store.state.styles.find((s) => s.id === btn.dataset.directBook);
+      if (st) jumpToBookingWithStyle(st.id, st.defaultSize, st.defaultLength);
     });
   });
 }
 
-function renderFeaturedAndStylists() {
-  const featuredGrid = document.getElementById('featuredStylesGrid');
-  if (featuredGrid) {
-    const featured = store.state.styles.filter((s) => s.featured).slice(0, 8);
-    featuredGrid.innerHTML = featured.map(buildStyleCardHtml).join('');
-    wireStyleCards(featuredGrid);
+function renderFeaturedAndBraiders() {
+  const featGrid = document.getElementById('featuredStylesGrid');
+  const countLbl = document.getElementById('seeAllCountLabel');
+  if (countLbl) countLbl.textContent = `Explore All ${store.state.styles.length}`;
+
+  if (featGrid) {
+    const items = store.state.styles.slice(0, 6);
+    featGrid.innerHTML = items.map((s) => buildStyleCardHtml(s)).join('');
+    wireStyleCards(featGrid);
   }
 
-  const stylistsRow = document.getElementById('stylistsRow');
-  if (stylistsRow) {
-    stylistsRow.innerHTML = STYLISTS.slice(0, 3)
+  const strip = document.getElementById('stylistsStrip');
+  if (strip) {
+    strip.innerHTML = STYLISTS.slice(0, 3)
       .map(
         (st) => `
-        <div class="stylist-card">
-          <img src="${esc(st.avatar)}" alt="${esc(st.name)}" loading="lazy" />
-          <div>
+        <div class="braider-card">
+          <img class="braider-avatar" src="${esc(st.avatar)}" alt="${esc(st.name)}" loading="lazy" />
+          <div class="braider-info">
             <strong>${esc(st.name)} • ★ ${st.rating.toFixed(1)}</strong>
-            <span>${esc(st.role)}</span>
-            <small>${esc(st.specialty)}</small>
+            <span class="braider-role">${esc(st.chair)} • ${esc(st.role)}</span>
+            <p class="braider-spec">${esc(st.specialty)}</p>
           </div>
         </div>
       `
@@ -525,1043 +768,1225 @@ function renderFeaturedAndStylists() {
   }
 }
 
-function renderMarketplace() {
-  const chipsWrap = document.getElementById('marketCategoryChips');
+/* ================= GALLERY / MARKETPLACE VIEW ================= */
+function renderGalleryView() {
+  const chipsWrap = document.getElementById('categoryChipsRow');
   const grid = document.getElementById('marketStylesGrid');
-  const countLabel = document.getElementById('marketCountLabel');
-  const savedBtn = document.getElementById('savedOnlyToggle');
-  if (!chipsWrap || !grid) return;
-
-  chipsWrap.innerHTML = CATEGORIES.map(
-    (c) => `
-      <button
-        type="button"
-        class="cat-chip ${ui.selectedCategory === c.id ? 'active' : ''}"
-        data-cat="${esc(c.id)}"
-      >
-        ${c.icon} ${esc(c.label)}
-      </button>
-    `
-  ).join('');
-
-  chipsWrap.querySelectorAll('.cat-chip').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      ui.selectedCategory = btn.dataset.cat;
-      renderMarketplace();
-    });
-  });
+  const countText = document.getElementById('marketCountText');
+  const savedBtn = document.getElementById('savedFilterBtn');
+  const clearBtn = document.getElementById('clearSearchBtn');
 
   savedBtn?.classList.toggle('active', ui.savedOnly);
+  clearBtn?.classList.toggle('hidden', !ui.searchQuery);
 
-  const q = ui.searchQuery.trim().toLowerCase();
-  let items = store.state.styles.filter((item) => {
-    if (ui.selectedCategory !== 'all' && item.category !== ui.selectedCategory) return false;
-    if (ui.savedOnly && !item.saved) return false;
-    if (!q) return true;
-    const hay = `${item.name} ${item.category} ${item.description} ${(item.tags || []).join(' ')}`.toLowerCase();
-    return hay.includes(q);
-  });
-
-  items.sort((a, b) => {
-    const pa = calculateStylePrice(a, a.defaultSize, a.defaultLength);
-    const pb = calculateStylePrice(b, b.defaultSize, b.defaultLength);
-    if (ui.sortBy === 'price-asc') return pa - pb;
-    if (ui.sortBy === 'price-desc') return pb - pa;
-    if (ui.sortBy === 'rating') return (b.rating || 5) - (a.rating || 5);
-    return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
-  });
-
-  if (countLabel) countLabel.textContent = `${items.length} hairstyle${items.length === 1 ? '' : 's'}`;
-
-  if (!items.length) {
-    grid.innerHTML = `
-      <div class="glass-card" style="grid-column: 1 / -1; text-align:center; padding: 32px;">
-        <h3>No matching hairstyles found</h3>
-        <p class="muted-sub">Try clearing your search filter or upload a custom hairstyle!</p>
-      </div>
-    `;
-    return;
+  if (chipsWrap) {
+    chipsWrap.innerHTML = CATEGORIES.map(
+      (c) => `
+      <button type="button" class="cat-pill ${ui.selectedCategory === c.id ? 'active' : ''}" data-cat="${esc(c.id)}">
+        ${esc(c.label)}
+      </button>`
+    ).join('');
+    chipsWrap.querySelectorAll('[data-cat]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        ui.selectedCategory = btn.dataset.cat;
+        renderGalleryView();
+      });
+    });
   }
 
-  grid.innerHTML = items.map(buildStyleCardHtml).join('');
-  wireStyleCards(grid);
+  let list = [...store.state.styles];
+  if (ui.selectedCategory !== 'all') {
+    list = list.filter((s) => s.category === ui.selectedCategory);
+  }
+  if (ui.savedOnly) {
+    list = list.filter((s) => s.saved);
+  }
+  if (ui.searchQuery.trim()) {
+    const q = ui.searchQuery.toLowerCase();
+    list = list.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q) ||
+        String(s.description || '').toLowerCase().includes(q) ||
+        (s.tags || []).some((t) => t.toLowerCase().includes(q)) ||
+        `p${calculateStylePrice(s, s.defaultSize, s.defaultLength)}`.includes(q)
+    );
+  }
+
+  if (ui.sortBy === 'price-asc') {
+    list.sort(
+      (a, b) =>
+        calculateStylePrice(a, a.defaultSize, a.defaultLength) -
+        calculateStylePrice(b, b.defaultSize, b.defaultLength)
+    );
+  } else if (ui.sortBy === 'price-desc') {
+    list.sort(
+      (a, b) =>
+        calculateStylePrice(b, b.defaultSize, b.defaultLength) -
+        calculateStylePrice(a, a.defaultSize, a.defaultLength)
+    );
+  } else if (ui.sortBy === 'rating') {
+    list.sort((a, b) => (b.rating || 5) - (a.rating || 5));
+  }
+
+  if (countText) {
+    countText.textContent = `${list.length} couture ${list.length === 1 ? 'hairstyle' : 'hairstyles'}`;
+  }
+
+  if (grid) {
+    if (!list.length) {
+      grid.innerHTML = `
+        <div class="studio-panel-card" style="grid-column: 1 / -1; text-align:center;">
+          <h3>No matching hairstyles found</h3>
+          <p class="mt-10">Reset filters or upload a custom hairstyle from your phone camera.</p>
+          <button type="button" class="btn-couture-primary sm mt-14" id="resetMarketFiltersBtn">Reset Filters</button>
+        </div>
+      `;
+      document.getElementById('resetMarketFiltersBtn')?.addEventListener('click', () => {
+        ui.searchQuery = '';
+        ui.selectedCategory = 'all';
+        ui.savedOnly = false;
+        const inp = document.getElementById('marketSearchInput');
+        if (inp) inp.value = '';
+        renderGalleryView();
+      });
+    } else {
+      grid.innerHTML = list.map((s) => buildStyleCardHtml(s)).join('');
+      wireStyleCards(grid);
+    }
+  }
 }
 
-/* ================= STYLE DETAIL MODAL ================= */
-function openStyleDetailModal(styleId) {
+/* ================= STYLE CONFIGURATOR POP-UP MODAL ================= */
+function openStyleConfigurator(styleId) {
   const style = store.state.styles.find((s) => s.id === styleId);
   if (!style) return;
 
   let selSize = style.defaultSize || 'medium';
-  let selLength = style.defaultLength || 'midback';
+  let selLen = style.defaultLength || 'midback';
+  let selColor = style.defaultColor || '1B';
 
-  const body = document.getElementById('styleDetailBody');
-  const renderModalInner = () => {
-    const livePrice = calculateStylePrice(style, selSize, selLength);
-    const sizeInfo = SIZE_OPTIONS.find((s) => s.id === selSize) || SIZE_OPTIONS[2];
+  const host = document.getElementById('styleDetailContent');
+  if (!host) return;
 
-    body.innerHTML = `
-      <img src="${esc(style.image)}" alt="${esc(style.name)}" class="detail-hero-img" />
-      <div class="modal-pad">
-        <div class="card-head" style="margin-bottom:8px;">
-          <div>
-            <span class="eyebrow-chip">${esc(style.category)} • ★ ${Number(style.rating || 5).toFixed(1)} (${style.reviewsCount || 24} reviews)</span>
-            <h2>${esc(style.name)}</h2>
-          </div>
-          <strong style="font-size:1.65rem; color:var(--sky-deep);">${formatPula(livePrice)}</strong>
+  const paint = () => {
+    const price = calculateStylePrice(style, selSize, selLen);
+    const deposit = Math.round(price * 0.3);
+    const shadeObj = HAIR_COLORS.find((c) => c.id === selColor) || HAIR_COLORS[0];
+
+    host.innerHTML = `
+      <div class="detail-modal-grid">
+        <div class="detail-photo-stage">
+          <img src="${esc(style.image)}" alt="${esc(style.name)}" />
         </div>
+        <div>
+          <span class="eyebrow-cyan">${esc(style.category)} • ★ ${Number(style.rating || 5).toFixed(1)}</span>
+          <h3 style="font-size:1.5rem; margin-bottom:8px;">${esc(style.name)}</h3>
+          <p style="font-size:13.5px; color:var(--ink-secondary);">${esc(style.description || '')}</p>
 
-        <p class="muted-sub">${esc(style.description)}</p>
+          ${
+            style.pricingMode === 'flat'
+              ? `<div class="flat-highlight-banner mt-14"><strong>Official Specialty Rate</strong><span>${formatPula(price)}</span></div>`
+              : `
+              <label class="micro-label mt-14">Select Braid Size</label>
+              <div class="chip-row-5">
+                ${SIZE_OPTIONS.map(
+                  (s) => `<button type="button" class="choice-chip ${selSize === s.id ? 'active' : ''}" data-d-size="${s.id}">${esc(s.short)}</button>`
+                ).join('')}
+              </div>
 
-        <div class="detail-tags-row">
-          <span>⏱ ${esc(style.duration || sizeInfo.durationHrs)}</span>
-          <span>🛍️ ${esc(style.packs || sizeInfo.packs)}</span>
-          ${(style.tags || []).map((t) => `<span>${esc(t)}</span>`).join('')}
-        </div>
-
-        ${
-          style.pricingMode === 'flat'
-            ? `<div class="notif-card" style="margin:12px 0;">
-                <strong>Official Flat-Rate Salon Special (${formatPula(livePrice)})</strong>
-                <p>Includes tension-free knotless parting &amp; mousse sheen finish (+P50 for Knee Length).</p>
-               </div>`
-            : `
-              <div class="calc-controls-wrap" style="margin-top:14px;">
-                <div class="calc-group">
-                  <label>Choose Braid Size</label>
-                  <div class="pill-selector">
-                    ${SIZE_OPTIONS.map(
-                      (s) => `
-                      <button type="button" class="choice-pill ${selSize === s.id ? 'active' : ''}" data-msize="${s.id}">
-                        ${esc(s.short)}
-                      </button>`
-                    ).join('')}
-                  </div>
-                </div>
-                <div class="calc-group">
-                  <label>Choose Braid Length</label>
-                  <div class="pill-selector three-col">
-                    ${LENGTH_OPTIONS.map(
-                      (l) => `
-                      <button type="button" class="choice-pill ${selLength === l.id ? 'active' : ''}" data-mlen="${l.id}">
-                        ${esc(l.label)}
-                      </button>`
-                    ).join('')}
-                  </div>
-                </div>
+              <label class="micro-label mt-12">Select Cascade Length</label>
+              <div class="chip-row-3">
+                ${LENGTH_OPTIONS.map(
+                  (l) => `<button type="button" class="choice-chip ${selLen === l.id ? 'active' : ''}" data-d-len="${l.id}">${esc(l.label)}</button>`
+                ).join('')}
               </div>
             `
-        }
+          }
 
-        <div class="modal-btn-pair">
-          <button type="button" class="secondary-btn" id="modalAskChatBtn">
-            💬 Ask Nicole in Chat
-          </button>
-          <button type="button" class="primary-cta" id="modalBookStyleBtn">
-            📅 Book for ${formatPula(livePrice)} ›
-          </button>
+          <label class="micro-label mt-12">Preferred Braiding Shade (${esc(shadeObj.name)})</label>
+          <div class="color-swatches-row">
+            ${HAIR_COLORS.map(
+              (c) => `
+              <button type="button" class="shade-swatch-btn ${selColor === c.id ? 'active' : ''}" data-d-col="${c.id}">
+                <span class="swatch-dot" style="background:${c.swatch}"></span>
+                <span>${esc(c.code)}</span>
+              </button>`
+            ).join('')}
+          </div>
+
+          <div class="odometer-result-panel mt-16">
+            <div>
+              <span class="odometer-kicker">TAILORED BWP TOTAL</span>
+              <div class="odometer-price" style="font-size:2rem;">${formatPula(price)}</div>
+              <span class="odometer-meta">${esc(style.duration)} • 30% Deposit ${formatPula(deposit)}</span>
+            </div>
+            <button type="button" class="btn-couture-primary" id="detailConfirmBookBtn">
+              Reserve Chair
+            </button>
+          </div>
+
+          <div class="two-col-inputs mt-12">
+            <button type="button" class="btn-couture-glass full-width sm" id="detailTryMirrorBtn">
+              Preview in Style Mirror
+            </button>
+            <button type="button" class="btn-couture-glass full-width sm" id="detailAskChatBtn">
+              Ask Nicole in Concierge
+            </button>
+          </div>
         </div>
       </div>
     `;
 
-    body.querySelectorAll('[data-msize]').forEach((b) => {
+    host.querySelectorAll('[data-d-size]').forEach((b) => {
       b.addEventListener('click', () => {
-        selSize = b.dataset.msize;
-        renderModalInner();
+        selSize = b.dataset.dSize;
+        paint();
+      });
+    });
+    host.querySelectorAll('[data-d-len]').forEach((b) => {
+      b.addEventListener('click', () => {
+        selLen = b.dataset.dLen;
+        paint();
+      });
+    });
+    host.querySelectorAll('[data-d-col]').forEach((b) => {
+      b.addEventListener('click', () => {
+        selColor = b.dataset.dCol;
+        paint();
       });
     });
 
-    body.querySelectorAll('[data-mlen]').forEach((b) => {
-      b.addEventListener('click', () => {
-        selLength = b.dataset.mlen;
-        renderModalInner();
-      });
+    document.getElementById('detailConfirmBookBtn')?.addEventListener('click', () => {
+      ui.bookColorId = selColor;
+      closeModal('styleDetailModal');
+      jumpToBookingWithStyle(style.id, selSize, selLen);
     });
 
-    body.querySelector('#modalBookStyleBtn')?.addEventListener('click', () => {
+    document.getElementById('detailTryMirrorBtn')?.addEventListener('click', () => {
+      ui.mirrorStyleId = style.id;
+      ui.mirrorColorId = selColor;
       closeModal('styleDetailModal');
-      startBookingForStyle(style.id, selSize, selLength);
+      openMirrorModal('selfie');
     });
 
-    body.querySelector('#modalAskChatBtn')?.addEventListener('click', () => {
+    document.getElementById('detailAskChatBtn')?.addEventListener('click', () => {
       closeModal('styleDetailModal');
-      sendStyleInquiryToChat(style, selSize, selLength, livePrice);
+      sendStyleInquiryToChat(style, selSize, selLen, shadeObj);
     });
   };
 
-  renderModalInner();
+  paint();
   openModal('styleDetailModal');
 }
 
-/* ================= OFFICIAL PRICE SHEET MODAL ================= */
-function renderPriceSheetModal() {
-  const wrap = document.getElementById('interactivePriceTableWrap');
-  if (!wrap) return;
-
-  wrap.innerHTML = `
-    <table class="price-matrix-table">
-      <thead>
-        <tr>
-          <th>Braid / Twist Size</th>
-          <th>Midback</th>
-          <th>Butt Length</th>
-          <th>Knee Length</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${SIZE_OPTIONS.map((s) => {
-          const row = OFFICIAL_PRICE_MATRIX[s.id];
-          return `
-            <tr>
-              <td>${esc(s.label)}</td>
-              <td><button type="button" class="price-cell-btn" data-psize="${s.id}" data-plen="midback">P${row.midback}</button></td>
-              <td><button type="button" class="price-cell-btn" data-psize="${s.id}" data-plen="butt">P${row.butt}</button></td>
-              <td><button type="button" class="price-cell-btn" data-psize="${s.id}" data-plen="knee">P${row.knee}</button></td>
-            </tr>
-          `;
-        }).join('')}
-        <tr>
-          <td>Pick n' Drop / Switch / Softdread</td>
-          <td colspan="3">
-            <button type="button" class="price-cell-btn" data-pflat="style-13" style="width:100%;">
-              Flat P250 — Tap to Book
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  `;
-
-  wrap.querySelectorAll('[data-psize]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      closeModal('priceSheetModal');
-      startBookingForStyle('style-01', btn.dataset.psize, btn.dataset.plen);
-    });
-  });
-
-  wrap.querySelector('[data-pflat]')?.addEventListener('click', () => {
-    closeModal('priceSheetModal');
-    startBookingForStyle('style-13', 'medium', 'midback');
-  });
+/* ================= VIRTUAL STYLE MIRROR & SMART MATCHER ================= */
+function openMirrorModal(tab = 'selfie') {
+  ui.mirrorTab = tab;
+  renderMirrorModal();
+  openModal('mirrorModal');
 }
 
-/* ================= BOOKING WIZARD & DIGITAL PASS ================= */
-function startBookingForStyle(styleId, sizeId, lengthId) {
-  const style = store.state.styles.find((s) => s.id === styleId) || store.state.styles[0];
-  if (style) {
-    ui.bookStyleId = style.id;
-    ui.bookSize = sizeId || style.defaultSize || 'medium';
-    ui.bookLength = lengthId || style.defaultLength || 'midback';
+function renderMirrorModal() {
+  const selfieBtn = document.getElementById('mirrorTabSelfieBtn');
+  const quizBtn = document.getElementById('mirrorTabQuizBtn');
+  const selfiePane = document.getElementById('mirrorSelfiePane');
+  const quizPane = document.getElementById('mirrorQuizPane');
+
+  const isSelfie = ui.mirrorTab === 'selfie';
+  selfieBtn?.classList.toggle('active', isSelfie);
+  quizBtn?.classList.toggle('active', !isSelfie);
+  selfiePane?.classList.toggle('hidden', !isSelfie);
+  quizPane?.classList.toggle('hidden', isSelfie);
+
+  const style = store.state.styles.find((s) => s.id === ui.mirrorStyleId) || store.state.styles[0];
+  const color = HAIR_COLORS.find((c) => c.id === ui.mirrorColorId) || HAIR_COLORS[0];
+  const price = calculateStylePrice(style, style.defaultSize, style.defaultLength);
+
+  const selfieImg = document.getElementById('mirrorSelfieImg');
+  const styleImg = document.getElementById('mirrorStyleImg');
+  const tint = document.getElementById('mirrorShadeTint');
+  const priceTag = document.getElementById('mirrorStylePriceTag');
+  const styleNameEl = document.getElementById('mirrorActiveStyleName');
+  const shadeLbl = document.getElementById('mirrorActiveShadeLabel');
+
+  if (selfieImg) selfieImg.src = ui.mirrorSelfieSrc;
+  if (styleImg) styleImg.src = style.image;
+  if (tint) tint.style.background = `radial-gradient(circle at 50% 30%, ${color.swatch}, transparent 75%)`;
+  if (priceTag) priceTag.textContent = formatPula(price);
+  if (styleNameEl) styleNameEl.textContent = style.name;
+  if (shadeLbl) shadeLbl.textContent = `Shade Aura: ${color.code} ${color.name}`;
+
+  const swatchesWrap = document.getElementById('mirrorShadeSwatches');
+  if (swatchesWrap) {
+    swatchesWrap.innerHTML = HAIR_COLORS.map(
+      (c) => `
+      <button type="button" class="shade-swatch-btn ${ui.mirrorColorId === c.id ? 'active' : ''}" data-m-col="${c.id}">
+        <span class="swatch-dot" style="background:${c.swatch}"></span>
+        <span>${esc(c.code)}</span>
+      </button>`
+    ).join('');
+    swatchesWrap.querySelectorAll('[data-m-col]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.mirrorColorId = b.dataset.mCol;
+        renderMirrorModal();
+      });
+    });
   }
-  renderBookingWizard();
+
+  const thumbsWrap = document.getElementById('mirrorStyleThumbs');
+  if (thumbsWrap) {
+    thumbsWrap.innerHTML = store.state.styles
+      .map(
+        (s) => `
+      <button type="button" class="mirror-thumb-btn ${s.id === style.id ? 'active' : ''}" data-m-style="${esc(s.id)}" title="${esc(s.name)}">
+        <img src="${esc(s.image)}" alt="${esc(s.name)}" loading="lazy" />
+      </button>`
+      )
+      .join('');
+    thumbsWrap.querySelectorAll('[data-m-style]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.mirrorStyleId = b.dataset.mStyle;
+        renderMirrorModal();
+      });
+    });
+  }
+
+  // Render Smart Matcher Quiz Results
+  const budgetLbl = document.getElementById('quizBudgetVal');
+  if (budgetLbl) budgetLbl.textContent = `Up to ${formatPula(ui.quizBudget)}`;
+
+  document.querySelectorAll('#quizVibeChips [data-vibe]').forEach((b) => {
+    b.classList.toggle('active', b.dataset.vibe === ui.quizVibe);
+  });
+
+  const quizGrid = document.getElementById('quizResultsGrid');
+  if (quizGrid) {
+    const scored = store.state.styles
+      .map((s) => {
+        const p = calculateStylePrice(s, s.defaultSize, s.defaultLength);
+        let score = 84;
+        if (p <= ui.quizBudget) score += 10;
+        else score -= Math.min(25, Math.round((p - ui.quizBudget) / 8));
+        if (ui.quizVibe === 'all' || s.vibe === ui.quizVibe) score += 5;
+        return { style: s, score: Math.max(72, Math.min(99, score)), price: p };
+      })
+      .sort((a, b) => b.score - a.score || a.price - b.price)
+      .slice(0, 3);
+
+    quizGrid.innerHTML = scored.map((item) => buildStyleCardHtml(item.style, item.score)).join('');
+    wireStyleCards(quizGrid);
+  }
+}
+
+/* ================= BOOKING CONCIERGE & HOLOGRAPHIC VIP PASS ================= */
+function jumpToBookingWithStyle(styleId, sizeId = 'medium', lengthId = 'midback') {
+  ui.bookStyleId = styleId;
+  ui.bookSize = sizeId || 'medium';
+  ui.bookLength = lengthId || 'midback';
   switchTab('book');
+  renderBookingView();
 }
 
 function getBookingTotals() {
   const style = store.state.styles.find((s) => s.id === ui.bookStyleId) || store.state.styles[0];
   const basePrice = calculateStylePrice(style, ui.bookSize, ui.bookLength);
-  let addOnsTotal = 0;
-  const selectedAddOns = [];
-  for (const addon of ADD_ONS) {
-    if (ui.bookAddOnIds.has(addon.id)) {
-      addOnsTotal += addon.price;
-      selectedAddOns.push(addon);
-    }
-  }
+  const selectedAddOns = ADD_ONS.filter((a) => ui.bookAddOnIds.has(a.id));
+  const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + a.price, 0);
   const subtotal = basePrice + addOnsTotal;
   const discount = ui.appliedPromo
-    ? Math.round((subtotal * Number(ui.appliedPromo.discountPercent || 0)) / 100)
+    ? Math.round(subtotal * (Number(ui.appliedPromo.discountPercent || 0) / 100))
     : 0;
   const total = Math.max(50, subtotal - discount);
-  const deposit = Math.round((total * SALON_INFO.depositPercent) / 100);
-  return { style, basePrice, selectedAddOns, subtotal, discount, total, deposit };
+  const deposit = Math.round(total * 0.3);
+  return { style, basePrice, selectedAddOns, addOnsTotal, subtotal, discount, total, deposit };
 }
 
-function renderBookingWizard() {
-  const preview = document.getElementById('bookingSelectedPreview');
-  const strip = document.getElementById('bookingStyleStrip');
-  const sizeSel = document.getElementById('bookSizeSelect');
-  const lenSel = document.getElementById('bookLengthSelect');
-  const stylistWrap = document.getElementById('bookStylistCards');
-  const dateRibbon = document.getElementById('bookDateRibbon');
-  const dateInput = document.getElementById('bookDateInput');
-  const slotsWrap = document.getElementById('bookTimeSlots');
-  const addOnsWrap = document.getElementById('bookAddOnsList');
-  const promoChips = document.getElementById('activePromoChips');
-  if (!preview || !strip) return;
+function renderBookingView() {
+  const styles = store.state.styles;
+  if (!styles.some((s) => s.id === ui.bookStyleId) && styles[0]) {
+    ui.bookStyleId = styles[0].id;
+  }
+  const style = styles.find((s) => s.id === ui.bookStyleId) || styles[0];
 
-  const { style, basePrice, subtotal, discount, total, deposit } = getBookingTotals();
+  const selEl = document.getElementById('bookStyleSelect');
+  if (selEl) {
+    selEl.innerHTML = styles
+      .map(
+        (s) =>
+          `<option value="${esc(s.id)}" ${s.id === ui.bookStyleId ? 'selected' : ''}>${esc(s.name)} — From ${formatPula(
+            calculateStylePrice(s, s.defaultSize, s.defaultLength)
+          )}</option>`
+      )
+      .join('');
+  }
 
-  preview.innerHTML = `
-    <img src="${esc(style.image)}" alt="${esc(style.name)}" />
-    <div>
-      <strong>${esc(style.name)}</strong>
-      <span>${esc(style.category)} • Base rate: ${formatPula(basePrice)} (${esc(style.duration || '4 hrs')})</span>
-    </div>
-  `;
+  const preview = document.getElementById('bookSelectedStylePreview');
+  if (preview && style) {
+    const curPrice = calculateStylePrice(style, ui.bookSize, ui.bookLength);
+    preview.innerHTML = `
+      <img src="${esc(style.image)}" alt="${esc(style.name)}" />
+      <div style="flex:1">
+        <strong style="display:block;font-size:14.5px;">${esc(style.name)}</strong>
+        <span style="font-size:12px;color:var(--ink-secondary);">${esc(style.duration)} • ${esc(style.packs)}</span>
+      </div>
+      <strong style="font-size:18px;color:var(--cyan);">${formatPula(curPrice)}</strong>
+    `;
+  }
 
-  strip.innerHTML = store.state.styles
-    .map(
-      (s) => `
-      <button
-        type="button"
-        class="mini-style-thumb ${s.id === style.id ? 'active' : ''}"
-        data-bstyle="${esc(s.id)}"
-        title="${esc(s.name)}"
-      >
-        <img src="${esc(s.image)}" alt="${esc(s.name)}" loading="lazy" />
-      </button>
-    `
-    )
-    .join('');
-
-  strip.querySelectorAll('.mini-style-thumb').forEach((b) => {
-    b.addEventListener('click', () => {
-      const picked = store.state.styles.find((s) => s.id === b.dataset.bstyle);
-      if (!picked) return;
-      ui.bookStyleId = picked.id;
-      ui.bookSize = picked.defaultSize || ui.bookSize;
-      ui.bookLength = picked.defaultLength || ui.bookLength;
-      renderBookingWizard();
+  const sizeWrap = document.getElementById('bookSizeChips');
+  if (sizeWrap) {
+    sizeWrap.innerHTML = SIZE_OPTIONS.map(
+      (s) => `<button type="button" class="choice-chip ${ui.bookSize === s.id ? 'active' : ''}" data-bk-size="${s.id}">${esc(s.short)}</button>`
+    ).join('');
+    sizeWrap.querySelectorAll('[data-bk-size]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.bookSize = b.dataset.bkSize;
+        renderBookingView();
+      });
     });
-  });
+  }
 
-  sizeSel.innerHTML = SIZE_OPTIONS.map(
-    (s) => `<option value="${s.id}" ${ui.bookSize === s.id ? 'selected' : ''}>${esc(s.label)} (${s.durationHrs})</option>`
-  ).join('');
-  sizeSel.disabled = style.pricingMode === 'flat';
+  const lenWrap = document.getElementById('bookLengthChips');
+  if (lenWrap) {
+    lenWrap.innerHTML = LENGTH_OPTIONS.map(
+      (l) => `<button type="button" class="choice-chip ${ui.bookLength === l.id ? 'active' : ''}" data-bk-len="${l.id}">${esc(l.label)}</button>`
+    ).join('');
+    lenWrap.querySelectorAll('[data-bk-len]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.bookLength = b.dataset.bkLen;
+        renderBookingView();
+      });
+    });
+  }
 
-  lenSel.innerHTML = LENGTH_OPTIONS.map(
-    (l) => `<option value="${l.id}" ${ui.bookLength === l.id ? 'selected' : ''}>${esc(l.label)}</option>`
-  ).join('');
+  const colWrap = document.getElementById('bookColorSwatches');
+  if (colWrap) {
+    colWrap.innerHTML = HAIR_COLORS.map(
+      (c) => `
+      <button type="button" class="shade-swatch-btn ${ui.bookColorId === c.id ? 'active' : ''}" data-bk-col="${c.id}">
+        <span class="swatch-dot" style="background:${c.swatch}"></span>
+        <span>${esc(c.code)} ${esc(c.name.split(' ')[0])}</span>
+      </button>`
+    ).join('');
+    colWrap.querySelectorAll('[data-bk-col]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.bookColorId = b.dataset.bkCol;
+        renderBookingView();
+      });
+    });
+  }
 
-  stylistWrap.innerHTML = STYLISTS.map(
-    (st) => `
-      <button
-        type="button"
-        class="stylist-pick-btn ${ui.bookStylistId === st.id ? 'active' : ''}"
-        data-bstylist="${st.id}"
-      >
+  const chairGrid = document.getElementById('bookStylistGrid');
+  if (chairGrid) {
+    chairGrid.innerHTML = STYLISTS.map(
+      (st) => `
+      <button type="button" class="chair-option-card ${ui.bookStylistId === st.id ? 'active' : ''}" data-bk-chair="${st.id}">
+        <span class="chair-tag">${esc(st.chair)}</span>
         <img src="${esc(st.avatar)}" alt="${esc(st.name)}" />
-        <div>
-          <strong>${esc(st.name)}</strong>
-          <small>${esc(st.badge)} • ★ ${st.rating.toFixed(1)}</small>
-        </div>
-      </button>
-    `
-  ).join('');
-
-  stylistWrap.querySelectorAll('.stylist-pick-btn').forEach((b) => {
-    b.addEventListener('click', () => {
-      ui.bookStylistId = b.dataset.bstylist;
-      renderBookingWizard();
+        <strong style="font-size:12.5px;">${esc(st.name)}</strong>
+        <span style="font-size:10.5px;color:var(--ink-muted);">${esc(st.badge)}</span>
+      </button>`
+    ).join('');
+    chairGrid.querySelectorAll('[data-bk-chair]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.bookStylistId = b.dataset.bkChair;
+        renderBookingView();
+      });
     });
-  });
+  }
 
-  const dates = getUpcomingDates(14);
-  if (dateInput) dateInput.value = ui.bookDate;
-  dateRibbon.innerHTML = dates
-    .map(
-      (d) => `
-      <button type="button" class="date-pill ${ui.bookDate === d.iso ? 'active' : ''}" data-bdate="${d.iso}">
-        <span>${d.dayName}</span>
+  const dateRibbon = document.getElementById('bookDateScroller');
+  if (dateRibbon) {
+    const dates = getUpcomingDates(14);
+    dateRibbon.innerHTML = dates
+      .map(
+        (d) => `
+      <button type="button" class="date-pill-card ${ui.bookDate === d.iso ? 'active' : ''}" data-bk-date="${d.iso}">
+        <span>${esc(d.dayName)}</span>
         <strong>${d.dayNum}</strong>
-        <span>${d.month}</span>
-      </button>
-    `
-    )
-    .join('');
-
-  dateRibbon.querySelectorAll('.date-pill').forEach((b) => {
-    b.addEventListener('click', () => {
-      ui.bookDate = b.dataset.bdate;
-      renderBookingWizard();
+        <span>${esc(d.month)}</span>
+      </button>`
+      )
+      .join('');
+    dateRibbon.querySelectorAll('[data-bk-date]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.bookDate = b.dataset.bkDate;
+        renderBookingView();
+      });
     });
-  });
+  }
 
-  slotsWrap.innerHTML = TIME_SLOTS.map(
-    (slot) => `
-      <button type="button" class="time-slot-btn ${ui.bookTime === slot ? 'active' : ''}" data-btime="${slot}">
-        ${slot}
-      </button>
-    `
-  ).join('');
-
-  slotsWrap.querySelectorAll('.time-slot-btn').forEach((b) => {
-    b.addEventListener('click', () => {
-      ui.bookTime = b.dataset.btime;
-      renderBookingWizard();
+  const timeGrid = document.getElementById('bookTimeGrid');
+  if (timeGrid) {
+    timeGrid.innerHTML = TIME_SLOTS.map(
+      (t) => `<button type="button" class="choice-chip ${ui.bookTime === t ? 'active' : ''}" data-bk-time="${t}">${t}</button>`
+    ).join('');
+    timeGrid.querySelectorAll('[data-bk-time]').forEach((b) => {
+      b.addEventListener('click', () => {
+        ui.bookTime = b.dataset.bkTime;
+        renderBookingView();
+      });
     });
-  });
-
-  addOnsWrap.innerHTML = ADD_ONS.map(
-    (addon) => `
-      <button
-        type="button"
-        class="addon-toggle ${ui.bookAddOnIds.has(addon.id) ? 'active' : ''}"
-        data-baddon="${addon.id}"
-      >
-        <span>${addon.icon} ${esc(addon.name)}</span>
-        <strong>+${formatPula(addon.price)}</strong>
-      </button>
-    `
-  ).join('');
-
-  addOnsWrap.querySelectorAll('.addon-toggle').forEach((b) => {
-    b.addEventListener('click', () => {
-      const id = b.dataset.baddon;
-      if (ui.bookAddOnIds.has(id)) ui.bookAddOnIds.delete(id);
-      else ui.bookAddOnIds.add(id);
-      renderBookingWizard();
-    });
-  });
-
-  promoChips.innerHTML = store.state.promotions
-    .filter((p) => p.active)
-    .map(
-      (p) => `
-      <button type="button" class="mini-promo-chip" data-chip-code="${esc(p.code)}">
-        🏷️ ${esc(p.code)} (-${p.discountPercent}%)
-      </button>
-    `
-    )
-    .join('');
-
-  promoChips.querySelectorAll('.mini-promo-chip').forEach((b) => {
-    b.addEventListener('click', () => {
-      const code = b.dataset.chipCode;
-      document.getElementById('bookPromoInput').value = code;
-      applyPromoCodeByText(code);
-    });
-  });
-
-  document.getElementById('sumSubtotal').textContent = formatPula(subtotal);
-  const discRow = document.getElementById('sumDiscountRow');
-  if (ui.appliedPromo && discount > 0) {
-    discRow.classList.remove('hidden');
-    document.getElementById('sumDiscountLabel').textContent = `Promo (${ui.appliedPromo.code} • -${ui.appliedPromo.discountPercent}%)`;
-    document.getElementById('sumDiscountVal').textContent = `-${formatPula(discount)}`;
-  } else {
-    discRow.classList.add('hidden');
-  }
-  document.getElementById('sumTotal').textContent = formatPula(total);
-  document.getElementById('sumDepositNote').textContent = `30% seat deposit: ${formatPula(deposit)} (Orange Money / MyZaka: ${SALON_INFO.phoneRaw})`;
-}
-
-function applyPromoCodeByText(rawCode) {
-  const code = String(rawCode || '').trim().toUpperCase();
-  const feedback = document.getElementById('promoFeedback');
-  if (!code) {
-    ui.appliedPromo = null;
-    if (feedback) feedback.textContent = '';
-    renderBookingWizard();
-    return;
-  }
-  const found = store.state.promotions.find((p) => p.active && p.code.toUpperCase() === code);
-  if (!found) {
-    ui.appliedPromo = null;
-    if (feedback) {
-      feedback.style.color = '#dc2626';
-      feedback.textContent = `Code "${code}" not found or inactive.`;
-    }
-    renderBookingWizard();
-    return;
-  }
-  ui.appliedPromo = found;
-  if (feedback) {
-    feedback.style.color = '#059669';
-    feedback.textContent = `✓ ${found.code} applied — ${found.discountPercent}% OFF unlocked!`;
-  }
-  renderBookingWizard();
-}
-
-function renderMyBookings() {
-  const list = document.getElementById('myBookingsList');
-  const badge = document.getElementById('bookingsCountBadge');
-  if (!list) return;
-
-  const bookings = store.state.bookings;
-  if (badge) badge.textContent = String(bookings.length);
-
-  if (!bookings.length) {
-    list.innerHTML = `<p class="muted-sub">No appointments yet — reserve your first chair on the left!</p>`;
-    return;
   }
 
-  list.innerHTML = bookings
-    .map((bk) => {
-      const waMsg = encodeURIComponent(
-        `Hi Nicole Beauty Parlour! 👑 Confirming my booking ${bk.id}:\n• Style: ${bk.styleName} (${bk.sizeLabel}, ${bk.lengthLabel})\n• Date: ${bk.date} at ${bk.time}\n• Total: P${bk.total} (Deposit P${bk.deposit})`
-      );
+  const addonsWrap = document.getElementById('bookAddonsList');
+  if (addonsWrap) {
+    addonsWrap.innerHTML = ADD_ONS.map((a) => {
+      const on = ui.bookAddOnIds.has(a.id);
       return `
-        <div class="booking-item-card">
-          <div class="bk-head">
-            <img src="${esc(bk.styleImage)}" alt="${esc(bk.styleName)}" />
-            <div>
-              <strong>${esc(bk.styleName)}</strong>
-              <small>${esc(bk.date)} • ${esc(bk.time)} • ${formatPula(bk.total)}</small>
-            </div>
-            <span class="bk-status-pill ${bk.status === 'Cancelled' ? 'cancelled' : ''}">
-              ${esc(bk.status)}
-            </span>
+        <div class="addon-row-item ${on ? 'active' : ''}" data-bk-addon="${a.id}">
+          <div>
+            <strong style="font-size:13px;">${esc(a.name)}</strong>
+            <span style="font-size:11px;color:var(--cyan);margin-left:6px;">${esc(a.tag)}</span>
           </div>
-          <div class="bk-actions">
-            <button type="button" data-open-pass="${esc(bk.id)}">🎟️ View Pass</button>
-            <button type="button" data-chat-bk="${esc(bk.id)}">💬 Message</button>
-            <a href="https://wa.me/${SALON_INFO.phoneIntl}?text=${waMsg}" target="_blank" rel="noopener noreferrer">
-              📲 WhatsApp
-            </a>
-            ${
-              bk.status !== 'Cancelled'
-                ? `<button type="button" data-cancel-bk="${esc(bk.id)}">Cancel</button>`
-                : ''
-            }
-          </div>
+          <strong style="color:var(--cyan);">+${formatPula(a.price)}</strong>
         </div>
       `;
-    })
+    }).join('');
+    addonsWrap.querySelectorAll('[data-bk-addon]').forEach((row) => {
+      row.addEventListener('click', () => {
+        const id = row.dataset.bkAddon;
+        if (ui.bookAddOnIds.has(id)) ui.bookAddOnIds.delete(id);
+        else ui.bookAddOnIds.add(id);
+        renderBookingView();
+      });
+    });
+  }
+
+  const promoFeedback = document.getElementById('promoFeedbackText');
+  if (promoFeedback) {
+    promoFeedback.textContent = ui.appliedPromo
+      ? `Active privilege: ${ui.appliedPromo.code} (${ui.appliedPromo.discountPercent}% OFF applied)`
+      : '';
+  }
+
+  const { basePrice, addOnsTotal, discount, total, deposit } = getBookingTotals();
+  const rowsEl = document.getElementById('bookingBreakdownRows');
+  if (rowsEl) {
+    rowsEl.innerHTML = `
+      <div class="vault-row"><span>Hairstyle Rate</span><strong>${formatPula(basePrice)}</strong></div>
+      ${addOnsTotal ? `<div class="vault-row"><span>Parlour Extras</span><strong>+${formatPula(addOnsTotal)}</strong></div>` : ''}
+      ${discount ? `<div class="vault-row" style="color:var(--cyan);"><span>Campaign Privilege (${esc(ui.appliedPromo.code)})</span><strong>-${formatPula(discount)}</strong></div>` : ''}
+      <div class="vault-row total"><span>Total Parlour Rate</span><strong>${formatPula(total)}</strong></div>
+      <div class="vault-row"><span>30% Chair Deposit Today</span><strong>${formatPula(deposit)}</strong></div>
+    `;
+  }
+
+  renderMyBookingsList();
+}
+
+function renderMyBookingsList() {
+  const listEl = document.getElementById('myBookingsList');
+  const countEl = document.getElementById('myBookingsCount');
+  const bookings = store.state.bookings;
+  if (countEl) countEl.textContent = String(bookings.length);
+  if (!listEl) return;
+
+  listEl.innerHTML = bookings
+    .map(
+      (b) => `
+      <div class="mini-pass-card">
+        <div class="mini-pass-top">
+          <img src="${esc(b.styleImage || '/images/style-01-honey-curly-knotless.jpg')}" alt="${esc(b.styleName)}" />
+          <div style="flex:1;min-width:0;">
+            <span class="eyebrow-cyan">${esc(b.id)} • ${esc(b.status)}</span>
+            <strong style="display:block;font-size:13.5px;">${esc(b.styleName)}</strong>
+            <span style="font-size:11.5px;color:var(--ink-muted);">${esc(b.date)} at ${esc(b.time)} • ${formatPula(b.total)}</span>
+          </div>
+        </div>
+        <div class="two-col-inputs">
+          <button type="button" class="btn-couture-glass sm full-width" data-open-pass="${esc(b.id)}">Open VIP Pass</button>
+          <a
+            href="https://wa.me/${SALON_INFO.phoneIntl}?text=${encodeURIComponent(
+              `Hi Nicole Beauty Parlour! Confirming my VIP Pass ${b.id} for ${b.styleName} on ${b.date} at ${b.time} (Total P${b.total}).`
+            )}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-couture-primary sm full-width"
+          >
+            WhatsApp Salon
+          </a>
+        </div>
+      </div>
+    `
+    )
     .join('');
 
-  list.querySelectorAll('[data-open-pass]').forEach((b) => {
-    b.addEventListener('click', () => {
-      const bk = store.state.bookings.find((x) => x.id === b.dataset.openPass);
+  listEl.querySelectorAll('[data-open-pass]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const bk = store.state.bookings.find((x) => x.id === btn.dataset.openPass);
       if (bk) openBookingPassModal(bk);
     });
   });
+}
 
-  list.querySelectorAll('[data-chat-bk]').forEach((b) => {
-    b.addEventListener('click', () => {
-      ui.activeThreadId = 'thread-nicole';
-      ui.mobileConvOpen = true;
-      switchTab('messages');
-    });
-  });
+function buildDeterministicQrSvg(seedStr) {
+  let hash = 2166136261;
+  for (let i = 0; i < seedStr.length; i++) {
+    hash ^= seedStr.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const n = 11;
+  let rects = '';
+  const isFinder = (r, c) =>
+    (r < 3 && c < 3) || (r < 3 && c >= n - 3) || (r >= n - 3 && c < 3);
 
-  list.querySelectorAll('[data-cancel-bk]').forEach((b) => {
-    b.addEventListener('click', async () => {
-      await store.updateBookingStatus(b.dataset.cancelBk, { status: 'Cancelled' });
-      showToast('Appointment cancelled');
-    });
-  });
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      let on = false;
+      if (isFinder(r, c)) {
+        on = true;
+      } else {
+        hash ^= (r * 31 + c * 17) & 0xff;
+        hash = Math.imul(hash, 16777619);
+        on = (hash >>> 3) % 2 === 0;
+      }
+      if (on) {
+        rects += `<rect x="${c * 7 + 2}" y="${r * 7 + 2}" width="6" height="6" rx="1.2" fill="#050B16"/>`;
+      }
+    }
+  }
+  return `<svg viewBox="0 0 81 81" width="76" height="76" aria-label="VIP QR Code">${rects}</svg>`;
+}
+
+function downloadBookingIcs(bk) {
+  const dtCompact = String(bk.date || '2026-12-01').replace(/-/g, '');
+  const tmCompact = String(bk.time || '09:00').replace(':', '') + '00';
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Nicole Beauty Parlour//VIP Pass//EN',
+    'BEGIN:VEVENT',
+    `UID:${bk.id}@nicolebeautyparlour.app`,
+    `DTSTART:${dtCompact}T${tmCompact}`,
+    `SUMMARY:Nicole Beauty Parlour — ${bk.styleName} (${bk.id})`,
+    `LOCATION:${SALON_INFO.location} (${SALON_INFO.phoneDisplay})`,
+    `DESCRIPTION:Stylist: ${bk.stylistName} | Total: P${bk.total} | 30% Deposit: P${bk.deposit}`,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${bk.id}-Nicole-Beauty-Parlour.ics`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
 function openBookingPassModal(bk) {
-  const body = document.getElementById('bookingPassBody');
-  if (!body) return;
+  const host = document.getElementById('bookingPassContent');
+  if (!host) return;
 
-  const waMsg = encodeURIComponent(
-    `Dumelang Nicole Beauty Parlour! 💙 Here is my Digital Appointment Pass (${bk.id}):\n• Client: ${bk.clientName} (${bk.clientPhone})\n• Style: ${bk.styleName} (${bk.sizeLabel} • ${bk.lengthLabel})\n• Stylist: ${bk.stylistName}\n• Date & Time: ${bk.date} at ${bk.time}\n• Total: P${bk.total} (30% Deposit: P${bk.deposit} via ${bk.paymentMethod})`
-  );
+  const waUrl = `https://wa.me/${SALON_INFO.phoneIntl}?text=${encodeURIComponent(
+    `Dumelang Nicole Beauty Parlour! Here is my Confirmed VIP Salon Pass ${bk.id}:\n• Style: ${bk.styleName} (${bk.sizeLabel || 'Medium'} • ${bk.lengthLabel || 'Midback'})\n• Shade: ${bk.hairColor || '#1B'}\n• Chair: ${bk.stylistName}\n• Date & Time: ${bk.date} at ${bk.time}\n• Total: P${bk.total} (30% Deposit P${bk.deposit} via ${bk.paymentMethod})`
+  )}`;
 
-  body.innerHTML = `
-    <div class="digital-pass-card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span class="pass-ref-badge">REF: ${esc(bk.id)}</span>
-        <span style="font-size:0.78rem; color:#86efac; font-weight:800;">✓ ${esc(bk.status)}</span>
-      </div>
-
-      <div style="display:flex; gap:12px; align-items:center;">
-        <img src="${esc(bk.styleImage)}" alt="${esc(bk.styleName)}" style="width:68px; height:68px; border-radius:16px; object-fit:cover;" />
-        <div>
-          <strong style="font-size:1.08rem; display:block;">${esc(bk.styleName)}</strong>
-          <span style="font-size:0.8rem; color:#bae6fd;">${esc(bk.sizeLabel)} • ${esc(bk.lengthLabel)}</span>
-        </div>
-      </div>
-
-      <div class="pass-grid">
-        <div><small>Client</small><strong>${esc(bk.clientName)}</strong></div>
-        <div><small>Stylist</small><strong>${esc(bk.stylistName)} 👑</strong></div>
-        <div><small>Date &amp; Time</small><strong>${esc(bk.date)} • ${esc(bk.time)}</strong></div>
-        <div><small>Total / Deposit</small><strong>${formatPula(bk.total)} (Dep ${formatPula(bk.deposit)})</strong></div>
-      </div>
-
-      <p style="font-size:0.76rem; color:#e0f2fe;">
-        💳 Deposit line: <b>${esc(bk.paymentMethod)}</b> • Salon WhatsApp: <b>${SALON_INFO.phoneDisplay}</b>
-      </p>
+  host.innerHTML = `
+    <div class="modal-header-lux">
+      <span class="eyebrow-cyan">CHAIR RESERVED • TILT CARD FOR HOLOGRAPHIC FOIL</span>
+      <h3>Your VIP Salon Boarding Pass</h3>
     </div>
 
-    <div class="modal-btn-pair">
-      <button type="button" class="secondary-btn" id="passDownloadIcsBtn">📅 Save to Calendar</button>
-      <a
-        href="https://wa.me/${SALON_INFO.phoneIntl}?text=${waMsg}"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="primary-cta"
-      >
-        📲 Send on WhatsApp
+    <div class="holo-ticket-wrap">
+      <div class="holo-ticket" id="interactiveHoloTicket">
+        <div class="holo-ticket-crest">
+          <img src="${SALON_INFO.logoLightInk}" alt="Nicole Beauty Parlour" />
+          <span class="holo-pass-id">${esc(bk.id)}</span>
+        </div>
+
+        <div class="holo-ticket-body">
+          <div>
+            <strong style="font-size:17px;display:block;">${esc(bk.styleName)}</strong>
+            <span style="color:#56ccf2;font-size:12px;font-weight:700;">${esc(bk.sizeLabel || 'Medium')} • ${esc(bk.lengthLabel || 'Midback')} • ${esc(bk.hairColor || '#1B')}</span>
+
+            <div class="holo-kv-grid">
+              <div><span>GUEST</span><strong>${esc(bk.clientName)}</strong></div>
+              <div><span>BRAIDER</span><strong>${esc(bk.stylistName || 'Nicole')}</strong></div>
+              <div><span>DATE &amp; TIME</span><strong>${esc(bk.date)} • ${esc(bk.time)}</strong></div>
+              <div><span>TOTAL / DEPOSIT</span><strong>${formatPula(bk.total)} (${formatPula(bk.deposit)})</strong></div>
+            </div>
+          </div>
+
+          <div class="holo-qr-box">
+            ${buildDeterministicQrSvg(bk.id + bk.clientName)}
+          </div>
+        </div>
+
+        <div style="padding-top:12px;border-top:1px dashed rgba(86,204,242,0.35);display:flex;justify-content:space-between;font-size:11px;color:#9cc2e3;">
+          <span>${esc(SALON_INFO.location)}</span>
+          <span>WhatsApp: ${esc(SALON_INFO.phoneDisplay)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col-inputs mt-16">
+      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-couture-primary full-width">
+        Send Pass to Salon WhatsApp
       </a>
+      <button type="button" class="btn-couture-glass full-width" id="savePassCalendarBtn">
+        Add to Phone Calendar (.ics)
+      </button>
     </div>
   `;
 
-  body.querySelector('#passDownloadIcsBtn')?.addEventListener('click', () => {
-    const dt = bk.date.replace(/-/g, '') + 'T' + bk.time.replace(':', '') + '00';
-    const ics = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'BEGIN:VEVENT',
-      `SUMMARY:Nicole Beauty Parlour - ${bk.styleName} (${bk.id})`,
-      `DTSTART:${dt}`,
-      `DESCRIPTION:Style: ${bk.styleName} (${bk.sizeLabel}, ${bk.lengthLabel}) | Total: P${bk.total} | Phone: ${SALON_INFO.phoneDisplay}`,
-      `LOCATION:${SALON_INFO.location}`,
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].join('\r\n');
-    const blob = new Blob([ics], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${bk.id}-nicole-beauty-parlour.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Calendar invite downloaded 📅');
+  const ticket = document.getElementById('interactiveHoloTicket');
+  if (ticket) {
+    ticket.addEventListener('pointermove', (e) => {
+      const rect = ticket.getBoundingClientRect();
+      const px = ((e.clientX - rect.left) / rect.width) * 100;
+      const py = ((e.clientY - rect.top) / rect.height) * 100;
+      const rx = ((py - 50) / 50) * -6;
+      const ry = ((px - 50) / 50) * 7;
+      ticket.style.setProperty('--mx', `${px}%`);
+      ticket.style.setProperty('--my', `${py}%`);
+      ticket.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    ticket.addEventListener('pointerleave', () => {
+      ticket.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+  }
+
+  document.getElementById('savePassCalendarBtn')?.addEventListener('click', () => {
+    downloadBookingIcs(bk);
+    showToast('Calendar invite downloaded!');
   });
 
   openModal('bookingPassModal');
 }
 
-/* ================= REAL-TIME TWO-WAY SALON MESSAGING ================= */
-function renderMessaging() {
-  const workspace = document.querySelector('.chat-workspace');
-  const threadsList = document.getElementById('threadsList');
-  const feed = document.getElementById('messagesFeed');
-  const navBadge = document.getElementById('navUnreadBadge');
-  if (!threadsList || !feed || !workspace) return;
-
-  workspace.classList.toggle('conv-open', ui.mobileConvOpen);
-
-  const totalUnread = store.state.threads.reduce((sum, t) => sum + Number(t.unread || 0), 0);
-  if (navBadge) {
-    navBadge.textContent = String(totalUnread);
-    navBadge.classList.toggle('hidden', totalUnread === 0);
-  }
-
-  threadsList.innerHTML = store.state.threads
-    .map((t) => {
-      const lastMsg = t.messages[t.messages.length - 1];
-      return `
-        <button
-          type="button"
-          class="thread-row ${t.id === ui.activeThreadId ? 'active' : ''}"
-          data-thread-id="${esc(t.id)}"
-        >
-          <img src="${esc(t.avatar)}" alt="${esc(t.title)}" />
-          <div class="thread-row-copy">
-            <strong>${esc(t.title)}</strong>
-            <small>${esc(lastMsg?.text || t.subtitle)}</small>
-          </div>
-          ${t.unread ? `<span class="thread-unread-pill">${t.unread}</span>` : ''}
-        </button>
-      `;
-    })
-    .join('');
-
-  threadsList.querySelectorAll('.thread-row').forEach((row) => {
-    row.addEventListener('click', () => {
-      ui.activeThreadId = row.dataset.threadId;
-      ui.mobileConvOpen = true;
-      store.markThreadRead(ui.activeThreadId);
-      renderMessaging();
-      scrollMessagesBottom();
-    });
-  });
-
-  const activeThread =
-    store.state.threads.find((t) => t.id === ui.activeThreadId) || store.state.threads[0];
-  if (!activeThread) return;
-
-  document.getElementById('activeThreadAvatar').src = activeThread.avatar;
-  document.getElementById('activeThreadTitle').textContent = activeThread.title;
-  document.getElementById('activeThreadSub').textContent = activeThread.subtitle;
-
-  document.querySelectorAll('.sender-mode-switch .mode-chip').forEach((chip) => {
-    chip.classList.toggle('active', chip.dataset.sender === ui.senderMode);
-  });
-
-  const input = document.getElementById('chatMessageInput');
-  if (input) {
-    input.placeholder =
-      ui.senderMode === 'salon'
-        ? 'Reply as Nicole (Salon Owner)... 👑'
-        : 'Write a message to Nicole Beauty Parlour...';
-  }
-
-  feed.innerHTML = activeThread.messages
-    .map(
-      (m) => `
-      <div class="msg-bubble ${m.sender === 'salon' ? 'salon' : 'client'}">
-        <span class="msg-sender-tag">${esc(m.senderName || (m.sender === 'salon' ? 'Nicole' : 'You'))}</span>
-        ${m.badge ? `<span class="msg-badge-chip">${esc(m.badge)}</span>` : ''}
-        ${m.image ? `<img src="${esc(m.image)}" alt="Shared hairstyle" class="msg-media-img" />` : ''}
-        <div>${esc(m.text)}</div>
-        <span class="msg-time">${esc(m.timestamp || 'Now')}</span>
-      </div>
-    `
-    )
-    .join('');
-}
-
-function scrollMessagesBottom() {
-  const feed = document.getElementById('messagesFeed');
-  if (feed) {
-    requestAnimationFrame(() => {
-      feed.scrollTop = feed.scrollHeight;
-    });
-  }
-}
-
-function sendStyleInquiryToChat(style, sizeId, lengthId, price) {
+/* ================= CONCIERGE MESSENGER ================= */
+function sendStyleInquiryToChat(style, sizeId, lenId, shadeObj) {
+  const price = calculateStylePrice(style, sizeId, lenId);
   ui.activeThreadId = 'thread-nicole';
   ui.mobileConvOpen = true;
-  const sizeLabel = SIZE_OPTIONS.find((s) => s.id === sizeId)?.label || 'Medium';
-  const lenLabel = LENGTH_OPTIONS.find((l) => l.id === lengthId)?.label || 'Midback';
+  switchTab('messages');
 
   store.sendMessage({
     threadId: 'thread-nicole',
     sender: 'client',
     senderName: 'You',
-    text: `Hi Nicole! 💙 I love "${style.name}" in ${sizeLabel} (${lenLabel} • ${formatPula(price)}). Do you have availability for this look?`,
+    text: `Hi Nicole! I'd love to ask about "${style.name}" (${sizeId} • ${lenId}, shade ${shadeObj.code} — ${formatPula(price)}). Do you have an open chair soon?`,
     image: style.image,
-    badge: `${formatPula(price)} • ${sizeLabel}`,
+    badge: `STYLE INQUIRY • ${formatPula(price)}`,
     styleName: style.name
   });
 
-  switchTab('messages');
-  triggerSalonSmartAutoReply(`availability for ${style.name}`, style.name);
+  triggerSmartAutoReply(style.name, style.name);
 }
 
-function triggerSalonSmartAutoReply(clientText, styleName = '') {
-  if (ui.activeThreadId === 'thread-promos') return;
+function triggerSmartAutoReply(userText, styleName = '') {
   const typing = document.getElementById('typingIndicator');
   typing?.classList.remove('hidden');
-  scrollMessagesBottom();
+  scrollChatBottom();
 
   setTimeout(() => {
     typing?.classList.add('hidden');
-    const reply = store.generateLocalSalonReply(clientText, styleName);
+    const reply = store.generateLocalSalonReply(userText, styleName);
     store.sendMessage({
       threadId: ui.activeThreadId,
       sender: 'salon',
-      senderName: ui.activeThreadId === 'thread-care' ? 'Nicky • Stylist' : 'Nicole',
+      senderName: 'Nicole',
       text: reply
     });
-    scrollMessagesBottom();
-  }, 620);
+    scrollChatBottom();
+  }, 680);
 }
 
-/* ================= SALON STUDIO: ADD HAIRSTYLE & ADVERTISE ================= */
-function renderStudio() {
-  const metrics = document.getElementById('studioMetrics');
-  const promosGrid = document.getElementById('studioPromosGrid');
-  const stylesList = document.getElementById('studioStylesList');
-  if (!metrics || !promosGrid || !stylesList) return;
-
-  const activeAds = store.state.promotions.filter((p) => p.active).length;
-  const confirmedBookings = store.state.bookings.filter((b) => b.status !== 'Cancelled');
-  const estRevenue = confirmedBookings.reduce((sum, b) => sum + Number(b.total || 0), 0);
-
-  metrics.innerHTML = `
-    <div class="metric-box">
-      <strong>${store.state.styles.length}</strong>
-      <span>Live Hairstyles</span>
-    </div>
-    <div class="metric-box">
-      <strong>${activeAds}</strong>
-      <span>Active Adverts</span>
-    </div>
-    <div class="metric-box">
-      <strong>${confirmedBookings.length}</strong>
-      <span>Appointments</span>
-    </div>
-    <div class="metric-box">
-      <strong>${formatPula(estRevenue)}</strong>
-      <span>Booked Value</span>
-    </div>
-  `;
-
-  promosGrid.innerHTML = store.state.promotions
-    .map(
-      (p) => `
-      <article class="studio-promo-card">
-        <div class="sp-img">
-          <img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" />
-          <span class="sp-status ${p.active ? '' : 'paused'}">${p.active ? '● LIVE' : 'PAUSED'}</span>
-        </div>
-        <div class="sp-body">
-          <span class="eyebrow-chip gold" style="justify-self:start; margin:0;">
-            CODE: ${esc(p.code)} • ${p.discountPercent}% OFF
-          </span>
-          <strong>${esc(p.title)}</strong>
-          <p class="muted-sub" style="margin:0;">${esc(p.subtitle)}</p>
-          <div class="sp-actions">
-            <button type="button" class="flyer-cta" data-studio-flyer="${esc(p.id)}">
-              🎨 Poster Flyer
-            </button>
-            <button type="button" data-toggle-promo="${esc(p.id)}">
-              ${p.active ? '⏸ Pause' : '▶ Activate'}
-            </button>
-            <button type="button" data-del-promo="${esc(p.id)}">🗑️</button>
-          </div>
-        </div>
-      </article>
-    `
-    )
-    .join('');
-
-  promosGrid.querySelectorAll('[data-studio-flyer]').forEach((b) => {
-    b.addEventListener('click', () => {
-      const p = store.state.promotions.find((x) => x.id === b.dataset.studioFlyer);
-      if (p) openFlyerGeneratorModal(p);
-    });
-  });
-
-  promosGrid.querySelectorAll('[data-toggle-promo]').forEach((b) => {
-    b.addEventListener('click', async () => {
-      const updated = await store.togglePromotion(b.dataset.togglePromo);
-      if (updated) showToast(`${updated.title} ${updated.active ? 'activated' : 'paused'}`);
-    });
-  });
-
-  promosGrid.querySelectorAll('[data-del-promo]').forEach((b) => {
-    b.addEventListener('click', async () => {
-      await store.deletePromotion(b.dataset.delPromo);
-      showToast('Advertisement removed');
-    });
-  });
-
-  stylesList.innerHTML = store.state.styles
-    .map((s) => {
-      const p = calculateStylePrice(s, s.defaultSize, s.defaultLength);
-      return `
-        <div class="studio-style-row">
-          <img src="${esc(s.image)}" alt="${esc(s.name)}" loading="lazy" />
-          <div>
-            <strong>${esc(s.name)}</strong>
-            <small>${esc(s.category)} • From ${formatPula(p)}</small>
-          </div>
-          ${
-            s.isCustom
-              ? `<button type="button" class="del-mini-btn" data-del-style="${esc(s.id)}">Delete</button>`
-              : `<span class="subtle-pill" style="margin-left:auto;">Official</span>`
-          }
-        </div>
-      `;
-    })
-    .join('');
-
-  stylesList.querySelectorAll('[data-del-style]').forEach((b) => {
-    b.addEventListener('click', async () => {
-      await store.deleteStyle(b.dataset.delStyle);
-      showToast('Custom hairstyle removed');
-    });
+function scrollChatBottom() {
+  requestAnimationFrame(() => {
+    const stream = document.getElementById('chatMessagesStream');
+    if (stream) stream.scrollTop = stream.scrollHeight;
   });
 }
 
-function prepareAddStyleModal() {
-  const presets = document.getElementById('newStylePresetThumbs');
-  if (presets) {
-    presets.innerHTML = store.state.styles
-      .slice(0, 8)
-      .map(
-        (s) => `
-        <button type="button" class="${ui.newStyleImage === s.image ? 'active' : ''}" data-preset-img="${esc(s.image)}">
-          <img src="${esc(s.image)}" alt="" />
-        </button>
-      `
-      )
+function renderMessenger() {
+  const layout = document.getElementById('chatLayout');
+  const threadsWrap = document.getElementById('threadsList');
+  const headEl = document.getElementById('activeThreadHeader');
+  const streamEl = document.getElementById('chatMessagesStream');
+  const unreadBadge = document.getElementById('navUnreadBadge');
+
+  layout?.classList.toggle('conv-open', ui.mobileConvOpen);
+
+  const totalUnread = store.state.threads.reduce((sum, t) => sum + (t.unread || 0), 0);
+  if (unreadBadge) {
+    unreadBadge.textContent = String(totalUnread);
+    unreadBadge.classList.toggle('hidden', totalUnread === 0);
+  }
+
+  if (threadsWrap) {
+    threadsWrap.innerHTML = store.state.threads
+      .map((t) => {
+        const last = t.messages[t.messages.length - 1];
+        return `
+          <button type="button" class="thread-item-btn ${t.id === ui.activeThreadId ? 'active' : ''}" data-thread-id="${esc(t.id)}">
+            <img class="thread-avatar" src="${esc(t.avatar)}" alt="${esc(t.title)}" />
+            <div style="flex:1;min-width:0;">
+              <strong style="display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(t.title)}</strong>
+              <span style="display:block;font-size:11.5px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(last?.text || t.subtitle)}</span>
+            </div>
+            ${t.unread ? `<span class="count-orb">${t.unread}</span>` : ''}
+          </button>
+        `;
+      })
       .join('');
 
-    presets.querySelectorAll('[data-preset-img]').forEach((b) => {
-      b.addEventListener('click', () => {
-        ui.newStyleImage = b.dataset.presetImg;
-        document.getElementById('newStylePreviewImg').src = ui.newStyleImage;
-        prepareAddStyleModal();
+    threadsWrap.querySelectorAll('[data-thread-id]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        ui.activeThreadId = btn.dataset.threadId;
+        ui.mobileConvOpen = true;
+        store.markThreadRead(ui.activeThreadId);
+        renderMessenger();
+        scrollChatBottom();
       });
     });
   }
-  openModal('addStyleModal');
+
+  const activeThread =
+    store.state.threads.find((t) => t.id === ui.activeThreadId) || store.state.threads[0];
+
+  if (headEl && activeThread) {
+    headEl.innerHTML = `
+      <strong>${esc(activeThread.title)}</strong>
+      <span>${esc(activeThread.subtitle)}</span>
+    `;
+  }
+
+  document.getElementById('modeClientBtn')?.classList.toggle('active', ui.senderMode === 'client');
+  document.getElementById('modeSalonBtn')?.classList.toggle('active', ui.senderMode === 'salon');
+
+  const input = document.getElementById('chatMessageInput');
+  if (input) {
+    input.placeholder =
+      ui.senderMode === 'salon'
+        ? 'Reply live as Nicole Beauty Parlour...'
+        : 'Message Nicole Beauty Parlour...';
+  }
+
+  if (streamEl && activeThread) {
+    streamEl.innerHTML = activeThread.messages
+      .map(
+        (m) => `
+        <div class="msg-bubble-row ${m.sender === 'client' ? 'client' : 'salon'}">
+          ${m.image ? `<img class="msg-media-img" src="${esc(m.image)}" alt="Attachment" />` : ''}
+          <div class="msg-bubble">${esc(m.text)}</div>
+          <span class="msg-meta-time">${esc(m.senderName || '')} • ${esc(m.timestamp || '')}</span>
+        </div>
+      `
+      )
+      .join('');
+  }
 }
 
-function prepareCreatePromoModal() {
-  const sel = document.getElementById('promoStyleSelect');
-  if (sel) {
-    sel.innerHTML = store.state.styles
+/* ================= STUDIO & LIVE POSTER DESIGNER ================= */
+function getDraftPromoFromForm() {
+  const styleId = document.getElementById('promoStyleSelect')?.value || 'style-01';
+  const style = store.state.styles.find((s) => s.id === styleId) || store.state.styles[0];
+  return {
+    title: document.getElementById('promoTitleInput')?.value || 'Festive Ice-Crown Special',
+    subtitle:
+      document.getElementById('promoSubtitleInput')?.value ||
+      '20% OFF all Knotless & French Curl bookings!',
+    discountPercent: Number(document.getElementById('promoDiscountInput')?.value || 20),
+    code: String(document.getElementById('promoCodeInput')?.value || 'GLOW20').toUpperCase(),
+    priceHighlight: document.getElementById('promoPriceHighlight')?.value || 'From P144',
+    validUntil: document.getElementById('promoValidUntil')?.value || '2026-12-31',
+    styleId,
+    image: ui.newPromoCustomImage || style?.image || '/images/style-01-honey-curly-knotless.jpg',
+    theme: document.getElementById('promoThemeSelect')?.value || 'obsidian-sapphire',
+    badge: 'LIMITED PARLOUR OFFER'
+  };
+}
+
+async function refreshLivePromoCanvas() {
+  const canvas = document.getElementById('livePromoPreviewCanvas');
+  if (!canvas) return;
+  const draft = getDraftPromoFromForm();
+  await renderPromoFlyerToCanvas(canvas, draft);
+}
+
+async function openFlyerPreviewModal(promo) {
+  ui.lastFlyerPromo = promo;
+  const blob = await renderPromoFlyerBlob(promo);
+  ui.lastFlyerBlob = blob;
+  const img = document.getElementById('flyerPreviewImage');
+  if (img && blob) {
+    img.src = URL.createObjectURL(blob);
+  }
+  openModal('flyerModal');
+}
+
+function renderStudioView() {
+  const kpiEl = document.getElementById('studioStatsGrid');
+  const promosList = document.getElementById('studioPromosList');
+  const stylesList = document.getElementById('studioStylesList');
+  const bookingsList = document.getElementById('studioBookingsList');
+
+  const styles = store.state.styles;
+  const promos = store.state.promotions;
+  const bookings = store.state.bookings;
+  const totalValue = bookings.reduce((sum, b) => sum + Number(b.total || 0), 0);
+
+  if (kpiEl) {
+    kpiEl.innerHTML = `
+      <div class="kpi-glass-box"><span>Live Hairstyles</span><strong>${styles.length}</strong></div>
+      <div class="kpi-glass-box"><span>Active Adverts</span><strong>${promos.filter((p) => p.active).length}</strong></div>
+      <div class="kpi-glass-box"><span>VIP Reservations</span><strong>${bookings.length}</strong></div>
+      <div class="kpi-glass-box"><span>Booked Volume</span><strong>${formatPula(totalValue)}</strong></div>
+    `;
+  }
+
+  const promoSel = document.getElementById('promoStyleSelect');
+  if (promoSel) {
+    promoSel.innerHTML = styles
       .map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`)
       .join('');
-    const cur = store.state.styles[0];
-    if (cur) {
-      ui.newPromoImage = cur.image;
-      document.getElementById('promoPreviewImg').src = cur.image;
-    }
   }
-  openModal('createPromoModal');
-}
 
-async function openFlyerGeneratorModal(promo) {
-  showToast('Generating high-res salon flyer... 🎨');
-  const { blob, dataUrl } = await renderPromoFlyerBlob(promo);
-  ui.lastFlyerBlob = blob;
-  ui.lastFlyerPromo = promo;
+  if (promosList) {
+    promosList.innerHTML = promos
+      .map(
+        (p) => `
+      <div class="studio-row-card">
+        <img src="${esc(p.image)}" alt="${esc(p.title)}" />
+        <div class="studio-row-info">
+          <strong>${esc(p.title)}</strong>
+          <span>Code: ${esc(p.code)} • ${p.discountPercent}% OFF • ${p.active ? 'Live' : 'Paused'}</span>
+        </div>
+        <div class="studio-row-actions">
+          <button type="button" class="mini-action-chip" data-st-flyer="${esc(p.id)}">Poster</button>
+          <button type="button" class="mini-action-chip" data-st-toggle-promo="${esc(p.id)}">${p.active ? 'Pause' : 'Resume'}</button>
+          <button type="button" class="mini-action-chip danger" data-st-del-promo="${esc(p.id)}">×</button>
+        </div>
+      </div>`
+      )
+      .join('');
 
-  const img = document.getElementById('generatedFlyerImg');
-  const dl = document.getElementById('downloadFlyerLink');
-  if (img) img.src = dataUrl;
-  if (dl) {
-    dl.href = dataUrl;
-    dl.download = `nicole-beauty-parlour-${promo.code.toLowerCase()}.png`;
+    promosList.querySelectorAll('[data-st-flyer]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const pr = promos.find((x) => x.id === b.dataset.stFlyer);
+        if (pr) openFlyerPreviewModal(pr);
+      });
+    });
+    promosList.querySelectorAll('[data-st-toggle-promo]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        await store.togglePromotion(b.dataset.stTogglePromo);
+        showToast('Campaign status updated');
+      });
+    });
+    promosList.querySelectorAll('[data-st-del-promo]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        await store.deletePromotion(b.dataset.stDelPromo);
+        showToast('Campaign removed');
+      });
+    });
   }
-  openModal('flyerPreviewModal');
+
+  if (stylesList) {
+    stylesList.innerHTML = styles
+      .slice(0, 12)
+      .map(
+        (s) => `
+      <div class="studio-row-card">
+        <img src="${esc(s.image)}" alt="${esc(s.name)}" />
+        <div class="studio-row-info">
+          <strong>${esc(s.name)}</strong>
+          <span>${esc(s.category)} • From ${formatPula(calculateStylePrice(s, s.defaultSize, s.defaultLength))}</span>
+        </div>
+        <div class="studio-row-actions">
+          <button type="button" class="mini-action-chip" data-st-view-style="${esc(s.id)}">View</button>
+          ${
+            s.isCustom
+              ? `<button type="button" class="mini-action-chip danger" data-st-del-style="${esc(s.id)}">Delete</button>`
+              : ''
+          }
+        </div>
+      </div>`
+      )
+      .join('');
+
+    stylesList.querySelectorAll('[data-st-view-style]').forEach((b) => {
+      b.addEventListener('click', () => openStyleConfigurator(b.dataset.stViewStyle));
+    });
+    stylesList.querySelectorAll('[data-st-del-style]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        await store.deleteStyle(b.dataset.stDelStyle);
+        showToast('Custom hairstyle deleted');
+      });
+    });
+  }
+
+  if (bookingsList) {
+    bookingsList.innerHTML = bookings
+      .map(
+        (bk) => `
+      <div class="studio-row-card">
+        <img src="${esc(bk.styleImage || '/images/style-01-honey-curly-knotless.jpg')}" alt="${esc(bk.styleName)}" />
+        <div class="studio-row-info">
+          <strong>${esc(bk.clientName)} • ${esc(bk.styleName)} (${esc(bk.id)})</strong>
+          <span>${esc(bk.date)} at ${esc(bk.time)} • ${esc(bk.stylistName)} • ${formatPula(bk.total)} • <strong>${esc(bk.status)}</strong></span>
+        </div>
+        <div class="studio-row-actions">
+          <button type="button" class="mini-action-chip" data-st-pass="${esc(bk.id)}">VIP Pass</button>
+          <button type="button" class="mini-action-chip" data-st-complete="${esc(bk.id)}">Mark Done</button>
+        </div>
+      </div>`
+      )
+      .join('');
+
+    bookingsList.querySelectorAll('[data-st-pass]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const bk = bookings.find((x) => x.id === b.dataset.stPass);
+        if (bk) openBookingPassModal(bk);
+      });
+    });
+    bookingsList.querySelectorAll('[data-st-complete]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        await store.updateBookingStatus(b.dataset.stComplete, { status: 'Completed' });
+        showToast('Chair appointment marked Completed');
+      });
+    });
+  }
 }
 
 /* ================= NOTIFICATIONS ================= */
 function renderNotifications() {
   const badge = document.getElementById('notifBadge');
   const list = document.getElementById('notificationsList');
-  const unreadCount = store.state.notifications.filter((n) => n.unread).length;
+  const unread = store.state.notifications.filter((n) => n.unread).length;
 
   if (badge) {
-    badge.textContent = String(unreadCount);
-    badge.classList.toggle('hidden', unreadCount === 0);
+    badge.textContent = String(unread);
+    badge.classList.toggle('hidden', unread === 0);
   }
-
   if (list) {
     list.innerHTML = store.state.notifications
       .map(
         (n) => `
-        <div class="notif-card ${n.unread ? 'unread' : ''}">
-          <strong>${esc(n.title)}</strong>
-          <p>${esc(n.body)}</p>
-          <small>${esc(n.time)}</small>
-        </div>
-      `
+      <div class="notif-item-card">
+        <strong>${esc(n.title)}</strong>
+        <p>${esc(n.body)}</p>
+      </div>`
       )
       .join('');
   }
 }
 
-/* ================= RENDER ALL ================= */
 function renderAll() {
-  renderStories();
-  renderPromoCarousel();
-  renderCalculator();
-  renderFeaturedAndStylists();
-  renderMarketplace();
-  renderBookingWizard();
-  renderMyBookings();
-  renderMessaging();
-  renderStudio();
+  renderStoriesBar();
+  renderCoverflow();
+  renderArchitect();
+  renderCampaigns();
+  renderFeaturedAndBraiders();
+  renderGalleryView();
+  renderBookingView();
+  renderMessenger();
+  renderStudioView();
   renderNotifications();
 }
 
-/* ================= GLOBAL EVENT WIRING ================= */
-function attachEvents() {
-  // Bottom Tabbar & Quick Goto buttons
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+/* ================= EVENT BINDINGS ================= */
+function bindEvents() {
+  // Theme Toggle
+  document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+    applyTheme(ui.theme === 'dark' ? 'light' : 'dark');
+    showToast(ui.theme === 'light' ? 'Ice-Pearl Day Mode' : 'Obsidian Velvet Runway Mode');
   });
 
-  document.querySelectorAll('[data-goto]').forEach((btn) => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.goto));
-  });
-
+  // Brand home
   document.getElementById('brandHomeBtn')?.addEventListener('click', () => switchTab('discover'));
 
-  // Modal Dismissals
-  document.querySelectorAll('[data-close-modal]').forEach((el) => {
-    el.addEventListener('click', () => closeModal(el.dataset.closeModal));
+  // Bottom dock & goto-tab triggers
+  document.querySelectorAll('.dock-item[data-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+  document.querySelectorAll('[data-goto-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.gotoTab));
   });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeAllModals();
+  // Close modal buttons & backdrop click
+  document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+    btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
   });
+  document.querySelectorAll('.modal-backdrop').forEach((bd) => {
+    bd.addEventListener('click', (e) => {
+      if (e.target === bd) closeModal(bd.id);
+    });
+  });
+
+  // Coverflow arrows & touch swipe
+  document.getElementById('cfPrevBtn')?.addEventListener('click', () => {
+    ui.coverflowIndex--;
+    renderCoverflow();
+  });
+  document.getElementById('cfNextBtn')?.addEventListener('click', () => {
+    ui.coverflowIndex++;
+    renderCoverflow();
+  });
+
+  const cfStage = document.getElementById('coverflowStage');
+  let touchStartX = 0;
+  cfStage?.addEventListener(
+    'touchstart',
+    (e) => {
+      touchStartX = e.changedTouches[0]?.clientX || 0;
+    },
+    { passive: true }
+  );
+  cfStage?.addEventListener(
+    'touchend',
+    (e) => {
+      const dx = (e.changedTouches[0]?.clientX || 0) - touchStartX;
+      if (Math.abs(dx) > 36) {
+        ui.coverflowIndex += dx < 0 ? 1 : -1;
+        renderCoverflow();
+      }
+    },
+    { passive: true }
+  );
+
+  // Hero & Topbar triggers
+  document.getElementById('heroReserveBtn')?.addEventListener('click', () => switchTab('book'));
+  document.getElementById('openMirrorModalBtn')?.addEventListener('click', () => openMirrorModal('selfie'));
+  document.getElementById('heroOpenMirrorBtn')?.addEventListener('click', () => openMirrorModal('selfie'));
+  document.getElementById('quickMirrorTileBtn')?.addEventListener('click', () => openMirrorModal('selfie'));
+  document.getElementById('marketMirrorBtn')?.addEventListener('click', () => openMirrorModal('quiz'));
+
+  document.getElementById('openPriceSheetBtn')?.addEventListener('click', () => openModal('priceSheetModal'));
+  document.getElementById('viewPosterInlineBtn')?.addEventListener('click', () => openModal('priceSheetModal'));
+  document.getElementById('marketPriceCardLink')?.addEventListener('click', () => openModal('priceSheetModal'));
+  document.getElementById('bookFromPriceModalBtn')?.addEventListener('click', () => {
+    closeModal('priceSheetModal');
+    switchTab('book');
+  });
+
+  document.getElementById('openNotificationsBtn')?.addEventListener('click', () => {
+    store.markNotificationsRead();
+    openModal('notificationsModal');
+  });
+  document.getElementById('openInstallModalBtn')?.addEventListener('click', () => openModal('installModal'));
 
   // Story prev/next
   document.getElementById('storyPrevBtn')?.addEventListener('click', () => openStoryAt(ui.storyIndex - 1));
   document.getElementById('storyNextBtn')?.addEventListener('click', () => openStoryAt(ui.storyIndex + 1));
 
-  // Price Sheet Modal & Tabs
-  const openPriceModal = (showPoster = false) => {
-    renderPriceSheetModal();
-    document.getElementById('priceTabInteractive')?.classList.toggle('active', !showPoster);
-    document.getElementById('priceTabPoster')?.classList.toggle('active', showPoster);
-    document.getElementById('interactivePriceTableWrap')?.classList.toggle('hidden', showPoster);
-    document.getElementById('originalPosterWrap')?.classList.toggle('hidden', !showPoster);
-    openModal('priceSheetModal');
-  };
+  // Virtual Mirror events
+  document.getElementById('mirrorTabSelfieBtn')?.addEventListener('click', () => {
+    ui.mirrorTab = 'selfie';
+    renderMirrorModal();
+  });
+  document.getElementById('mirrorTabQuizBtn')?.addEventListener('click', () => {
+    ui.mirrorTab = 'quiz';
+    renderMirrorModal();
+  });
+  document.getElementById('mirrorSelfieInput')?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    ui.mirrorSelfieSrc = await compressImageFile(file, 720, 0.85);
+    renderMirrorModal();
+    showToast('Selfie loaded into Style Mirror!');
+  });
+  document.getElementById('mirrorBookLookBtn')?.addEventListener('click', () => {
+    const st = store.state.styles.find((s) => s.id === ui.mirrorStyleId) || store.state.styles[0];
+    ui.bookColorId = ui.mirrorColorId;
+    closeModal('mirrorModal');
+    jumpToBookingWithStyle(st.id, st.defaultSize, st.defaultLength);
+  });
+  document.getElementById('mirrorSendToChatBtn')?.addEventListener('click', () => {
+    const st = store.state.styles.find((s) => s.id === ui.mirrorStyleId) || store.state.styles[0];
+    const col = HAIR_COLORS.find((c) => c.id === ui.mirrorColorId) || HAIR_COLORS[0];
+    closeModal('mirrorModal');
+    sendStyleInquiryToChat(st, st.defaultSize, st.defaultLength, col);
+  });
 
-  document.getElementById('openPriceSheetBtn')?.addEventListener('click', () => openPriceModal(false));
-  document.getElementById('viewOriginalPosterBtn')?.addEventListener('click', () => openPriceModal(true));
-  document.getElementById('priceTabInteractive')?.addEventListener('click', () => openPriceModal(false));
-  document.getElementById('priceTabPoster')?.addEventListener('click', () => openPriceModal(true));
-
-  // Price Calculator controls
-  document.querySelectorAll('#calcTypeToggle .seg-btn').forEach((btn) => {
+  document.getElementById('quizBudgetRange')?.addEventListener('input', (e) => {
+    ui.quizBudget = Number(e.target.value);
+    renderMirrorModal();
+  });
+  document.querySelectorAll('#quizVibeChips [data-vibe]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      ui.calcMode = btn.dataset.mode;
-      renderCalculator();
+      ui.quizVibe = btn.dataset.vibe;
+      renderMirrorModal();
     });
   });
 
+  // Architect calculator events
+  document.getElementById('calcModeMatrixBtn')?.addEventListener('click', () => {
+    ui.calcMode = 'matrix';
+    renderArchitect();
+  });
+  document.getElementById('calcModeFlatBtn')?.addEventListener('click', () => {
+    ui.calcMode = 'flat';
+    renderArchitect();
+  });
   document.getElementById('calcBookNowBtn')?.addEventListener('click', () => {
-    if (ui.calcMode === 'flat') {
-      startBookingForStyle('style-13', 'medium', 'midback');
-    } else {
-      startBookingForStyle('style-01', ui.calcSize, ui.calcLength);
-    }
+    const targetId = ui.calcMode === 'flat' ? 'style-13' : 'style-01';
+    jumpToBookingWithStyle(targetId, ui.calcSize, ui.calcLength);
   });
 
-  // Marketplace Filters
-  document.getElementById('styleSearchInput')?.addEventListener('input', (e) => {
+  // Gallery search & filters
+  document.getElementById('marketSearchInput')?.addEventListener('input', (e) => {
     ui.searchQuery = e.target.value;
-    renderMarketplace();
+    renderGalleryView();
   });
-
-  document.getElementById('savedOnlyToggle')?.addEventListener('click', () => {
+  document.getElementById('clearSearchBtn')?.addEventListener('click', () => {
+    ui.searchQuery = '';
+    const inp = document.getElementById('marketSearchInput');
+    if (inp) inp.value = '';
+    renderGalleryView();
+  });
+  document.getElementById('savedFilterBtn')?.addEventListener('click', () => {
     ui.savedOnly = !ui.savedOnly;
-    renderMarketplace();
+    renderGalleryView();
   });
-
   document.getElementById('marketSortSelect')?.addEventListener('change', (e) => {
     ui.sortBy = e.target.value;
-    renderMarketplace();
+    renderGalleryView();
   });
 
-  // Booking Form Events
-  document.getElementById('bookSizeSelect')?.addEventListener('change', (e) => {
-    ui.bookSize = e.target.value;
-    renderBookingWizard();
-  });
-
-  document.getElementById('bookLengthSelect')?.addEventListener('change', (e) => {
-    ui.bookLength = e.target.value;
-    renderBookingWizard();
-  });
-
-  document.getElementById('bookDateInput')?.addEventListener('change', (e) => {
-    if (e.target.value) {
-      ui.bookDate = e.target.value;
-      renderBookingWizard();
+  // Booking form events
+  document.getElementById('bookStyleSelect')?.addEventListener('change', (e) => {
+    ui.bookStyleId = e.target.value;
+    const st = store.state.styles.find((s) => s.id === ui.bookStyleId);
+    if (st) {
+      ui.bookSize = st.defaultSize || 'medium';
+      ui.bookLength = st.defaultLength || 'midback';
     }
+    renderBookingView();
   });
 
   document.getElementById('applyPromoBtn')?.addEventListener('click', () => {
-    applyPromoCodeByText(document.getElementById('bookPromoInput')?.value);
+    const raw = String(document.getElementById('bookPromoInput')?.value || '')
+      .trim()
+      .toUpperCase();
+    const match = store.state.promotions.find((p) => p.active && p.code.toUpperCase() === raw);
+    if (!match) {
+      ui.appliedPromo = null;
+      showToast('Code not found — try SLAY15 or CROWN250');
+    } else {
+      ui.appliedPromo = match;
+      showToast(`Code ${match.code} applied (${match.discountPercent}% OFF)!`);
+    }
+    renderBookingView();
   });
 
   document.getElementById('bookingForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const clientName = document.getElementById('bookClientName')?.value.trim();
-    const clientPhone = document.getElementById('bookClientPhone')?.value.trim();
-
+    const clientName = document.getElementById('clientNameInput')?.value.trim();
+    const clientPhone = document.getElementById('clientPhoneInput')?.value.trim();
     if (!clientName || !clientPhone) {
-      showToast('Please enter your name and WhatsApp/phone number 💙');
-      document.getElementById(!clientName ? 'bookClientName' : 'bookClientPhone')?.focus();
+      showToast('Please enter your name and WhatsApp number');
       return;
     }
 
     const { style, selectedAddOns, subtotal, discount, total, deposit } = getBookingTotals();
     const sizeObj = SIZE_OPTIONS.find((s) => s.id === ui.bookSize);
     const lenObj = LENGTH_OPTIONS.find((l) => l.id === ui.bookLength);
-    const stylistObj = STYLISTS.find((st) => st.id === ui.bookStylistId);
+    const colObj = HAIR_COLORS.find((c) => c.id === ui.bookColorId) || HAIR_COLORS[0];
+    const stylist = STYLISTS.find((s) => s.id === ui.bookStylistId) || STYLISTS[0];
 
     const created = await store.createBooking({
       clientName,
@@ -1570,313 +1995,256 @@ function attachEvents() {
       styleName: style.name,
       styleImage: style.image,
       size: ui.bookSize,
-      sizeLabel: style.pricingMode === 'flat' ? 'Standard' : sizeObj?.label || 'Medium',
+      sizeLabel: sizeObj?.label || 'Medium',
       length: ui.bookLength,
       lengthLabel: lenObj?.label || 'Midback',
-      stylistId: ui.bookStylistId,
-      stylistName: stylistObj?.name || 'Nicole',
+      hairColor: `${colObj.code} ${colObj.name}`,
+      stylistId: stylist.id,
+      stylistName: stylist.name,
       date: ui.bookDate,
       time: ui.bookTime,
       addOns: selectedAddOns.map((a) => a.name),
-      promoCode: ui.appliedPromo?.code || '',
+      promoCode: ui.appliedPromo?.code || null,
       subtotal,
       discount,
       total,
       deposit,
-      paymentMethod: document.getElementById('bookPaymentSelect')?.value || 'Orange Money (72517904)',
-      notes: document.getElementById('bookNotesInput')?.value.trim() || ''
+      paymentMethod: document.getElementById('paymentMethodSelect')?.value || 'Orange Money (72517904)',
+      notes: document.getElementById('bookingNotesInput')?.value.trim() || ''
     });
 
-    showToast(`Appointment ${created.id} confirmed! 🎉👑`);
+    launchIceConfetti();
     openBookingPassModal(created);
   });
 
-  // Messaging Events
+  // Concierge Messenger events
   document.getElementById('backToThreadsBtn')?.addEventListener('click', () => {
     ui.mobileConvOpen = false;
-    renderMessaging();
+    renderMessenger();
+  });
+  document.getElementById('modeClientBtn')?.addEventListener('click', () => {
+    ui.senderMode = 'client';
+    renderMessenger();
+  });
+  document.getElementById('modeSalonBtn')?.addEventListener('click', () => {
+    ui.senderMode = 'salon';
+    renderMessenger();
   });
 
-  document.querySelectorAll('.sender-mode-switch .mode-chip').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      ui.senderMode = chip.dataset.sender;
-      renderMessaging();
-      showToast(
-        ui.senderMode === 'salon'
-          ? 'Switched to Salon Reply mode (Nicole) 👑'
-          : 'Switched to Client chat mode 👤'
-      );
-    });
-  });
-
-  document.querySelectorAll('#chatQuickPrompts [data-prompt]').forEach((btn) => {
+  document.querySelectorAll('#chatQuickChips [data-quick-msg]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const prompt = btn.dataset.prompt;
+      const text = btn.dataset.quickMsg;
       store.sendMessage({
         threadId: ui.activeThreadId,
         sender: 'client',
         senderName: 'You',
-        text: prompt
+        text
       });
-      scrollMessagesBottom();
-      triggerSalonSmartAutoReply(prompt);
+      scrollChatBottom();
+      triggerSmartAutoReply(text);
     });
   });
 
-  document.getElementById('attachStyleCardChatBtn')?.addEventListener('click', () => {
-    const pick = store.state.styles[Math.floor(Math.random() * Math.min(6, store.state.styles.length))];
-    if (!pick) return;
-    const p = calculateStylePrice(pick, pick.defaultSize, pick.defaultLength);
-    ui.pendingChatAttachment = {
-      image: pick.image,
-      label: `${pick.name} (${formatPula(p)})`,
-      styleName: pick.name
-    };
-    document.getElementById('chatAttachImg').src = pick.image;
-    document.getElementById('chatAttachLabel').textContent = ui.pendingChatAttachment.label;
-    document.getElementById('chatAttachmentPreview')?.classList.remove('hidden');
-  });
-
-  document.getElementById('chatPhotoInput')?.addEventListener('change', async (e) => {
+  document.getElementById('chatImageInput')?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const dataUrl = await compressImageFile(file, 840, 0.8);
-      ui.pendingChatAttachment = { image: dataUrl, label: file.name, styleName: '' };
-      document.getElementById('chatAttachImg').src = dataUrl;
-      document.getElementById('chatAttachLabel').textContent = `📷 ${file.name}`;
-      document.getElementById('chatAttachmentPreview')?.classList.remove('hidden');
-    } catch {
-      showToast('Could not attach image');
+    ui.pendingChatAttachment = await compressImageFile(file, 840, 0.82);
+    const strip = document.getElementById('chatAttachmentPreview');
+    if (strip) {
+      strip.classList.remove('hidden');
+      strip.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img src="${ui.pendingChatAttachment}" alt="Preview" />
+          <span style="font-size:12px;">Photo ready to send</span>
+        </div>
+        <button type="button" class="mini-action-chip" id="removeChatPhotoBtn">Remove</button>
+      `;
+      document.getElementById('removeChatPhotoBtn')?.addEventListener('click', () => {
+        ui.pendingChatAttachment = null;
+        strip.classList.add('hidden');
+      });
     }
-    e.target.value = '';
-  });
-
-  document.getElementById('clearChatAttachBtn')?.addEventListener('click', () => {
-    ui.pendingChatAttachment = null;
-    document.getElementById('chatAttachmentPreview')?.classList.add('hidden');
   });
 
   document.getElementById('chatComposerForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const input = document.getElementById('chatMessageInput');
-    const text = input?.value.trim() || '';
+    const inp = document.getElementById('chatMessageInput');
+    const text = inp?.value.trim() || '';
     if (!text && !ui.pendingChatAttachment) return;
 
-    const attachment = ui.pendingChatAttachment;
+    const isClient = ui.senderMode === 'client';
     store.sendMessage({
       threadId: ui.activeThreadId,
       sender: ui.senderMode,
-      senderName: ui.senderMode === 'salon' ? 'Nicole • Salon' : 'You',
-      text: text || (attachment ? `Sharing hairstyle inspiration: ${attachment.label}` : ''),
-      image: attachment?.image || null,
-      badge: attachment?.styleName ? 'STYLE INQUIRY' : null,
-      styleName: attachment?.styleName || ''
+      senderName: isClient ? 'You' : 'Nicole',
+      text: text || 'Shared an inspiration photo',
+      image: ui.pendingChatAttachment
     });
 
-    if (input) input.value = '';
+    if (inp) inp.value = '';
     ui.pendingChatAttachment = null;
     document.getElementById('chatAttachmentPreview')?.classList.add('hidden');
-    scrollMessagesBottom();
+    scrollChatBottom();
 
-    if (ui.senderMode === 'client') {
-      triggerSalonSmartAutoReply(text, attachment?.styleName || '');
+    if (isClient) {
+      triggerSmartAutoReply(text);
     }
   });
 
-  // Add Hairstyle Modal Triggers & Form
-  ['quickAddStyleBtn', 'marketAddStyleBtn', 'studioAddStyleBtn', 'newStyleInlineBtn'].forEach((id) => {
-    document.getElementById(id)?.addEventListener('click', prepareAddStyleModal);
-  });
+  // Add Hairstyle Modal triggers & submission
+  const openAddStyle = () => openModal('addStyleModal');
+  document.getElementById('quickAddStyleBtn')?.addEventListener('click', openAddStyle);
+  document.getElementById('marketAddStyleBtn')?.addEventListener('click', openAddStyle);
+  document.getElementById('studioAddStyleBtn')?.addEventListener('click', openAddStyle);
+  document.getElementById('studioNewStyleInlineBtn')?.addEventListener('click', openAddStyle);
 
   document.getElementById('newStylePricingMode')?.addEventListener('change', (e) => {
-    const isFlat = e.target.value === 'flat';
-    document.getElementById('newStyleFlatPriceWrap')?.classList.toggle('hidden', !isFlat);
-    document.getElementById('newStyleDefaultSizeWrap')?.classList.toggle('hidden', isFlat);
+    document
+      .getElementById('newStyleFlatPriceWrap')
+      ?.classList.toggle('hidden', e.target.value !== 'flat');
   });
 
   document.getElementById('newStylePhotoInput')?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      ui.newStyleImage = await compressImageFile(file, 960, 0.84);
-      document.getElementById('newStylePreviewImg').src = ui.newStyleImage;
-      showToast('Hairstyle photo uploaded! ✨');
-    } catch {
-      showToast('Could not read photo');
-    }
+    ui.newStyleImage = await compressImageFile(file, 920, 0.84);
+    const img = document.getElementById('newStylePreviewImg');
+    if (img) img.src = ui.newStyleImage;
   });
 
   document.getElementById('addStyleForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('newStyleName')?.value.trim();
-    if (!name) {
-      showToast('Please enter a hairstyle name');
-      return;
-    }
+    if (!name) return;
+
     const pricingMode = document.getElementById('newStylePricingMode')?.value || 'matrix';
     await store.addStyle({
       name,
       category: document.getElementById('newStyleCategory')?.value || 'Knotless',
+      badge: document.getElementById('newStyleBadge')?.value.trim() || 'New Drop',
       image: ui.newStyleImage,
       pricingMode,
-      flatPrice: Number(document.getElementById('newStyleFlatPrice')?.value || 250),
+      flatPrice:
+        pricingMode === 'flat'
+          ? Number(document.getElementById('newStyleFlatPrice')?.value || 250)
+          : undefined,
       defaultSize: document.getElementById('newStyleDefaultSize')?.value || 'medium',
-      defaultLength: 'midback',
+      defaultLength: document.getElementById('newStyleDefaultLength')?.value || 'midback',
       duration: document.getElementById('newStyleDuration')?.value.trim() || '4 – 5 hrs',
       packs: document.getElementById('newStylePacks')?.value.trim() || '5–6 packs',
-      badge: document.getElementById('newStyleBadge')?.value.trim() || 'New Drop ✨',
       description:
         document.getElementById('newStyleDesc')?.value.trim() ||
-        'Fresh custom braid & twist creation by Nicole Beauty Parlour.',
-      tags: ['Custom Upload', 'Pain-Free']
+        'Custom salon hairstyle crafted at Nicole Beauty Parlour.',
+      tags: ['New Drop', 'Custom Style']
     });
 
-    e.target.reset();
     closeModal('addStyleModal');
-    showToast(`"${name}" added to the live Market! 🎉`);
-    switchTab('styles');
+    launchIceConfetti();
+    showToast(`"${name}" published to Gallery!`);
+    e.target.reset();
   });
 
-  // Advertise / Create Promo Modal Triggers & Form
-  ['quickAdvertiseBtn', 'studioCreatePromoBtn', 'newPromoInlineBtn'].forEach((id) => {
-    document.getElementById(id)?.addEventListener('click', prepareCreatePromoModal);
+  // Launch Advert & Live Poster Studio triggers
+  const openPromoStudio = () => {
+    ui.newPromoCustomImage = null;
+    openModal('addPromoModal');
+    refreshLivePromoCanvas();
+  };
+  document.getElementById('quickAdvertiseBtn')?.addEventListener('click', openPromoStudio);
+  document.getElementById('newPromoFromHomeBtn')?.addEventListener('click', openPromoStudio);
+  document.getElementById('studioLaunchPromoBtn')?.addEventListener('click', openPromoStudio);
+  document.getElementById('studioNewAdInlineBtn')?.addEventListener('click', openPromoStudio);
+
+  [
+    'promoTitleInput',
+    'promoSubtitleInput',
+    'promoDiscountInput',
+    'promoCodeInput',
+    'promoPriceHighlight',
+    'promoStyleSelect',
+    'promoThemeSelect'
+  ].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', refreshLivePromoCanvas);
+    document.getElementById(id)?.addEventListener('change', refreshLivePromoCanvas);
   });
 
-  document.getElementById('promoStyleSelect')?.addEventListener('change', (e) => {
-    const picked = store.state.styles.find((s) => s.id === e.target.value);
-    if (picked) {
-      ui.newPromoImage = picked.image;
-      document.getElementById('promoPreviewImg').src = picked.image;
-    }
-  });
-
-  document.getElementById('promoPhotoInput')?.addEventListener('change', async (e) => {
+  document.getElementById('promoCustomPhotoInput')?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      ui.newPromoImage = await compressImageFile(file, 960, 0.84);
-      document.getElementById('promoPreviewImg').src = ui.newPromoImage;
-      showToast('Custom promo banner photo ready! 📸');
-    } catch {
-      showToast('Could not process image');
-    }
+    ui.newPromoCustomImage = await compressImageFile(file, 980, 0.85);
+    refreshLivePromoCanvas();
   });
 
-  document.getElementById('createPromoForm')?.addEventListener('submit', async (e) => {
+  document.getElementById('addPromoForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const title = document.getElementById('promoTitleInput')?.value.trim();
-    const code = document.getElementById('promoCodeInput')?.value.trim();
-    if (!title || !code) {
-      showToast('Please enter a campaign headline and promo code');
-      return;
-    }
-
-    const createdPromo = await store.createPromotion({
-      title,
-      subtitle:
-        document.getElementById('promoSubtitleInput')?.value.trim() ||
-        'Special salon promotion at Nicole Beauty Parlour!',
-      discountPercent: Number(document.getElementById('promoDiscountInput')?.value || 20),
-      code,
-      styleId: document.getElementById('promoStyleSelect')?.value || 'style-01',
-      image: ui.newPromoImage,
-      priceHighlight: document.getElementById('promoHighlightInput')?.value.trim() || 'Special Rate',
-      validUntil: document.getElementById('promoValidUntilInput')?.value || '2026-12-31',
-      theme: document.getElementById('promoThemeSelect')?.value || 'royal-sky',
-      badge: 'FLASH ADVERT'
-    });
-
-    closeModal('createPromoModal');
-    showToast(`Advert "${createdPromo.title}" is now LIVE! 🔥`);
-    await openFlyerGeneratorModal(createdPromo);
+    const draft = getDraftPromoFromForm();
+    const created = await store.createPromotion(draft);
+    closeModal('addPromoModal');
+    launchIceConfetti();
+    showToast(`Campaign ${created.code} is LIVE!`);
+    await openFlyerPreviewModal(created);
   });
 
-  // Share Flyer via Web Share API
-  document.getElementById('shareFlyerNativeBtn')?.addEventListener('click', async () => {
-    const promo = ui.lastFlyerPromo;
-    if (!promo) return;
-    const shareText = `👑 ${promo.title} at Nicole Beauty Parlour!\n${promo.subtitle}\nUse code ${promo.code} (${promo.discountPercent}% OFF) • Call/WhatsApp ${SALON_INFO.phoneDisplay}`;
+  // Flyer download & share
+  document.getElementById('downloadFlyerBtn')?.addEventListener('click', () => {
+    if (!ui.lastFlyerBlob) return;
+    const url = URL.createObjectURL(ui.lastFlyerBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Nicole-Beauty-Parlour-${ui.lastFlyerPromo?.code || 'Poster'}.png`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    showToast('1080×1350 HD Poster downloaded!');
+  });
 
-    try {
-      if (navigator.share && ui.lastFlyerBlob) {
-        const file = new File([ui.lastFlyerBlob], `nicole-promo-${promo.code}.png`, {
-          type: 'image/png'
+  document.getElementById('shareFlyerBtn')?.addEventListener('click', async () => {
+    if (ui.lastFlyerBlob && navigator.share) {
+      try {
+        const file = new File([ui.lastFlyerBlob], 'nicole-parlour-offer.png', { type: 'image/png' });
+        await navigator.share({
+          title: ui.lastFlyerPromo?.title || 'Nicole Beauty Parlour',
+          text: `${ui.lastFlyerPromo?.title} — Use code ${ui.lastFlyerPromo?.code} at Nicole Beauty Parlour (${SALON_INFO.phoneDisplay})!`,
+          files: navigator.canShare?.({ files: [file] }) ? [file] : undefined
         });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ title: promo.title, text: shareText, files: [file] });
-          return;
-        }
-        await navigator.share({ title: promo.title, text: shareText });
         return;
+      } catch {
+        // Fallback below
       }
-    } catch {
-      // User cancelled share sheet or browser fallback
     }
-
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    const waText = encodeURIComponent(
+      `${ui.lastFlyerPromo?.title || 'Special Offer'} at Nicole Beauty Parlour! Use code ${
+        ui.lastFlyerPromo?.code || 'SLAY15'
+      } — WhatsApp ${SALON_INFO.phoneDisplay}`
+    );
+    window.open(`https://wa.me/?text=${waText}`, '_blank', 'noopener');
   });
 
-  // Notifications & Install App Modals
-  document.getElementById('openNotificationsBtn')?.addEventListener('click', () => {
-    store.markNotificationsRead();
-    openModal('notificationsModal');
-  });
-
-  document.getElementById('openInstallModalBtn')?.addEventListener('click', () => {
-    openModal('installAppModal');
-  });
-
-  document.getElementById('replaySplashBtn')?.addEventListener('click', () => {
-    closeModal('installAppModal');
-    runSplashSequence(false);
-  });
-
+  // Native PWA install prompt
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     ui.deferredInstallPrompt = e;
-    document.getElementById('triggerNativeInstallBtn')?.classList.remove('hidden');
+    document.getElementById('nativeInstallPromptBtn')?.classList.remove('hidden');
   });
 
-  document.getElementById('triggerNativeInstallBtn')?.addEventListener('click', async () => {
+  document.getElementById('nativeInstallPromptBtn')?.addEventListener('click', async () => {
     if (!ui.deferredInstallPrompt) return;
     ui.deferredInstallPrompt.prompt();
     await ui.deferredInstallPrompt.userChoice;
     ui.deferredInstallPrompt = null;
-    document.getElementById('triggerNativeInstallBtn')?.classList.add('hidden');
+    document.getElementById('nativeInstallPromptBtn')?.classList.add('hidden');
+    closeModal('installModal');
   });
-
-  // Auto-advance Promo Carousel gently
-  setInterval(() => {
-    if (ui.activeTab !== 'discover') return;
-    const wrap = document.getElementById('promoCarousel');
-    const dots = document.querySelectorAll('#promoDots .promo-dot');
-    if (!wrap || dots.length <= 1) return;
-    ui.promoSlideIndex = (ui.promoSlideIndex + 1) % dots.length;
-    wrap.scrollTo({ left: wrap.clientWidth * ui.promoSlideIndex, behavior: 'smooth' });
-    dots.forEach((d, idx) => d.classList.toggle('active', idx === ui.promoSlideIndex));
-  }, 5800);
 }
 
 /* ================= BOOTSTRAP ================= */
 function init() {
-  // Handle deep-link tab query (?tab=book / messages / studio)
-  const params = new URLSearchParams(window.location.search);
-  const tabParam = params.get('tab');
-  if (tabParam && ['discover', 'styles', 'book', 'messages', 'studio'].includes(tabParam)) {
-    ui.activeTab = tabParam;
-  }
-
+  applyTheme(ui.theme);
+  initSplashExperience();
+  bindEvents();
   store.subscribe(() => renderAll());
   renderAll();
-  if (ui.activeTab !== 'discover') switchTab(ui.activeTab);
-
-  attachEvents();
-  runSplashSequence(false);
   store.syncFromServer();
 
-  // Register PWA Service Worker for Android/iOS offline & installability
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js').catch(() => {});

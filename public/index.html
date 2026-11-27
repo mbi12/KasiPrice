@@ -1,22 +1,22 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#0A1931" />
+    <meta name="theme-color" content="#040914" id="metaThemeColor" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Nicole Parlour" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta
       name="description"
-      content="Nicole Beauty Parlour — Look Good, Feel Good, Be You. Botswana Hair Braiding Market, Online Booking, Live Messaging & Promo Studio."
+      content="Nicole Beauty Parlour — Look Good, Feel Good, Be You. Couture Hair Braiding Marketplace, Virtual Style Mirror, Instant VIP Booking, Live Concierge & Ad Studio in Gaborone, Botswana."
     />
 
-    <title>Nicole Beauty Parlour • Look Good 💙 Feel Good 💙 Be You</title>
+    <title>Nicole Beauty Parlour • Look Good • Feel Good • Be You</title>
 
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/png" href="/icons/favicon.png" />
@@ -25,1079 +25,1289 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <!-- ================= ANIMATED HAIRSTYLE SPLASH / LOADING SCREEN ================= -->
+    <!-- Ambient Couture Silk Backdrop -->
+    <div class="ambient-backdrop" aria-hidden="true">
+      <div class="ambient-orb orb-1"></div>
+      <div class="ambient-orb orb-2"></div>
+      <div class="ambient-grid"></div>
+    </div>
+
+    <!-- ================= 3D COUTURE RUNWAY SPLASH / LOADING STAGE ================= -->
     <div id="splashScreen" class="splash-screen" role="status" aria-live="polite">
-      <div class="splash-aurora"></div>
-      <div class="splash-sparkles" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
+      <canvas id="splashCanvas" class="splash-canvas" aria-hidden="true"></canvas>
+      <div class="splash-vignette" aria-hidden="true"></div>
 
-      <div class="splash-inner">
-        <button id="skipSplashBtn" type="button" class="splash-skip-btn">Skip ›</button>
-
-        <div class="splash-crown-wrap">
-          <svg class="splash-crown-svg" viewBox="0 0 80 54" fill="none" aria-hidden="true">
-            <path
-              d="M8 42L14 16L29 29L40 9L51 29L66 16L72 42H8Z"
-              stroke="url(#crownGold)"
-              stroke-width="3.2"
-              stroke-linejoin="round"
-            />
-            <path d="M11 48H69" stroke="url(#crownGold)" stroke-width="3.4" stroke-linecap="round" />
-            <circle cx="40" cy="7" r="3.5" fill="#FBBF24" />
-            <circle cx="13" cy="14" r="3" fill="#38BDF8" />
-            <circle cx="67" cy="14" r="3" fill="#38BDF8" />
-            <defs>
-              <linearGradient id="crownGold" x1="8" y1="9" x2="72" y2="48" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#FDE68A" />
-                <stop offset="0.5" stop-color="#F59E0B" />
-                <stop offset="1" stop-color="#38BDF8" />
-              </linearGradient>
-            </defs>
-          </svg>
+      <div class="splash-stage">
+        <div class="splash-top-row">
+          <span class="splash-pill-tag">
+            <span class="pulse-dot"></span>
+            GABORONE • BOTSWANA
+          </span>
+          <button id="skipSplashBtn" type="button" class="splash-enter-btn">
+            Enter Parlour
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M4.5 10H15.5M15.5 10L10.5 5M15.5 10L10.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
 
-        <div class="splash-logo-card">
-          <img src="/images/nicole-logo.jpg" alt="Nicole Beauty Parlour Logo" />
+        <!-- Restored Transparent Master Logo with Liquid Shimmer Sweep -->
+        <div class="splash-crest-hero">
+          <div class="splash-crest-halo" aria-hidden="true"></div>
+          <img
+            src="/images/nicole-logo-light.png"
+            alt="Nicole Beauty Parlour — Look Good, Feel Good, Be You"
+            class="splash-master-logo"
+          />
         </div>
 
-        <p class="splash-tagline">Look Good <span>💙</span> Feel Good <span>💙</span> Be You</p>
-
-        <!-- Animated Gliding Hairstyle Filmstrip -->
-        <div class="splash-marquee-shell" aria-hidden="true">
-          <div class="splash-marquee-track">
-            <div class="splash-hair-card">
+        <!-- 3D Perspective Gliding Salon Lookbook Runway -->
+        <div class="splash-runway-viewport" aria-hidden="true">
+          <div class="splash-runway-track">
+            <div class="splash-look-card">
               <img src="/images/style-01-honey-curly-knotless.jpg" alt="" />
-              <span>Honey Curly • P180</span>
+              <div class="splash-look-meta">
+                <span>Honey Curly Knotless</span>
+                <strong>P180</strong>
+              </div>
             </div>
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
               <img src="/images/style-14-burgundy-french-curl.jpg" alt="" />
-              <span>French Curl • P250</span>
+              <div class="splash-look-meta">
+                <span>Ombre French Curl</span>
+                <strong>P250</strong>
+              </div>
             </div>
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
               <img src="/images/style-05-caramel-high-pony.jpg" alt="" />
-              <span>Caramel Pony • P250</span>
+              <div class="splash-look-meta">
+                <span>Caramel Crown Pony</span>
+                <strong>P250</strong>
+              </div>
             </div>
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
               <img src="/images/style-13-passion-curly-twists.jpg" alt="" />
-              <span>Softdread • P250</span>
+              <div class="splash-look-meta">
+                <span>Spring Softdread</span>
+                <strong>P250</strong>
+              </div>
             </div>
-            <div class="splash-hair-card">
-              <img src="/images/style-06-golden-velvet-updo.jpg" alt="" />
-              <span>Golden Glam • P180</span>
-            </div>
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
               <img src="/images/style-11-goddess-boho-knee.jpg" alt="" />
-              <span>Boho Knee • P400</span>
+              <div class="splash-look-meta">
+                <span>Goddess Boho Knee</span>
+                <strong>P400</strong>
+              </div>
             </div>
-            <!-- Duplicated seamlessly for infinite glide -->
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
+              <img src="/images/style-06-golden-velvet-updo.jpg" alt="" />
+              <div class="splash-look-meta">
+                <span>Golden Velvet Updo</span>
+                <strong>P180</strong>
+              </div>
+            </div>
+            <div class="splash-look-card">
+              <img src="/images/style-15-precision-knotless-grid.jpg" alt="" />
+              <div class="splash-look-meta">
+                <span>Mirror Grid Knotless</span>
+                <strong>P300</strong>
+              </div>
+            </div>
+            <!-- Seamless loop clones -->
+            <div class="splash-look-card">
               <img src="/images/style-01-honey-curly-knotless.jpg" alt="" />
-              <span>Honey Curly • P180</span>
+              <div class="splash-look-meta">
+                <span>Honey Curly Knotless</span>
+                <strong>P180</strong>
+              </div>
             </div>
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
               <img src="/images/style-14-burgundy-french-curl.jpg" alt="" />
-              <span>French Curl • P250</span>
+              <div class="splash-look-meta">
+                <span>Ombre French Curl</span>
+                <strong>P250</strong>
+              </div>
             </div>
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
               <img src="/images/style-05-caramel-high-pony.jpg" alt="" />
-              <span>Caramel Pony • P250</span>
+              <div class="splash-look-meta">
+                <span>Caramel Crown Pony</span>
+                <strong>P250</strong>
+              </div>
             </div>
-            <div class="splash-hair-card">
+            <div class="splash-look-card">
               <img src="/images/style-13-passion-curly-twists.jpg" alt="" />
-              <span>Softdread • P250</span>
+              <div class="splash-look-meta">
+                <span>Spring Softdread</span>
+                <strong>P250</strong>
+              </div>
+            </div>
+            <div class="splash-look-card">
+              <img src="/images/style-11-goddess-boho-knee.jpg" alt="" />
+              <div class="splash-look-meta">
+                <span>Goddess Boho Knee</span>
+                <strong>P400</strong>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="splash-loader-box">
-          <div class="splash-progress-bar">
+        <div class="splash-loader-panel">
+          <div class="splash-progress-rail">
             <div id="splashProgressFill" class="splash-progress-fill"></div>
           </div>
-          <div class="splash-status-row">
-            <span id="splashStatusText">Sectioning crisp knotless parts...</span>
+          <div class="splash-status-meta">
+            <span id="splashStatusText">Illuminating the Gaborone Crown Runway...</span>
             <strong id="splashPercent">0%</strong>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ================= MAIN NATIVE APP SHELL ================= -->
+    <!-- ================= CONFETTI CELEBRATION LAYER ================= -->
+    <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+    <!-- ================= MAIN COUTURE APP SHELL ================= -->
     <div id="appShell" class="app-shell">
-      <!-- Top Glass App Header -->
+      <!-- Floating Frosted Glass Header -->
       <header class="app-topbar">
-        <button type="button" class="brand-header-btn" id="brandHomeBtn" aria-label="Nicole Beauty Parlour Home">
-          <div class="brand-logo-thumb">
-            <img src="/images/nicole-logo.jpg" alt="Nicole Beauty Parlour" />
-          </div>
-          <div class="brand-header-copy">
-            <div class="brand-title-row">
-              <h1>Nicole <span>Beauty Parlour</span></h1>
-              <span class="verified-crown" title="Official Salon">👑</span>
-            </div>
-            <p><span class="live-dot"></span> Gaborone • 72517904</p>
-          </div>
+        <button type="button" class="brand-lockup-btn" id="brandHomeBtn" aria-label="Nicole Beauty Parlour Home">
+          <img
+            src="/images/nicole-wordmark-light.png"
+            alt="Nicole Beauty Parlour"
+            class="topbar-wordmark wordmark-for-dark"
+          />
+          <img
+            src="/images/nicole-wordmark-dark.png"
+            alt="Nicole Beauty Parlour"
+            class="topbar-wordmark wordmark-for-light"
+          />
+          <span class="live-parlour-chip">
+            <span class="pulse-dot"></span>
+            <span>72517904</span>
+          </span>
         </button>
 
         <div class="topbar-actions">
-          <button type="button" class="pill-action-btn" id="openPriceSheetBtn" title="Official Price List">
-            <span>💎</span>
-            <span class="hide-xs">Prices</span>
-          </button>
-          <button type="button" class="pill-action-btn install-pill" id="openInstallModalBtn" title="Get Mobile App">
-            <span>📲</span>
-            <span class="hide-xs">Get App</span>
-          </button>
-          <button type="button" class="icon-circle-btn" id="openNotificationsBtn" aria-label="Notifications">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 2.75a5.25 5.25 0 0 1 5.25 5.25v2.68c0 .74.24 1.47.69 2.06l1.39 1.85a1 1 0 0 1-.8 1.6H5.47a1 1 0 0 1-.8-1.6l1.39-1.85c.45-.59.69-1.32.69-2.06V8A5.25 5.25 0 0 1 12 2.75Zm-2.25 15a2.25 2.25 0 0 0 4.5 0h-4.5Z"
-              />
+          <button type="button" class="lux-pill-btn mirror-trigger-pill" id="openMirrorModalBtn" title="Virtual Style Mirror & Matcher">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 2.2L11.6 6.4L15.8 8L11.6 9.6L10 13.8L8.4 9.6L4.2 8L8.4 6.4L10 2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M15.5 13L16.3 15.2L18.5 16L16.3 16.8L15.5 19L14.7 16.8L12.5 16L14.7 15.2L15.5 13Z" fill="currentColor"/>
             </svg>
-            <span id="notifBadge" class="badge-counter hidden">0</span>
+            <span>Style Mirror</span>
+          </button>
+
+          <button type="button" class="lux-pill-btn" id="openPriceSheetBtn" title="Official BWP Price Menu">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M3.5 6.5L10 2.5L16.5 6.5L10 17.5L3.5 6.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M3.8 6.8H16.2" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+            <span class="hide-xs">Price Menu</span>
+          </button>
+
+          <button type="button" class="icon-orb-btn" id="themeToggleBtn" aria-label="Switch Ice Pearl / Obsidian Velvet Theme" title="Switch Ice-Pearl / Obsidian Theme">
+            <svg class="icon-sun" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="3.8" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M10 2.2V4.2M10 15.8V17.8M2.2 10H4.2M15.8 10H17.8M4.5 4.5L5.9 5.9M14.1 14.1L15.5 15.5M15.5 4.5L14.1 5.9M5.9 14.1L4.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M15.8 12.6A6.5 6.5 0 0 1 7.4 4.2a6.6 6.6 0 1 0 8.4 8.4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <button type="button" class="icon-orb-btn" id="openInstallModalBtn" aria-label="Install Mobile App" title="Android, iPhone & Play Store">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <rect x="5" y="2.2" width="10" height="15.6" rx="2.3" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M8.5 15.2H11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+
+          <button type="button" class="icon-orb-btn" id="openNotificationsBtn" aria-label="Notifications">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 2.8A4.6 4.6 0 0 1 14.6 7.4V10.2L16.2 12.6C16.6 13.2 16.1 14 15.4 14H4.6C3.9 14 3.4 13.2 3.8 12.6L5.4 10.2V7.4A4.6 4.6 0 0 1 10 2.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M8.2 16.2C8.6 17 9.2 17.4 10 17.4C10.8 17.4 11.4 17 11.8 16.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <span id="notifBadge" class="orb-badge hidden">0</span>
           </button>
         </div>
       </header>
 
-      <!-- ================= TAB 1: DISCOVER (HOME & MARKET) ================= -->
-      <main class="views-container">
-        <section id="view-discover" class="app-view active" aria-label="Discover">
-          <!-- Salon Story Highlights Strip -->
-          <div class="stories-strip" id="storiesStrip" aria-label="Salon Highlights"></div>
+      <!-- ================= MAIN VIEWPORT ================= -->
+      <main class="app-main">
+        <!-- ==================== TAB 1: RUNWAY (DISCOVER) ==================== -->
+        <section id="view-discover" class="app-view active" aria-label="Parlour Runway">
+          <!-- Lookbook Stories Strip -->
+          <div class="stories-ribbon" id="storiesBar" aria-label="Salon Lookbook Stories"></div>
 
-          <!-- Dynamic Animated Promo / Advert Banner Carousel -->
-          <div class="promo-carousel-wrap">
-            <div id="promoCarousel" class="promo-carousel"></div>
-            <div id="promoDots" class="promo-dots"></div>
-          </div>
+          <!-- SHOWSTOPPER HERO: Restored Crest + 3D Interactive Coverflow Stage -->
+          <section class="couture-hero-stage" id="coutureHeroStage">
+            <div class="hero-dynamic-aura" id="heroDynamicAura" aria-hidden="true"></div>
 
-          <!-- Quick Action Tiles -->
-          <div class="quick-actions-grid">
-            <button type="button" class="quick-tile" data-goto="book">
-              <span class="qt-icon sky">📅</span>
-              <div>
-                <strong>Book Chair</strong>
-                <small>Instant Pass</small>
-              </div>
-            </button>
-            <button type="button" class="quick-tile" id="quickAddStyleBtn">
-              <span class="qt-icon gold">➕</span>
-              <div>
-                <strong>Add Style</strong>
-                <small>Upload Look</small>
-              </div>
-            </button>
-            <button type="button" class="quick-tile" id="quickAdvertiseBtn">
-              <span class="qt-icon berry">📣</span>
-              <div>
-                <strong>Advertise</strong>
-                <small>Launch Promo</small>
-              </div>
-            </button>
-            <button type="button" class="quick-tile" data-goto="messages">
-              <span class="qt-icon emerald">💬</span>
-              <div>
-                <strong>Chat Salon</strong>
-                <small>Live Desk</small>
-              </div>
-            </button>
-          </div>
-
-          <!-- Interactive Official BWP Price Calculator -->
-          <section class="glass-card calc-card">
-            <div class="card-head">
-              <div>
-                <span class="eyebrow-chip">OFFICIAL @NICOLE_BEAUTY_PARLOUR RATES</span>
-                <h2>Instant Braid Price Calculator</h2>
-              </div>
-              <button type="button" class="link-chip" id="viewOriginalPosterBtn">View Poster 🖼️</button>
-            </div>
-
-            <div class="calc-type-toggle" id="calcTypeToggle">
-              <button type="button" class="seg-btn active" data-mode="matrix">
-                Knotless / Box / Twist
-              </button>
-              <button type="button" class="seg-btn" data-mode="flat">
-                Pick n' Drop / Softdread
-              </button>
-            </div>
-
-            <div id="calcMatrixControls" class="calc-controls-wrap">
-              <div class="calc-group">
-                <label>1. Select Braid Size</label>
-                <div class="pill-selector" id="calcSizePills"></div>
-              </div>
-              <div class="calc-group">
-                <label>2. Select Length</label>
-                <div class="pill-selector three-col" id="calcLengthPills"></div>
-              </div>
-            </div>
-
-            <div class="calc-result-bar">
-              <div class="calc-price-box">
-                <span class="calc-label">Estimated Salon Price</span>
-                <div class="calc-price-row">
-                  <strong id="calcPriceDisplay">P180</strong>
-                  <span id="calcMetaDisplay" class="calc-meta-pill">4 – 5 hrs • 5–6 packs</span>
-                </div>
-              </div>
-              <button type="button" class="primary-cta" id="calcBookNowBtn">
-                Book This Rate ›
-              </button>
-            </div>
-          </section>
-
-          <!-- Featured Hairstyles Section -->
-          <section class="section-block">
-            <div class="section-title-bar">
-              <div>
-                <span class="mini-label">CROWN COLLECTION</span>
-                <h2>Signature Styles in BWP</h2>
-              </div>
-              <button type="button" class="text-link-btn" data-goto="styles">See all 16+ ›</button>
-            </div>
-            <div id="featuredStylesGrid" class="styles-grid"></div>
-          </section>
-
-          <!-- Meet the Stylists Strip -->
-          <section class="section-block">
-            <div class="section-title-bar">
-              <div>
-                <span class="mini-label">GABORONE TEAM</span>
-                <h2>Master Braiders</h2>
-              </div>
-              <span class="subtle-pill">Pain-Free Guarantee 💙</span>
-            </div>
-            <div id="stylistsRow" class="stylists-scroll"></div>
-          </section>
-        </section>
-
-        <!-- ================= TAB 2: STYLES MARKETPLACE ================= -->
-        <section id="view-styles" class="app-view" aria-label="Hairstyles Market">
-          <div class="glass-card market-toolbar">
-            <div class="market-top-row">
-              <div class="search-box">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M10.5 3a7.5 7.5 0 1 1 0 15a7.5 7.5 0 0 1 0-15Zm0 2a5.5 5.5 0 1 0 0 11a5.5 5.5 0 0 0 0-11Zm7.1 17.4 2.6 2.6-1.4 1.4-2.6-2.6 1.4-1.4Z"
-                  />
-                </svg>
-                <input
-                  id="styleSearchInput"
-                  type="search"
-                  placeholder="Search knotless, french curl, twists, boho..."
-                  aria-label="Search hairstyles"
+            <div class="hero-brand-showcase">
+              <div class="hero-crest-glass">
+                <img
+                  src="/images/nicole-logo-light.png"
+                  alt="Nicole Beauty Parlour — Look Good, Feel Good, Be You"
+                  class="hero-full-logo logo-for-dark"
+                />
+                <img
+                  src="/images/nicole-logo-transparent.png"
+                  alt="Nicole Beauty Parlour — Look Good, Feel Good, Be You"
+                  class="hero-full-logo logo-for-light"
                 />
               </div>
-              <button type="button" class="primary-cta compact" id="marketAddStyleBtn">
-                ＋ Add Style
+
+              <div class="hero-editorial-headline">
+                <div class="hero-live-pills">
+                  <span class="editorial-kicker">
+                    <span class="pulse-dot"></span>
+                    CHAIR 01 &amp; 02 OPEN TODAY
+                  </span>
+                  <span class="editorial-kicker subtle">@NICOLE_BEAUTY_PARLOUR</span>
+                </div>
+                <h1 class="display-serif">
+                  Where Gaborone Crowns Come Alive in <em>Silk &amp; Precision.</em>
+                </h1>
+                <p class="hero-lead">
+                  Pain-free Knotless, French Curls, Box Braids, Twists &amp; Softdread crafted from
+                  <strong>P130</strong> — customize length in 3D, test shades in our Virtual Mirror, and unlock an instant holographic VIP Pass.
+                </p>
+
+                <div class="hero-cta-cluster">
+                  <button type="button" class="btn-couture-primary" id="heroReserveBtn">
+                    <span>Reserve Your Chair</span>
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M4.5 10H15.5M15.5 10L10.5 5M15.5 10L10.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn-couture-glass" id="heroOpenMirrorBtn">
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M10 2.2L11.6 6.4L15.8 8L11.6 9.6L10 13.8L8.4 9.6L4.2 8L8.4 6.4L10 2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Try Style Mirror</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive 3D Perspective Hairstyle Coverflow -->
+            <div class="coverflow-theatre">
+              <div class="coverflow-header-row">
+                <div>
+                  <span class="eyebrow-cyan">INTERACTIVE 3D RUNWAY</span>
+                  <h2 id="coverflowActiveTitle" class="coverflow-active-title">Honey Blonde Curly-Ends Knotless</h2>
+                </div>
+                <div class="coverflow-nav-btns">
+                  <button type="button" class="cf-arrow-btn" id="cfPrevBtn" aria-label="Previous Hairstyle">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <button type="button" class="cf-arrow-btn" id="cfNextBtn" aria-label="Next Hairstyle">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="coverflow-stage" id="coverflowStage"></div>
+
+              <div class="coverflow-spotlight-bar" id="coverflowSpotlightBar"></div>
+            </div>
+          </section>
+
+          <!-- 4 Bespoke Couture Quick Actions -->
+          <section class="couture-action-strip" aria-label="Parlour Quick Actions">
+            <button type="button" class="couture-tile" data-goto-tab="book">
+              <div class="tile-icon-ring">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M8 3V6.5M16 3V6.5M3.5 9.5H20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 14.5L11.2 16.5L15.5 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="tile-copy">
+                <strong>Book VIP Chair</strong>
+                <span>Instant QR Pass</span>
+              </div>
+            </button>
+
+            <button type="button" class="couture-tile" id="quickMirrorTileBtn">
+              <div class="tile-icon-ring">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="11" r="7.5" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 21H15.5M12 18.5V21" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.5 7.5L15.3 9.4L17.2 10.2L15.3 11L14.5 12.9L13.7 11L11.8 10.2L13.7 9.4L14.5 7.5Z" fill="currentColor"/></svg>
+              </div>
+              <div class="tile-copy">
+                <strong>Style Mirror</strong>
+                <span>Selfie &amp; Shade Match</span>
+              </div>
+            </button>
+
+            <button type="button" class="couture-tile" id="quickAddStyleBtn">
+              <div class="tile-icon-ring">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="4.5" width="17" height="15" rx="3.2" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M5.5 17.5L10.5 13L13.8 16L16.5 13.5L19 16.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5V7.5M16 5H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </div>
+              <div class="tile-copy">
+                <strong>Add Hairstyle</strong>
+                <span>Upload to Market</span>
+              </div>
+            </button>
+
+            <button type="button" class="couture-tile" id="quickAdvertiseBtn">
+              <div class="tile-icon-ring">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 13.5V9.5C4 8.4 4.9 7.5 6 7.5H9.5L17.5 4V19L9.5 15.5H6C4.9 15.5 4 14.6 4 13.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 15.5L8.8 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M20 8.5C21.2 9.8 21.2 13.2 20 14.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </div>
+              <div class="tile-copy">
+                <strong>Launch Advert</strong>
+                <span>HD Poster &amp; Code</span>
+              </div>
+            </button>
+          </section>
+
+          <!-- SHOWSTOPPER #4: VISUAL SILHOUETTE BRAID LENGTH & THICKNESS ARCHITECT -->
+          <section class="architect-card" aria-label="Interactive Braid Length and Price Architect">
+            <div class="section-heading-row">
+              <div>
+                <span class="eyebrow-cyan">OFFICIAL @NICOLE_BEAUTY_PARLOUR MATRIX</span>
+                <h2>Interactive Braid Length &amp; Price Architect</h2>
+              </div>
+              <button type="button" class="ghost-link-btn" id="viewPosterInlineBtn">
+                <span>Official Poster</span>
+                <svg viewBox="0 0 20 20" fill="none"><path d="M6 14L14 6M14 6H7.5M14 6V12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
 
-            <div class="category-chips-scroll" id="marketCategoryChips"></div>
+            <div class="architect-grid">
+              <!-- Live Animated SVG Silhouette & Cascading Braids -->
+              <div class="silhouette-stage">
+                <svg id="braidSilhouetteSvg" class="silhouette-svg" viewBox="0 0 280 340" fill="none" aria-label="Visual Braid Length Guide">
+                  <defs>
+                    <linearGradient id="braidSilkGrad" x1="140" y1="45" x2="140" y2="315" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="#56CCF2" />
+                      <stop offset="55%" stop-color="#29ABE2" />
+                      <stop offset="100%" stop-color="#0B7BC1" />
+                    </linearGradient>
+                    <linearGradient id="bodyOutlineGrad" x1="140" y1="20" x2="140" y2="330" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="rgba(41,171,226,0.55)" />
+                      <stop offset="100%" stop-color="rgba(41,171,226,0.12)" />
+                    </linearGradient>
+                  </defs>
 
-            <div class="market-filter-footer">
-              <span id="marketCountLabel" class="count-text">16 hairstyles</span>
-              <div class="market-right-controls">
-                <button type="button" class="wish-filter-btn" id="savedOnlyToggle">
-                  ♥ Saved
-                </button>
-                <select id="marketSortSelect" aria-label="Sort hairstyles">
-                  <option value="featured">Featured first</option>
-                  <option value="price-asc">Lowest price (P130+)</option>
-                  <option value="price-desc">Luxury / Extra Long</option>
-                  <option value="rating">Top rated</option>
-                </select>
+                  <!-- Guide ticks -->
+                  <line x1="24" y1="152" x2="256" y2="152" stroke="rgba(41,171,226,0.16)" stroke-dasharray="4 4"/>
+                  <text x="26" y="146" fill="currentColor" opacity="0.48" font-size="10" font-weight="700">MIDBACK</text>
+
+                  <line x1="24" y1="230" x2="256" y2="230" stroke="rgba(41,171,226,0.16)" stroke-dasharray="4 4"/>
+                  <text x="26" y="224" fill="currentColor" opacity="0.48" font-size="10" font-weight="700">BUTT LENGTH</text>
+
+                  <line x1="24" y1="304" x2="256" y2="304" stroke="rgba(41,171,226,0.16)" stroke-dasharray="4 4"/>
+                  <text x="26" y="298" fill="currentColor" opacity="0.48" font-size="10" font-weight="700">KNEE LENGTH</text>
+
+                  <!-- Elegant Back & Shoulders Silhouette -->
+                  <path
+                    d="M140 22C154 22 164 33 164 48C164 59 158 67 153 73C165 79 194 86 202 103C209 118 202 152 192 175C186 190 198 214 197 238C196 262 186 298 182 326M140 22C126 22 116 33 116 48C116 59 122 67 127 73C115 79 86 86 78 103C71 118 78 152 88 175C94 190 82 214 83 238C84 262 94 298 98 326"
+                    stroke="url(#bodyOutlineGrad)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+
+                  <!-- 5 Cascading Braided Strands (dynamically morphed in JS for length & thickness!) -->
+                  <g id="svgBraidStrands" stroke="url(#braidSilkGrad)" stroke-linecap="round">
+                    <path id="strand1" d="M122 46 Q116 98 118 152" stroke-width="6.2"/>
+                    <path id="strand2" d="M131 42 Q128 98 129 152" stroke-width="6.2"/>
+                    <path id="strand3" d="M140 40 Q140 98 140 152" stroke-width="6.2"/>
+                    <path id="strand4" d="M149 42 Q152 98 151 152" stroke-width="6.2"/>
+                    <path id="strand5" d="M158 46 Q164 98 162 152" stroke-width="6.2"/>
+                  </g>
+
+                  <!-- Glowing Active Laser Marker -->
+                  <g id="svgLaserGroup" style="transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);">
+                    <line x1="62" y1="152" x2="226" y2="152" stroke="#29ABE2" stroke-width="2.4" />
+                    <circle cx="62" cy="152" r="4.5" fill="#29ABE2" />
+                    <rect x="184" y="138" width="76" height="26" rx="13" fill="#29ABE2" />
+                    <text id="svgLaserPrice" x="222" y="155" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="800">P180</text>
+                  </g>
+                </svg>
+
+                <div class="strand-gauge-bar">
+                  <span id="strandGaugeLabel">Medium Thickness • 5–6 Packs</span>
+                </div>
               </div>
+
+              <!-- Controls & Rolling Odometer -->
+              <div class="architect-controls">
+                <div class="segmented-glass" role="tablist">
+                  <button type="button" class="seg-btn active" id="calcModeMatrixBtn">
+                    Knotless / Box / Twist
+                  </button>
+                  <button type="button" class="seg-btn" id="calcModeFlatBtn">
+                    Pick n' Drop / Softdread
+                  </button>
+                </div>
+
+                <div id="calcMatrixControls" class="architect-matrix-controls">
+                  <div class="control-block">
+                    <div class="control-label-row">
+                      <span>01. Braid Thickness</span>
+                      <strong id="calcSizeHint">Medium</strong>
+                    </div>
+                    <div class="chip-row-5" id="calcSizeRow"></div>
+                  </div>
+
+                  <div class="control-block">
+                    <div class="control-label-row">
+                      <span>02. Cascade Length</span>
+                      <strong id="calcLengthHint">Midback</strong>
+                    </div>
+                    <div class="chip-row-3" id="calcLengthRow"></div>
+                  </div>
+                </div>
+
+                <div id="calcFlatBanner" class="flat-specialty-box hidden">
+                  <div class="flat-badge">OFFICIAL FLAT RATE</div>
+                  <h3>Pick n' Drop • Switch • Hardread • Softdread</h3>
+                  <p>All standard lengths at our signature <strong>P250</strong> parlour rate (+P50 for extra-long Knee Length).</p>
+                </div>
+
+                <div class="odometer-result-panel">
+                  <div class="odometer-left">
+                    <span class="odometer-kicker">OFFICIAL PARLOUR RATE</span>
+                    <div class="odometer-price" id="calcPriceOutput">P180</div>
+                    <span class="odometer-meta" id="calcMetaOutput">4 – 5 hrs • 5–6 packs • Deposit P54</span>
+                  </div>
+                  <button type="button" class="btn-couture-primary compact" id="calcBookNowBtn">
+                    <span>Book Rate</span>
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M4.5 10H15.5M15.5 10L10.5 5M15.5 10L10.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Live Campaigns & Exportable Posters -->
+          <section class="campaigns-section" aria-label="Active Salon Promotions">
+            <div class="section-heading-row">
+              <div>
+                <span class="eyebrow-cyan">LIVE PARLOUR OFFERS</span>
+                <h2>VIP Campaigns &amp; Promo Codes</h2>
+              </div>
+              <button type="button" class="ghost-link-btn" id="newPromoFromHomeBtn">
+                <span>+ Create Advert</span>
+              </button>
+            </div>
+            <div class="campaign-carousel" id="promoCarousel"></div>
+          </section>
+
+          <!-- Featured Crown Collection -->
+          <section class="collection-preview-section">
+            <div class="section-heading-row">
+              <div>
+                <span class="eyebrow-cyan">CURATED LOOKBOOK</span>
+                <h2>Signature Styles in BWP</h2>
+              </div>
+              <button type="button" class="ghost-link-btn" data-goto-tab="market">
+                <span id="seeAllCountLabel">Explore All 16+</span>
+                <svg viewBox="0 0 20 20" fill="none"><path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="couture-cards-grid" id="featuredStylesGrid"></div>
+          </section>
+
+          <!-- Master Braiders Chairs -->
+          <section class="chairs-showcase-section">
+            <div class="section-heading-row">
+              <div>
+                <span class="eyebrow-cyan">GABORONE ARTISTS</span>
+                <h2>Meet Your Master Braiders</h2>
+              </div>
+              <span class="guarantee-pill">Zero-Tension Guarantee</span>
+            </div>
+            <div class="braiders-strip" id="stylistsStrip"></div>
+          </section>
+        </section>
+
+        <!-- ==================== TAB 2: COUTURE GALLERY (MARKET) ==================== -->
+        <section id="view-market" class="app-view" aria-label="Hairstyle Marketplace">
+          <div class="view-top-banner">
+            <div>
+              <span class="eyebrow-cyan">NICOLE BEAUTY PARLOUR CATALOG</span>
+              <h2>Couture Braid &amp; Twist Gallery</h2>
+            </div>
+            <div class="banner-btn-pair">
+              <button type="button" class="btn-couture-glass sm" id="marketMirrorBtn">
+                <span>Style Mirror</span>
+              </button>
+              <button type="button" class="btn-couture-primary sm" id="marketAddStyleBtn">
+                <span>+ Add Style</span>
+              </button>
             </div>
           </div>
 
-          <div id="marketStylesGrid" class="styles-grid"></div>
+          <div class="gallery-filter-bar">
+            <div class="search-glass-box">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <circle cx="9" cy="9" r="5.8" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <input
+                type="search"
+                id="marketSearchInput"
+                placeholder="Search French curl, knotless, softdread, #27 honey, P130..."
+                autocomplete="off"
+              />
+              <button type="button" id="clearSearchBtn" class="clear-input-btn hidden" aria-label="Clear">×</button>
+            </div>
+
+            <div class="filter-controls-inline">
+              <button type="button" id="savedFilterBtn" class="filter-toggle-chip">
+                <svg viewBox="0 0 20 20" fill="none"><path d="M10 16.8L3.8 10.7A4.2 4.2 0 0 1 9.8 4.8L10 5L10.2 4.8A4.2 4.2 0 0 1 16.2 10.7L10 16.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <span>Saved</span>
+              </button>
+              <select id="marketSortSelect" class="glass-select" aria-label="Sort hairstyles">
+                <option value="featured">Featured Runway</option>
+                <option value="price-asc">Lowest Price (P130+)</option>
+                <option value="price-desc">Luxury / Knee Length</option>
+                <option value="rating">Highest Rated</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="category-pills-ribbon" id="categoryChipsRow"></div>
+
+          <div class="gallery-meta-bar">
+            <span id="marketCountText">16 couture hairstyles</span>
+            <button type="button" class="text-action-cyan" id="marketPriceCardLink">View Official Price Sheet</button>
+          </div>
+
+          <div class="couture-cards-grid" id="marketStylesGrid"></div>
         </section>
 
-        <!-- ================= TAB 3: INTERACTIVE BOOKING & APPOINTMENTS ================= -->
-        <section id="view-book" class="app-view" aria-label="Book Appointment">
-          <div class="booking-layout">
-            <form id="bookingForm" class="glass-card booking-wizard" novalidate>
-              <div class="card-head">
-                <div>
-                  <span class="eyebrow-chip">RESERVE YOUR CHAIR</span>
-                  <h2>Book Appointment</h2>
+        <!-- ==================== TAB 3: VIP CHAIR RESERVATION (BOOK) ==================== -->
+        <section id="view-book" class="app-view" aria-label="Reserve Salon Chair">
+          <div class="view-top-banner">
+            <div>
+              <span class="eyebrow-cyan">INSTANT HOLOGRAPHIC VIP PASS</span>
+              <h2>Reserve Your Salon Chair</h2>
+            </div>
+            <a
+              href="https://wa.me/26772517904"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-couture-glass sm"
+            >
+              <span>WhatsApp 72517904</span>
+            </a>
+          </div>
+
+          <div class="booking-architecture">
+            <form id="bookingForm" class="booking-concierge-form">
+              <!-- Selected Hairstyle Card -->
+              <div class="concierge-step-card">
+                <div class="step-card-head">
+                  <span class="step-num">01</span>
+                  <h3>Selected Crown Style</h3>
+                  <button type="button" class="text-action-cyan" data-goto-tab="market">Browse Gallery</button>
                 </div>
-                <span class="badge-soft-sky">Instant Confirmation</span>
+                <select id="bookStyleSelect" class="glass-select full-width" aria-label="Choose hairstyle"></select>
+                <div id="bookSelectedStylePreview" class="selected-look-banner"></div>
               </div>
 
-              <!-- 1. Choose Hairstyle -->
-              <div class="form-step">
-                <div class="step-label-row">
-                  <label>1. Choose Hairstyle</label>
-                  <button type="button" class="link-chip" data-goto="styles">Browse Gallery</button>
+              <!-- Size, Length & Shade -->
+              <div class="concierge-step-card">
+                <div class="step-card-head">
+                  <span class="step-num">02</span>
+                  <h3>Size, Cascade Length &amp; Hair Shade</h3>
                 </div>
-                <div id="bookingSelectedPreview" class="selected-style-banner"></div>
-                <div id="bookingStyleStrip" class="mini-style-strip"></div>
-              </div>
-
-              <!-- 2. Size & Length -->
-              <div id="bookingSizeLengthWrap" class="form-step two-col-grid">
-                <div>
-                  <label for="bookSizeSelect">2. Braid Size</label>
-                  <select id="bookSizeSelect"></select>
+                <div id="bookSizeLengthSection">
+                  <label class="micro-label">Braid Size</label>
+                  <div class="chip-row-5" id="bookSizeChips"></div>
+                  <label class="micro-label mt-14">Cascade Length</label>
+                  <div class="chip-row-3" id="bookLengthChips"></div>
                 </div>
-                <div>
-                  <label for="bookLengthSelect">3. Braid Length</label>
-                  <select id="bookLengthSelect"></select>
+
+                <label class="micro-label mt-14">Braiding Hair Shade</label>
+                <div class="color-swatches-row" id="bookColorSwatches"></div>
+              </div>
+
+              <!-- Master Braider Chair & Slot -->
+              <div class="concierge-step-card">
+                <div class="step-card-head">
+                  <span class="step-num">03</span>
+                  <h3>Choose Salon Chair, Date &amp; Time</h3>
                 </div>
+                <div class="chair-picker-grid" id="bookStylistGrid"></div>
+
+                <label class="micro-label mt-14">Appointment Date</label>
+                <div class="date-ribbon" id="bookDateScroller"></div>
+
+                <label class="micro-label mt-14">Available Start Times</label>
+                <div class="timeslot-grid" id="bookTimeGrid"></div>
               </div>
 
-              <!-- 3. Stylist -->
-              <div class="form-step">
-                <label>4. Choose Stylist</label>
-                <div id="bookStylistCards" class="mini-stylist-grid"></div>
-              </div>
-
-              <!-- 4. Date & Time -->
-              <div class="form-step">
-                <div class="step-label-row">
-                  <label for="bookDateInput">5. Pick Date & Time Slot</label>
-                  <input type="date" id="bookDateInput" class="inline-date-picker" />
+              <!-- Finishing Touches & Promo Code -->
+              <div class="concierge-step-card">
+                <div class="step-card-head">
+                  <span class="step-num">04</span>
+                  <h3>Parlour Extras &amp; Promo Privilege</h3>
                 </div>
-                <div id="bookDateRibbon" class="date-ribbon"></div>
-                <div id="bookTimeSlots" class="time-slots-grid"></div>
-              </div>
+                <div class="addons-stack" id="bookAddonsList"></div>
 
-              <!-- 5. Optional Add-Ons -->
-              <div class="form-step">
-                <label>6. Salon Add-Ons (Optional)</label>
-                <div id="bookAddOnsList" class="addons-grid"></div>
-              </div>
-
-              <!-- 6. Promo Code -->
-              <div class="form-step">
-                <label for="bookPromoInput">7. Promo / Advert Code</label>
-                <div class="promo-input-row">
+                <div class="promo-apply-bar">
                   <input
                     type="text"
                     id="bookPromoInput"
-                    placeholder="e.g. SLAY15 or CROWN250"
+                    placeholder="Enter code (SLAY15, CROWN250, BESTIE12)"
                     autocomplete="off"
                   />
-                  <button type="button" class="secondary-btn" id="applyPromoBtn">Apply</button>
+                  <button type="button" class="btn-couture-glass sm" id="applyPromoBtn">Apply</button>
                 </div>
-                <div id="activePromoChips" class="promo-chips-row"></div>
-                <small id="promoFeedback" class="promo-feedback"></small>
+                <p id="promoFeedbackText" class="promo-feedback-msg"></p>
               </div>
 
-              <!-- 7. Client Details & Payment -->
-              <div class="form-step two-col-grid">
-                <div>
-                  <label for="bookClientName">Your Full Name *</label>
-                  <input
-                    type="text"
-                    id="bookClientName"
-                    placeholder="e.g. Boitumelo K."
-                    required
-                  />
+              <!-- Client Details -->
+              <div class="concierge-step-card">
+                <div class="step-card-head">
+                  <span class="step-num">05</span>
+                  <h3>Guest Details &amp; Deposit Option</h3>
                 </div>
-                <div>
-                  <label for="bookClientPhone">Phone / WhatsApp *</label>
-                  <input
-                    type="tel"
-                    id="bookClientPhone"
-                    placeholder="+267 7X XXX XXX"
-                    required
-                  />
+                <div class="two-col-inputs">
+                  <div>
+                    <label class="micro-label" for="clientNameInput">Full Name *</label>
+                    <input type="text" id="clientNameInput" class="glass-input" required placeholder="e.g. Boitumelo K." />
+                  </div>
+                  <div>
+                    <label class="micro-label" for="clientPhoneInput">WhatsApp / Mobile *</label>
+                    <input type="tel" id="clientPhoneInput" class="glass-input" required placeholder="+267 7X XXX XXX" />
+                  </div>
                 </div>
-              </div>
 
-              <div class="form-step two-col-grid">
-                <div>
-                  <label for="bookPaymentSelect">Deposit / Payment Method</label>
-                  <select id="bookPaymentSelect">
-                    <option value="Orange Money (72517904)">Orange Money • 72517904</option>
-                    <option value="MyZaka (72517904)">MyZaka • 72517904</option>
-                    <option value="Smega (72517904)">Smega • 72517904</option>
-                    <option value="Pay Cash at Salon">Pay Cash at Salon</option>
+                <div class="mt-12">
+                  <label class="micro-label" for="paymentMethodSelect">30% Chair Deposit Method</label>
+                  <select id="paymentMethodSelect" class="glass-select full-width">
+                    <option value="Orange Money (72517904)">Orange Money → 72517904</option>
+                    <option value="MyZaka (72517904)">MyZaka → 72517904</option>
+                    <option value="Smega (72517904)">Smega → 72517904</option>
+                    <option value="FNB eWallet (72517904)">FNB eWallet → 72517904</option>
+                    <option value="Pay at Parlour (Cash / Card)">Pay at Parlour (Gaborone)</option>
                   </select>
                 </div>
-                <div>
-                  <label for="bookNotesInput">Hair Color / Special Notes</label>
-                  <input
-                    type="text"
-                    id="bookNotesInput"
-                    placeholder="e.g. Color #1B with #30 tips"
-                  />
+
+                <div class="mt-12">
+                  <label class="micro-label" for="bookingNotesInput">Stylist Notes (optional)</label>
+                  <textarea
+                    id="bookingNotesInput"
+                    class="glass-textarea"
+                    rows="2"
+                    placeholder="Edge sensitivity, tuck-in curls, house-call directions..."
+                  ></textarea>
                 </div>
               </div>
 
-              <!-- Live Booking Price Summary -->
-              <div class="booking-summary-box">
-                <div class="sum-row">
-                  <span>Style & Add-Ons Subtotal</span>
-                  <strong id="sumSubtotal">P180</strong>
-                </div>
-                <div class="sum-row discount-row hidden" id="sumDiscountRow">
-                  <span id="sumDiscountLabel">Promo Discount</span>
-                  <strong id="sumDiscountVal">-P0</strong>
-                </div>
-                <div class="sum-row total-row">
-                  <div>
-                    <span>Total Amount (BWP)</span>
-                    <small id="sumDepositNote">30% seat deposit: P54</small>
-                  </div>
-                  <strong id="sumTotal">P180</strong>
-                </div>
-                <button type="submit" class="primary-cta full-width lg">
-                  Confirm Appointment & Get Pass 👑
+              <!-- Checkout Summary Panel -->
+              <div class="checkout-vault-card">
+                <div class="vault-rows" id="bookingBreakdownRows"></div>
+                <button type="submit" class="btn-couture-primary full-width lg">
+                  <span>Confirm Chair &amp; Issue Holographic VIP Pass</span>
+                  <svg viewBox="0 0 20 20" fill="none"><path d="M4.5 10H15.5M15.5 10L10.5 5M15.5 10L10.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
               </div>
             </form>
 
-            <!-- My Appointments List -->
-            <div class="bookings-sidebar">
-              <div class="glass-card">
-                <div class="card-head">
-                  <div>
-                    <span class="eyebrow-chip">YOUR SCHEDULE</span>
-                    <h3>My Appointments</h3>
-                  </div>
-                  <span id="bookingsCountBadge" class="badge-soft-sky">1</span>
+            <!-- Issued VIP Passes Column -->
+            <aside class="my-passes-panel">
+              <div class="section-heading-row compact">
+                <div>
+                  <span class="eyebrow-cyan">CONFIRMED APPOINTMENTS</span>
+                  <h3>Your Salon VIP Passes</h3>
                 </div>
-                <div id="myBookingsList" class="bookings-list"></div>
+                <span class="count-orb" id="myBookingsCount">1</span>
               </div>
-            </div>
+              <div id="myBookingsList" class="passes-list"></div>
+            </aside>
           </div>
         </section>
 
-        <!-- ================= TAB 4: REAL-TIME TWO-WAY SALON MESSAGES ================= -->
-        <section id="view-messages" class="app-view" aria-label="Salon Messages">
-          <div class="chat-workspace glass-card">
-            <!-- Left / Top Threads List -->
-            <aside id="chatThreadsPane" class="chat-threads-pane">
-              <div class="threads-header">
+        <!-- ==================== TAB 4: LIVE SALON CONCIERGE (MESSAGES) ==================== -->
+        <section id="view-messages" class="app-view" aria-label="Salon Concierge Messenger">
+          <div class="messenger-frame" id="chatLayout">
+            <aside class="threads-sidebar" id="chatThreadsPane">
+              <div class="threads-head">
                 <div>
-                  <span class="eyebrow-chip">SALON INBOX</span>
-                  <h2>Messages</h2>
+                  <span class="eyebrow-cyan">LIVE DESK • 72517904</span>
+                  <h2>Parlour Concierge</h2>
                 </div>
                 <a
-                  href="https://wa.me/26772517904?text=Hi%20Nicole%20Beauty%20Parlour!%20I%27d%20love%20to%20book%20a%20hairstyle%20%F0%9F%92%99"
+                  href="https://wa.me/26772517904"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="whatsapp-pill-btn"
+                  class="lux-pill-btn"
                 >
-                  WhatsApp ↗
+                  WhatsApp
                 </a>
               </div>
-              <div id="threadsList" class="threads-list"></div>
+              <div id="threadsList" class="threads-stack"></div>
             </aside>
 
-            <!-- Active Conversation Pane -->
-            <div id="chatConversationPane" class="chat-conv-pane">
-              <div class="chat-conv-header">
-                <div class="conv-left">
-                  <button
-                    type="button"
-                    class="mobile-back-threads"
-                    id="backToThreadsBtn"
-                    aria-label="Back to inbox"
-                  >
-                    ‹
-                  </button>
-                  <img
-                    id="activeThreadAvatar"
-                    src="/images/nicole-logo.jpg"
-                    alt="Nicole"
-                    class="conv-avatar"
-                  />
-                  <div>
-                    <h3 id="activeThreadTitle">Nicole • Booking & Style Desk</h3>
-                    <p id="activeThreadSub">Online • +267 72 517 904</p>
-                  </div>
-                </div>
+            <div class="conversation-stage" id="chatConversationPane">
+              <div class="conv-topbar">
+                <button type="button" class="icon-orb-btn mobile-back-threads" id="backToThreadsBtn" aria-label="Threads">
+                  <svg viewBox="0 0 20 20" fill="none"><path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
 
-                <!-- Interactive Sender Mode Toggle so Owner OR Client can message! -->
-                <div class="sender-mode-switch" title="Switch between Client view and Salon Owner reply mode">
-                  <button type="button" class="mode-chip active" data-sender="client">
-                    👤 Client
-                  </button>
-                  <button type="button" class="mode-chip" data-sender="salon">
-                    👑 Salon Reply
-                  </button>
+                <div class="conv-identity" id="activeThreadHeader"></div>
+
+                <div class="role-mode-switch" title="Test replying both as Client and as Salon Owner!">
+                  <button type="button" class="role-pill active" id="modeClientBtn">Client</button>
+                  <button type="button" class="role-pill" id="modeSalonBtn">Nicole Desk</button>
                 </div>
               </div>
 
-              <!-- Quick Inquiry Chips -->
-              <div class="quick-prompts-bar" id="chatQuickPrompts">
-                <button type="button" data-prompt="Can you send the full BWP price list?">
-                  💎 Full Price List
-                </button>
-                <button type="button" data-prompt="Do you have open slots tomorrow morning?">
-                  📅 Open Slots?
-                </button>
-                <button type="button" data-prompt="How many packs of braiding hair do I need?">
-                  🛍️ Hair Packs Guide
-                </button>
-                <button type="button" data-prompt="How do I pay my deposit with Orange Money?">
-                  📲 Orange Money Info
-                </button>
-                <button type="button" id="attachStyleCardChatBtn" class="accent-chip">
-                  ✨ Share a Style
-                </button>
-              </div>
+              <div class="messages-viewport" id="chatMessagesStream"></div>
 
-              <!-- Messages Scroll Feed -->
-              <div id="messagesFeed" class="messages-feed" aria-live="polite"></div>
-
-              <!-- Typing Indicator -->
-              <div id="typingIndicator" class="typing-indicator hidden">
+              <div id="typingIndicator" class="typing-wave-pill hidden">
                 <span>Nicole is typing</span>
                 <i></i><i></i><i></i>
               </div>
 
-              <!-- Attachment Preview Bar -->
-              <div id="chatAttachmentPreview" class="chat-attach-preview hidden">
-                <img id="chatAttachImg" src="" alt="Attachment preview" />
-                <span id="chatAttachLabel">Photo attached</span>
-                <button type="button" id="clearChatAttachBtn" aria-label="Remove attachment">×</button>
+              <div class="quick-prompts-strip" id="chatQuickChips">
+                <button type="button" data-quick-msg="Hi Nicole! Please share your official BWP braid price list.">Price List</button>
+                <button type="button" data-quick-msg="Do you have an open chair tomorrow morning?">Open Slots</button>
+                <button type="button" data-quick-msg="How many hair packs should I bring for Medium Butt-Length Knotless?">Hair Packs</button>
+                <button type="button" data-quick-msg="Can I book a VIP House-Call in Gaborone?">House-Call</button>
               </div>
 
-              <!-- Message Composer -->
-              <form id="chatComposerForm" class="chat-composer">
-                <label class="attach-photo-btn" title="Upload hairstyle photo">
-                  📷
-                  <input type="file" id="chatPhotoInput" accept="image/*" hidden />
+              <div id="chatAttachmentPreview" class="attachment-preview-strip hidden"></div>
+
+              <form id="chatComposerForm" class="composer-bar">
+                <label class="icon-orb-btn attach-photo-btn" title="Attach inspiration photo">
+                  <input type="file" id="chatImageInput" accept="image/*" hidden />
+                  <svg viewBox="0 0 20 20" fill="none"><rect x="2.8" y="4" width="14.4" height="12" rx="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="7.2" cy="8.2" r="1.3" fill="currentColor"/><path d="M4.2 14.5L8.4 10.6L11.2 13.2L13.5 11.2L16 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </label>
                 <input
                   type="text"
                   id="chatMessageInput"
-                  placeholder="Write a message to Nicole Beauty Parlour..."
+                  placeholder="Message Nicole Beauty Parlour..."
                   autocomplete="off"
                 />
-                <button type="submit" class="send-msg-btn" aria-label="Send message">
-                  ➤
+                <button type="submit" class="send-orb-btn" aria-label="Send message">
+                  <svg viewBox="0 0 20 20" fill="none"><path d="M3.5 10L16.5 3.8L13.2 16.5L9.5 11.5L3.5 10Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
                 </button>
               </form>
             </div>
           </div>
         </section>
 
-        <!-- ================= TAB 5: ADVERTISE & ADD HAIRSTYLE STUDIO ================= -->
-        <section id="view-studio" class="app-view" aria-label="Advertise and Salon Studio">
-          <div class="studio-hero glass-card">
+        <!-- ==================== TAB 5: NICOLE OWNER STUDIO (ADD STYLES & ADVERTS) ==================== -->
+        <section id="view-studio" class="app-view" aria-label="Salon Owner Studio">
+          <div class="studio-command-hero">
             <div class="studio-hero-copy">
-              <span class="eyebrow-chip gold">SALON OWNER & MARKETING HUB</span>
-              <h2>Grow Nicole Beauty Parlour 👑</h2>
+              <span class="eyebrow-cyan">PARLOUR CREATIVE &amp; OWNER SUITE</span>
+              <h2>Grow Nicole Beauty Parlour</h2>
               <p>
-                Upload new client hairstyles to the live marketplace, launch flash promotional
-                adverts, and download branded WhatsApp &amp; Instagram poster flyers in one tap.
+                Publish new hairstyles straight from your phone camera, design 1080×1350 branded promo posters with live discount codes, and manage client chairs.
               </p>
               <div class="studio-cta-row">
-                <button type="button" class="primary-cta" id="studioAddStyleBtn">
-                  ＋ Add New Hairstyle
+                <button type="button" class="btn-couture-primary" id="studioAddStyleBtn">
+                  <span>+ Upload New Hairstyle</span>
                 </button>
-                <button type="button" class="gold-cta" id="studioCreatePromoBtn">
-                  📣 Launch New Advert
+                <button type="button" class="btn-couture-glass" id="studioLaunchPromoBtn">
+                  <span>Design Advert &amp; Promo</span>
                 </button>
               </div>
             </div>
-            <div class="studio-metrics-grid" id="studioMetrics"></div>
+            <div class="studio-kpi-grid" id="studioStatsGrid"></div>
           </div>
 
-          <!-- Active Advertisements & Poster Flyer Generator -->
-          <section class="section-block">
-            <div class="section-title-bar">
-              <div>
-                <span class="mini-label">LIVE MARKETING CAMPAIGNS</span>
-                <h3>Active Advertisements &amp; Flyers</h3>
+          <div class="studio-panels-grid">
+            <div class="studio-panel-card">
+              <div class="section-heading-row compact">
+                <div>
+                  <span class="eyebrow-cyan">CAMPAIGNS &amp; POSTERS</span>
+                  <h3>Active Adverts &amp; Promo Codes</h3>
+                </div>
+                <button type="button" class="text-action-cyan" id="studioNewAdInlineBtn">+ New Campaign</button>
               </div>
-              <button type="button" class="link-chip" id="newPromoInlineBtn">
-                ＋ New Campaign
-              </button>
+              <div id="studioPromosList" class="studio-items-stack"></div>
             </div>
-            <div id="studioPromosGrid" class="studio-promos-grid"></div>
-          </section>
 
-          <!-- Manage Hairstyles Catalog -->
-          <section class="section-block">
-            <div class="section-title-bar">
-              <div>
-                <span class="mini-label">MARKETPLACE CATALOG</span>
-                <h3>Manage Hairstyles</h3>
+            <div class="studio-panel-card">
+              <div class="section-heading-row compact">
+                <div>
+                  <span class="eyebrow-cyan">MARKETPLACE CATALOG</span>
+                  <h3>Uploaded &amp; Signature Hairstyles</h3>
+                </div>
+                <button type="button" class="text-action-cyan" id="studioNewStyleInlineBtn">+ Add Look</button>
               </div>
-              <button type="button" class="link-chip" id="newStyleInlineBtn">
-                ＋ Upload Style
-              </button>
+              <div id="studioStylesList" class="studio-items-stack"></div>
             </div>
-            <div id="studioStylesList" class="studio-styles-list"></div>
-          </section>
+          </div>
+
+          <div class="studio-panel-card mt-20">
+            <div class="section-heading-row compact">
+              <div>
+                <span class="eyebrow-cyan">CHAIR SCHEDULE</span>
+                <h3>Client Reservations &amp; VIP Passes</h3>
+              </div>
+            </div>
+            <div id="studioBookingsList" class="studio-items-stack"></div>
+          </div>
         </section>
       </main>
 
-      <!-- ================= FLOATING NATIVE BOTTOM NAVIGATION ================= -->
-      <nav class="bottom-tabbar" aria-label="Primary navigation">
-        <button type="button" class="tab-btn active" data-tab="discover">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 3.2 4 9.6V20a1 1 0 0 0 1 1h5.2v-6h3.6v6H19a1 1 0 0 0 1-1V9.6L12 3.2Z"
-            />
-          </svg>
-          <span>Discover</span>
+      <!-- ================= FLOATING COUTURE BOTTOM NAVIGATION ================= -->
+      <nav class="couture-bottom-dock" aria-label="Primary Navigation">
+        <button type="button" class="dock-item active" data-tab="discover">
+          <svg viewBox="0 0 22 22" fill="none"><path d="M11 2.5L13.1 8.2L18.8 10.3L13.1 12.4L11 18.1L8.9 12.4L3.2 10.3L8.9 8.2L11 2.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <span>Runway</span>
         </button>
 
-        <button type="button" class="tab-btn" data-tab="styles">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"
-            />
-          </svg>
-          <span>Styles</span>
+        <button type="button" class="dock-item" data-tab="market">
+          <svg viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="6.8" height="6.8" rx="1.8" stroke="currentColor" stroke-width="1.7"/><rect x="12.2" y="3" width="6.8" height="6.8" rx="1.8" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="12.2" width="6.8" height="6.8" rx="1.8" stroke="currentColor" stroke-width="1.7"/><rect x="12.2" y="12.2" width="6.8" height="6.8" rx="1.8" stroke="currentColor" stroke-width="1.7"/></svg>
+          <span>Gallery</span>
         </button>
 
-        <button type="button" class="tab-btn center-book-btn" data-tab="book">
-          <div class="center-fab">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 19.5v-13A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1Zm12.5 7h-15v10.5c0 .28.22.5.5.5h14c.28 0 .5-.22.5-.5V9Zm-8.8 3.2 1.8 1.8 3.8-3.8 1.4 1.4-5.2 5.2-3.2-3.2 1.4-1.4Z"
-              />
-            </svg>
+        <button type="button" class="dock-item dock-center-crown" data-tab="book">
+          <div class="dock-crown-orb">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 17L6.2 8.2L10.3 12L12 6L13.7 12L17.8 8.2L20 17H4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M5 20H19" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
           </div>
-          <span>Book</span>
+          <span>Reserve</span>
         </button>
 
-        <button type="button" class="tab-btn" data-tab="messages">
-          <div class="tab-icon-wrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-4.5 3.5A.8.8 0 0 1 2 20.8V6a2 2 0 0 1 2-2Z"
-              />
-            </svg>
-            <span id="navUnreadBadge" class="nav-dot-badge hidden">1</span>
+        <button type="button" class="dock-item" data-tab="messages">
+          <div class="dock-icon-rel">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M4 6.2C4 4.7 5.2 3.5 6.7 3.5H15.3C16.8 3.5 18 4.7 18 6.2V12.8C18 14.3 16.8 15.5 15.3 15.5H9.2L5.2 18.5V15.5C4.5 15.1 4 14 4 12.8V6.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            <span id="navUnreadBadge" class="dock-badge hidden">1</span>
           </div>
-          <span>Messages</span>
+          <span>Concierge</span>
         </button>
 
-        <button type="button" class="tab-btn" data-tab="studio">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M19 4v12.5a1 1 0 0 1-1.5.86L12 14.2l-3.2 1.85.95 3.7a1 1 0 0 1-.97 1.25H6.5a1 1 0 0 1-.96-.73L4.1 15H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h9l5.5-3.86A1 1 0 0 1 19 4Zm2 4.5a3.5 3.5 0 0 1 0 5v-5Z"
-            />
-          </svg>
-          <span>Promote</span>
+        <button type="button" class="dock-item" data-tab="studio">
+          <svg viewBox="0 0 22 22" fill="none"><path d="M11 3.5V18.5M3.5 11H18.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span>Studio</span>
         </button>
       </nav>
     </div>
 
-    <!-- ================= UNIVERSAL ANIMATED POP-UP MODAL SYSTEM ================= -->
+    <!-- ======================================================================= -->
+    <!--                       10 COUTURE POP-UP MODALS                          -->
+    <!-- ======================================================================= -->
 
-    <!-- 1. Hairstyle Detail & Dynamic Price Configurator Modal -->
-    <div id="styleDetailModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="styleDetailModal"></div>
-      <div class="modal-sheet lg">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="styleDetailModal"
-          aria-label="Close modal"
-        >
-          ×
-        </button>
-        <div id="styleDetailBody"></div>
+    <!-- 1. VIRTUAL STYLE MIRROR & SMART CROWN MATCHER MODAL -->
+    <div id="mirrorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Virtual Style Mirror and Matcher">
+      <div class="modal-sheet modal-xl">
+        <button type="button" class="modal-close-orb" data-close-modal="mirrorModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">INTERACTIVE SALON CONSULTATION</span>
+          <h3>Virtual Style Mirror &amp; Smart Crown Matcher</h3>
+          <div class="segmented-glass mt-12">
+            <button type="button" class="seg-btn active" id="mirrorTabSelfieBtn">Selfie &amp; Shade Mirror</button>
+            <button type="button" class="seg-btn" id="mirrorTabQuizBtn">3-Tap Smart Matcher</button>
+          </div>
+        </div>
+
+        <!-- Tab A: Selfie & Shade Mirror -->
+        <div id="mirrorSelfiePane" class="mirror-pane">
+          <div class="mirror-studio-grid">
+            <div class="mirror-Comparison-card" id="mirrorStageCard">
+              <div class="mirror-split-frame">
+                <div class="mirror-half selfie-half" id="mirrorSelfieHalf">
+                  <img id="mirrorSelfieImg" src="/images/style-06-golden-velvet-updo.jpg" alt="Your Portrait" />
+                  <div class="mirror-shade-tint" id="mirrorShadeTint"></div>
+                  <span class="mirror-corner-tag">YOUR VIBE / SELFIE</span>
+                </div>
+                <div class="mirror-divider-glow" aria-hidden="true"></div>
+                <div class="mirror-half target-half">
+                  <img id="mirrorStyleImg" src="/images/style-01-honey-curly-knotless.jpg" alt="Selected Hairstyle" />
+                  <span class="mirror-corner-tag right" id="mirrorStylePriceTag">P180</span>
+                </div>
+              </div>
+              <div class="mirror-caption-strip">
+                <div>
+                  <strong id="mirrorActiveStyleName">Honey Blonde Curly-Ends Knotless</strong>
+                  <span id="mirrorActiveShadeLabel">Shade Preview: #27 Honey Gold Blonde</span>
+                </div>
+                <label class="lux-pill-btn cursor-pointer">
+                  <input type="file" id="mirrorSelfieInput" accept="image/*" capture="user" hidden />
+                  <span>Upload Selfie</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="mirror-controls-col">
+              <label class="micro-label">1. Test Braiding Hair Shade</label>
+              <div class="color-swatches-row" id="mirrorShadeSwatches"></div>
+
+              <label class="micro-label mt-14">2. Pair With Salon Hairstyle</label>
+              <div class="mirror-thumbs-grid" id="mirrorStyleThumbs"></div>
+
+              <div class="mirror-actions-stack mt-16">
+                <button type="button" class="btn-couture-primary full-width" id="mirrorBookLookBtn">
+                  Reserve This Style &amp; Shade
+                </button>
+                <button type="button" class="btn-couture-glass full-width" id="mirrorSendToChatBtn">
+                  Send Consultation Card to Nicole's Chat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab B: 3-Tap Smart Crown Matcher -->
+        <div id="mirrorQuizPane" class="mirror-pane hidden">
+          <div class="quiz-controls-card">
+            <div class="quiz-row">
+              <div class="control-label-row">
+                <span>Maximum Budget in Pula (BWP)</span>
+                <strong id="quizBudgetVal">Up to P300</strong>
+              </div>
+              <input type="range" id="quizBudgetRange" min="130" max="500" step="10" value="300" class="cyan-slider" />
+            </div>
+
+            <div class="quiz-row mt-14">
+              <span class="micro-label">Desired Vibe</span>
+              <div class="chip-row-4" id="quizVibeChips">
+                <button type="button" class="choice-chip active" data-vibe="all">Any Glam</button>
+                <button type="button" class="choice-chip" data-vibe="boho">Boho &amp; Curls</button>
+                <button type="button" class="choice-chip" data-vibe="sleek">Sleek &amp; Long</button>
+                <button type="button" class="choice-chip" data-vibe="updo">Crown Updos</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-16">
+            <span class="eyebrow-cyan">YOUR PERSONALIZED PARLOUR MATCHES</span>
+            <div class="couture-cards-grid compact-3 mt-10" id="quizResultsGrid"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 2. Official Price Menu & Original Poster Modal -->
-    <div id="priceSheetModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="priceSheetModal"></div>
-      <div class="modal-sheet lg">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="priceSheetModal"
-          aria-label="Close price sheet"
-        >
-          ×
-        </button>
-        <div class="modal-pad">
-          <span class="eyebrow-chip">OFFICIAL @NICOLE_BEAUTY_PARLOUR MENU</span>
-          <h3>Braid &amp; Twist Price List (BWP)</h3>
-          <p class="muted-sub">Tap any price cell to jump straight into booking that exact size &amp; length!</p>
+    <!-- 2. HAIRSTYLE CONFIGURATOR POP-UP MODAL -->
+    <div id="styleDetailModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Customize Hairstyle">
+      <div class="modal-sheet modal-lg">
+        <button type="button" class="modal-close-orb" data-close-modal="styleDetailModal" aria-label="Close">×</button>
+        <div id="styleDetailContent"></div>
+      </div>
+    </div>
 
-          <div class="price-tabs-switch">
-            <button type="button" class="seg-btn active" id="priceTabInteractive">
-              Interactive Table
-            </button>
-            <button type="button" class="seg-btn" id="priceTabPoster">
-              Original Salon Poster 🖼️
-            </button>
-          </div>
+    <!-- 3. 3D HOLOGRAPHIC VIP BOOKING PASS MODAL -->
+    <div id="bookingPassModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Confirmed VIP Salon Pass">
+      <div class="modal-sheet modal-md">
+        <button type="button" class="modal-close-orb" data-close-modal="bookingPassModal" aria-label="Close">×</button>
+        <div id="bookingPassContent"></div>
+      </div>
+    </div>
 
-          <div id="interactivePriceTableWrap"></div>
-
-          <div id="originalPosterWrap" class="poster-img-wrap hidden">
+    <!-- 4. OFFICIAL BWP PRICE MENU MODAL -->
+    <div id="priceSheetModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Official Price Sheet">
+      <div class="modal-sheet modal-lg">
+        <button type="button" class="modal-close-orb" data-close-modal="priceSheetModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">@NICOLE_BEAUTY_PARLOUR • 72517904</span>
+          <h3>Official Botswana Pula (BWP) Price Menu</h3>
+        </div>
+        <div class="price-modal-layout">
+          <div class="poster-glass-frame">
             <img src="/images/price-menu-card.jpg" alt="Nicole Beauty Parlour Official Price List" />
           </div>
+          <div class="matrix-table-wrap">
+            <table class="couture-price-table">
+              <thead>
+                <tr>
+                  <th>Braid Size</th>
+                  <th>Midback</th>
+                  <th>Butt Length</th>
+                  <th>Knee Length</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>1. Jumbo</strong></td><td>P130</td><td>P160</td><td>P200</td></tr>
+                <tr><td><strong>2. Large</strong></td><td>P160</td><td>P200</td><td>P250</td></tr>
+                <tr><td><strong>3. Medium</strong></td><td>P180</td><td>P250</td><td>P300</td></tr>
+                <tr><td><strong>4. S-Medium</strong></td><td>P200</td><td>P300</td><td>P400</td></tr>
+                <tr><td><strong>5. Small</strong></td><td>P250</td><td>P350</td><td>P500</td></tr>
+              </tbody>
+            </table>
+            <div class="flat-highlight-banner">
+              <strong>Pick n' Drop / Switch / Hardread / Softdread</strong>
+              <span>Flat P250</span>
+            </div>
+            <button type="button" class="btn-couture-primary full-width mt-14" id="bookFromPriceModalBtn">
+              Choose Style &amp; Reserve Chair
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 3. Add New Hairstyle Modal -->
-    <div id="addStyleModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="addStyleModal"></div>
-      <div class="modal-sheet">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="addStyleModal"
-          aria-label="Close add hairstyle modal"
-        >
-          ×
-        </button>
-        <form id="addStyleForm" class="modal-pad modal-form">
-          <span class="eyebrow-chip gold">MARKETPLACE STUDIO</span>
-          <h3>Add New Hairstyle ✨</h3>
-          <p class="muted-sub">Upload a client hairstyle photo from your phone or choose from gallery presets.</p>
+    <!-- 5. ADD NEW HAIRSTYLE POP-UP MODAL (WITH LIVE CARD PREVIEW) -->
+    <div id="addStyleModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Add New Hairstyle">
+      <div class="modal-sheet modal-lg">
+        <button type="button" class="modal-close-orb" data-close-modal="addStyleModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">MARKETPLACE STUDIO</span>
+          <h3>Publish New Hairstyle to Gallery</h3>
+        </div>
 
-          <div class="photo-upload-dropzone" id="styleUploadZone">
-            <img id="newStylePreviewImg" src="/images/style-01-honey-curly-knotless.jpg" alt="Preview" />
-            <div class="upload-overlay-actions">
-              <label class="upload-pill-btn">
-                📷 Upload / Take Photo
-                <input type="file" id="newStylePhotoInput" accept="image/*" hidden />
-              </label>
+        <form id="addStyleForm" class="studio-split-form">
+          <div class="form-col">
+            <label class="photo-dropzone" for="newStylePhotoInput">
+              <img id="newStylePreviewImg" src="/images/style-01-honey-curly-knotless.jpg" alt="Preview" />
+              <div class="dropzone-caption">Tap to Upload from Camera or Gallery</div>
+              <input type="file" id="newStylePhotoInput" accept="image/*" hidden />
+            </label>
+
+            <label class="micro-label mt-12" for="newStyleName">Hairstyle Title *</label>
+            <input type="text" id="newStyleName" class="glass-input" required placeholder="e.g. Ice-Tip Waist Boho Knotless" />
+
+            <div class="two-col-inputs mt-12">
+              <div>
+                <label class="micro-label" for="newStyleCategory">Category</label>
+                <select id="newStyleCategory" class="glass-select full-width">
+                  <option value="Knotless">Knotless</option>
+                  <option value="Box Braids">Box Braids</option>
+                  <option value="Twists">Twists</option>
+                  <option value="Updos & Buns">Updos &amp; Buns</option>
+                  <option value="Softdread & Switch">Pick n' Drop / Softdread</option>
+                </select>
+              </div>
+              <div>
+                <label class="micro-label" for="newStyleBadge">Spotlight Badge</label>
+                <input type="text" id="newStyleBadge" class="glass-input" placeholder="e.g. New Drop" value="New Drop" />
+              </div>
             </div>
           </div>
 
-          <div class="preset-thumbs-row" id="newStylePresetThumbs"></div>
+          <div class="form-col">
+            <div class="two-col-inputs">
+              <div>
+                <label class="micro-label" for="newStylePricingMode">Pricing Mode</label>
+                <select id="newStylePricingMode" class="glass-select full-width">
+                  <option value="matrix">Official Size × Length Matrix</option>
+                  <option value="flat">Custom Flat Price (BWP)</option>
+                </select>
+              </div>
+              <div id="newStyleFlatPriceWrap" class="hidden">
+                <label class="micro-label" for="newStyleFlatPrice">Flat Price (Pula)</label>
+                <input type="number" id="newStyleFlatPrice" class="glass-input" min="50" max="2500" value="250" />
+              </div>
+            </div>
 
-          <div class="two-col-grid">
-            <div>
-              <label for="newStyleName">Hairstyle Name *</label>
-              <input
-                type="text"
-                id="newStyleName"
-                placeholder="e.g. Waist-Length Boho Knotless"
-                required
-              />
+            <div class="two-col-inputs mt-12">
+              <div>
+                <label class="micro-label" for="newStyleDefaultSize">Default Size</label>
+                <select id="newStyleDefaultSize" class="glass-select full-width">
+                  <option value="jumbo">Jumbo</option>
+                  <option value="large">Large</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="s_medium">S-Medium</option>
+                  <option value="small">Small</option>
+                </select>
+              </div>
+              <div>
+                <label class="micro-label" for="newStyleDefaultLength">Default Length</label>
+                <select id="newStyleDefaultLength" class="glass-select full-width">
+                  <option value="midback" selected>Midback</option>
+                  <option value="butt">Butt Length</option>
+                  <option value="knee">Knee Length</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label for="newStyleCategory">Category</label>
-              <select id="newStyleCategory">
-                <option value="Knotless">Knotless</option>
-                <option value="Box Braids">Box Braids</option>
-                <option value="Twists">Twists</option>
-                <option value="Updos & Buns">Updos &amp; Buns</option>
-                <option value="Softdread & Switch">Pick n' Drop / Dread</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="two-col-grid">
-            <div>
-              <label for="newStylePricingMode">Pricing Type</label>
-              <select id="newStylePricingMode">
-                <option value="matrix">Official Size × Length Matrix</option>
-                <option value="flat">Custom Flat Price (BWP)</option>
-              </select>
+            <div class="two-col-inputs mt-12">
+              <div>
+                <label class="micro-label" for="newStyleDuration">Chair Duration</label>
+                <input type="text" id="newStyleDuration" class="glass-input" value="4 – 5 hrs" />
+              </div>
+              <div>
+                <label class="micro-label" for="newStylePacks">Hair Packs Needed</label>
+                <input type="text" id="newStylePacks" class="glass-input" value="5–6 packs" />
+              </div>
             </div>
-            <div id="newStyleFlatPriceWrap" class="hidden">
-              <label for="newStyleFlatPrice">Flat Price (Pula)</label>
-              <input type="number" id="newStyleFlatPrice" value="250" min="50" max="2500" />
-            </div>
-            <div id="newStyleDefaultSizeWrap">
-              <label for="newStyleDefaultSize">Default Displayed Size</label>
-              <select id="newStyleDefaultSize">
-                <option value="jumbo">Jumbo (from P130)</option>
-                <option value="large">Large (from P160)</option>
-                <option value="medium" selected>Medium (from P180)</option>
-                <option value="s_medium">S-Medium (from P200)</option>
-                <option value="small">Small (from P250)</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="two-col-grid">
-            <div>
-              <label for="newStyleDuration">Sitting Time</label>
-              <input type="text" id="newStyleDuration" value="4 – 5 hrs" />
-            </div>
-            <div>
-              <label for="newStylePacks">Hair Packs Needed</label>
-              <input type="text" id="newStylePacks" value="5–6 packs" />
-            </div>
-          </div>
-
-          <div>
-            <label for="newStyleBadge">Highlight Badge</label>
-            <input type="text" id="newStyleBadge" value="New Drop ✨" placeholder="e.g. New Drop, Hot Look" />
-          </div>
-
-          <div>
-            <label for="newStyleDesc">Style Description</label>
+            <label class="micro-label mt-12" for="newStyleDesc">Client Description</label>
             <textarea
               id="newStyleDesc"
-              rows="2"
-              placeholder="Describe parting, curls, color blend, or hair care..."
+              class="glass-textarea"
+              rows="3"
+              placeholder="Describe the parting precision, curls, hair color blend & feel..."
             ></textarea>
-          </div>
 
-          <button type="submit" class="primary-cta full-width lg">
-            Publish Hairstyle to Market 🚀
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- 4. Create Advertisement / Promo Campaign Modal -->
-    <div id="createPromoModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="createPromoModal"></div>
-      <div class="modal-sheet">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="createPromoModal"
-          aria-label="Close advertise modal"
-        >
-          ×
-        </button>
-        <form id="createPromoForm" class="modal-pad modal-form">
-          <span class="eyebrow-chip gold">ADVERTISE &amp; PROMOTE</span>
-          <h3>Launch Salon Advertisement 📣</h3>
-          <p class="muted-sub">
-            Publishes to the Home Banner Carousel, broadcasts to VIP Messages, and generates a
-            shareable WhatsApp/Instagram poster flyer!
-          </p>
-
-          <div class="photo-upload-dropzone compact">
-            <img id="promoPreviewImg" src="/images/style-14-burgundy-french-curl.jpg" alt="Promo visual" />
-            <div class="upload-overlay-actions">
-              <label class="upload-pill-btn">
-                📷 Custom Ad Photo
-                <input type="file" id="promoPhotoInput" accept="image/*" hidden />
-              </label>
-            </div>
-          </div>
-
-          <div class="two-col-grid">
-            <div>
-              <label for="promoStyleSelect">Or Pick Existing Style</label>
-              <select id="promoStyleSelect"></select>
-            </div>
-            <div>
-              <label for="promoThemeSelect">Banner Luxury Theme</label>
-              <select id="promoThemeSelect">
-                <option value="royal-sky">Royal Sapphire Sky 💙</option>
-                <option value="obsidian-gold">Obsidian Crown Gold 👑</option>
-                <option value="berry-velvet">Burgundy Velvet 🍷</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label for="promoTitleInput">Campaign Headline *</label>
-            <input
-              type="text"
-              id="promoTitleInput"
-              placeholder="e.g. Festive December Braids Bonanza!"
-              required
-            />
-          </div>
-
-          <div class="two-col-grid">
-            <div>
-              <label for="promoDiscountInput">Discount % *</label>
-              <input type="number" id="promoDiscountInput" value="20" min="5" max="75" required />
-            </div>
-            <div>
-              <label for="promoCodeInput">Promo Code *</label>
-              <input type="text" id="promoCodeInput" placeholder="e.g. QUEEN20" required />
-            </div>
-          </div>
-
-          <div class="two-col-grid">
-            <div>
-              <label for="promoHighlightInput">Price Callout</label>
-              <input type="text" id="promoHighlightInput" placeholder="e.g. From P140" value="From P145" />
-            </div>
-            <div>
-              <label for="promoValidUntilInput">Valid Until</label>
-              <input type="date" id="promoValidUntilInput" value="2026-12-31" />
-            </div>
-          </div>
-
-          <div>
-            <label for="promoSubtitleInput">Offer Details</label>
-            <textarea
-              id="promoSubtitleInput"
-              rows="2"
-              placeholder="e.g. 20% OFF all Knotless & French Curl bookings + free mousse finish!"
-            >20% OFF all Knotless &amp; French Curl bookings + free mousse finish!</textarea>
-          </div>
-
-          <button type="submit" class="gold-cta full-width lg">
-            Publish Advert &amp; Generate Flyer 🔥
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- 5. Booking Confirmation & Digital Appointment Pass Modal -->
-    <div id="bookingPassModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="bookingPassModal"></div>
-      <div class="modal-sheet">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="bookingPassModal"
-          aria-label="Close appointment pass"
-        >
-          ×
-        </button>
-        <div id="bookingPassBody" class="modal-pad"></div>
-      </div>
-    </div>
-
-    <!-- 6. Generated Poster Flyer Preview & Share Modal -->
-    <div id="flyerPreviewModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="flyerPreviewModal"></div>
-      <div class="modal-sheet">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="flyerPreviewModal"
-          aria-label="Close flyer preview"
-        >
-          ×
-        </button>
-        <div class="modal-pad center-text">
-          <span class="eyebrow-chip gold">READY FOR WHATSAPP STATUS &amp; INSTAGRAM</span>
-          <h3>Branded Promo Poster Flyer 🎨</h3>
-          <div class="flyer-canvas-wrap">
-            <img id="generatedFlyerImg" src="" alt="Generated Nicole Beauty Parlour Promo Flyer" />
-          </div>
-          <div class="modal-btn-pair">
-            <a id="downloadFlyerLink" download="nicole-beauty-parlour-promo.png" class="primary-cta">
-              ⬇️ Download PNG
-            </a>
-            <button type="button" id="shareFlyerNativeBtn" class="gold-cta">
-              📤 Share to WhatsApp / Socials
+            <button type="submit" class="btn-couture-primary full-width mt-16">
+              Publish Hairstyle to Live Gallery
             </button>
           </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 6. ADVERTISE / CAMPAIGN & LIVE POSTER DESIGNER MODAL -->
+    <div id="addPromoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Launch Advert and Promo Poster">
+      <div class="modal-sheet modal-xl">
+        <button type="button" class="modal-close-orb" data-close-modal="addPromoModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">ADVERTISING &amp; POSTER STUDIO</span>
+          <h3>Launch Promo Campaign &amp; 1080×1350 HD Poster</h3>
+        </div>
+
+        <form id="addPromoForm" class="studio-split-form">
+          <div class="form-col">
+            <label class="micro-label" for="promoTitleInput">Campaign Headline *</label>
+            <input type="text" id="promoTitleInput" class="glass-input" required value="Festive Ice-Crown Knotless Special" />
+
+            <label class="micro-label mt-12" for="promoSubtitleInput">Offer Details *</label>
+            <textarea id="promoSubtitleInput" class="glass-textarea" rows="2" required>20% OFF all Knotless &amp; French Curl bookings + free silk mousse finish!</textarea>
+
+            <div class="two-col-inputs mt-12">
+              <div>
+                <label class="micro-label" for="promoDiscountInput">Discount (%)</label>
+                <input type="number" id="promoDiscountInput" class="glass-input" min="5" max="75" value="20" required />
+              </div>
+              <div>
+                <label class="micro-label" for="promoCodeInput">Promo Code *</label>
+                <input type="text" id="promoCodeInput" class="glass-input" value="GLOW20" required />
+              </div>
+            </div>
+
+            <div class="two-col-inputs mt-12">
+              <div>
+                <label class="micro-label" for="promoPriceHighlight">Price Callout</label>
+                <input type="text" id="promoPriceHighlight" class="glass-input" value="From P144" />
+              </div>
+              <div>
+                <label class="micro-label" for="promoValidUntil">Valid Until</label>
+                <input type="date" id="promoValidUntil" class="glass-input" value="2026-12-31" />
+              </div>
+            </div>
+
+            <div class="two-col-inputs mt-12">
+              <div>
+                <label class="micro-label" for="promoStyleSelect">Featured Hairstyle</label>
+                <select id="promoStyleSelect" class="glass-select full-width"></select>
+              </div>
+              <div>
+                <label class="micro-label" for="promoThemeSelect">Poster Palette</label>
+                <select id="promoThemeSelect" class="glass-select full-width">
+                  <option value="obsidian-sapphire">Obsidian Sapphire &amp; Sky</option>
+                  <option value="ice-pearl">Ice-Pearl White &amp; Sky</option>
+                  <option value="editorial-sky">Deep Editorial Botswana Blue</option>
+                </select>
+              </div>
+            </div>
+
+            <label class="lux-pill-btn mt-12 cursor-pointer inline-upload">
+              <input type="file" id="promoCustomPhotoInput" accept="image/*" hidden />
+              <span>Or Upload Custom Campaign Photo</span>
+            </label>
+
+            <button type="submit" class="btn-couture-primary full-width mt-16">
+              Publish Campaign &amp; Generate HD Poster
+            </button>
+          </div>
+
+          <!-- Live Real-Time Branded Canvas Preview -->
+          <div class="live-poster-preview-col">
+            <span class="micro-label">LIVE 1080×1350 INSTAGRAM / WHATSAPP POSTER PREVIEW</span>
+            <div class="canvas-preview-frame">
+              <canvas id="livePromoPreviewCanvas" width="1080" height="1350"></canvas>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 7. EXPORTABLE HD POSTER MODAL -->
+    <div id="flyerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Download Branded Promo Poster">
+      <div class="modal-sheet modal-md">
+        <button type="button" class="modal-close-orb" data-close-modal="flyerModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">READY FOR WHATSAPP STATUS &amp; INSTAGRAM</span>
+          <h3>Branded Salon Poster</h3>
+        </div>
+        <div class="exported-flyer-box">
+          <img id="flyerPreviewImage" alt="Generated Nicole Beauty Parlour Poster" />
+        </div>
+        <div class="two-col-inputs mt-14">
+          <button type="button" class="btn-couture-primary full-width" id="downloadFlyerBtn">Download HD PNG</button>
+          <button type="button" class="btn-couture-glass full-width" id="shareFlyerBtn">Share Poster</button>
         </div>
       </div>
     </div>
 
-    <!-- 7. Full-Screen Story Viewer Modal -->
-    <div id="storyModal" class="modal-overlay story-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="storyModal"></div>
+    <!-- 8. FULL-SCREEN LOOKBOOK STORY VIEWER -->
+    <div id="storyModal" class="modal-backdrop story-fullscreen hidden" role="dialog" aria-modal="true" aria-label="Lookbook Story">
       <div class="story-player-card">
-        <div id="storyProgressBars" class="story-progress-bars"></div>
+        <div class="story-bars" id="storyProgressTrack"></div>
         <div class="story-top-meta">
-          <div class="story-author">
+          <div class="story-brand-row">
             <img src="/images/nicole-logo.jpg" alt="Nicole" />
             <div>
-              <strong id="storyTitle">Nicole Beauty Parlour</strong>
-              <small id="storySub">@NICOLE_BEAUTY_PARLOUR</small>
+              <strong id="storyTitleText">Nicole Lookbook</strong>
+              <span id="storySubText">@NICOLE_BEAUTY_PARLOUR</span>
             </div>
           </div>
-          <button type="button" class="story-close-btn" data-close-modal="storyModal">×</button>
+          <button type="button" class="modal-close-orb static" data-close-modal="storyModal" aria-label="Close">×</button>
         </div>
 
-        <div class="story-stage">
-          <button type="button" class="story-tap-zone prev" id="storyPrevBtn" aria-label="Previous story"></button>
-          <img id="storyMainImg" src="/images/style-01-honey-curly-knotless.jpg" alt="Story" />
-          <button type="button" class="story-tap-zone next" id="storyNextBtn" aria-label="Next story"></button>
-          <div class="story-caption-box">
-            <span id="storyPriceBadge" class="story-price-pill">From P180</span>
-            <p id="storyCaptionText"></p>
-            <button type="button" class="primary-cta full-width" id="storyBookBtn">
-              Book This Look Now 👑
-            </button>
-          </div>
+        <div class="story-media-stage">
+          <img id="storyMainImage" src="/images/style-01-honey-curly-knotless.jpg" alt="Story" />
+          <button type="button" class="story-tap prev" id="storyPrevBtn" aria-label="Previous"></button>
+          <button type="button" class="story-tap next" id="storyNextBtn" aria-label="Next"></button>
+        </div>
+
+        <div class="story-bottom-bar">
+          <div id="storyCaptionText" class="story-caption"></div>
+          <button type="button" class="btn-couture-primary full-width" id="storyActionBtn">Reserve This Look</button>
         </div>
       </div>
     </div>
 
-    <!-- 8. Notifications Drawer Modal -->
-    <div id="notificationsModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="notificationsModal"></div>
-      <div class="modal-sheet">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="notificationsModal"
-          aria-label="Close notifications"
-        >
-          ×
+    <!-- 9. NOTIFICATIONS DRAWER MODAL -->
+    <div id="notificationsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Notifications">
+      <div class="modal-sheet modal-sm">
+        <button type="button" class="modal-close-orb" data-close-modal="notificationsModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">LIVE PARLOUR UPDATES</span>
+          <h3>Activity &amp; Alerts</h3>
+        </div>
+        <div id="notificationsList" class="notif-stack"></div>
+      </div>
+    </div>
+
+    <!-- 10. ANDROID, APPLE iOS & GOOGLE PLAY STORE MODAL -->
+    <div id="installModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Install Mobile App">
+      <div class="modal-sheet modal-md">
+        <button type="button" class="modal-close-orb" data-close-modal="installModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">ANDROID • APPLE iOS • GOOGLE PLAY</span>
+          <h3>Install Nicole Beauty Parlour</h3>
+        </div>
+
+        <div class="install-showcase-logo">
+          <img src="/icons/icon-192.png" alt="Nicole Beauty Parlour App Icon" />
+          <div>
+            <strong>Nicole Beauty Parlour</strong>
+            <span>com.nicolebeautyparlour.app • v2.0 Couture</span>
+          </div>
+        </div>
+
+        <button type="button" id="nativeInstallPromptBtn" class="btn-couture-primary full-width mb-14 hidden">
+          Install App to Home Screen Now
         </button>
-        <div class="modal-pad">
-          <span class="eyebrow-chip">SALON UPDATES</span>
-          <h3>Notifications &amp; Deals 🔔</h3>
-          <div id="notificationsList" class="notifications-list"></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- 9. Install App (Android APK / Play Store / Apple iOS) Modal -->
-    <div id="installAppModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-      <div class="modal-backdrop" data-close-modal="installAppModal"></div>
-      <div class="modal-sheet">
-        <button
-          type="button"
-          class="modal-close-btn"
-          data-close-modal="installAppModal"
-          aria-label="Close install modal"
-        >
-          ×
-        </button>
-        <div class="modal-pad">
-          <div class="install-hero-logo">
-            <img src="/images/nicole-logo.jpg" alt="Nicole Beauty Parlour" />
+        <div class="platform-cards-stack">
+          <div class="platform-guide-card">
+            <strong>Android &amp; Huawei Phones</strong>
+            <p>Tap Chrome's menu (<strong>⋮</strong>) → <strong>Install App / Add to Home Screen</strong>, or install our signed native Android APK / Google Play Store bundle (<code>.aab</code>).</p>
           </div>
-          <span class="eyebrow-chip">ANDROID • APPLE iOS • PLAY STORE READY</span>
-          <h3>Install Nicole Beauty Parlour 📲</h3>
-          <p class="muted-sub">
-            Works natively on both Android phones &amp; iPhones with offline access, full-screen
-            standalone mode, and Capacitor Play Store packaging.
-          </p>
-
-          <button type="button" id="triggerNativeInstallBtn" class="primary-cta full-width lg hidden">
-            ⚡ Install App on This Device Now
-          </button>
-
-          <div class="install-guides-stack">
-            <div class="install-platform-card">
-              <strong>🤖 Android &amp; Google Play Store</strong>
-              <p>
-                Tap browser menu <b>⋮ → Install app / Add to Home screen</b> for instant native install,
-                or build the signed <code>.apk</code> &amp; Play Store <code>.aab</code> bundle via our
-                included Capacitor Android project &amp; GitHub Actions workflow.
-              </p>
-            </div>
-            <div class="install-platform-card">
-              <strong>🍎 Apple iPhone &amp; iPad (iOS)</strong>
-              <p>
-                In Safari, tap the <b>Share icon (⬆️) → "Add to Home Screen"</b> to launch Nicole Beauty
-                Parlour full-screen from your iPhone home screen with the official crown icon!
-              </p>
-            </div>
-          </div>
-
-          <div class="modal-btn-pair" style="margin-top: 14px">
-            <button type="button" id="replaySplashBtn" class="secondary-btn full-width">
-              ✨ Replay Animated Loading Screen
-            </button>
+          <div class="platform-guide-card">
+            <strong>Apple iPhone &amp; iPad (iOS)</strong>
+            <p>In Safari, tap <strong>Share</strong> → <strong>Add to Home Screen</strong> for full-screen native iOS mode, or build <code>ios/App/App.xcodeproj</code> in Xcode.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Animated Toast Stack -->
-    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+    <!-- Floating Toast Stack -->
+    <div id="toastContainer" class="toast-stack" aria-live="polite"></div>
 
     <script type="module" src="/js/app.js"></script>
   </body>

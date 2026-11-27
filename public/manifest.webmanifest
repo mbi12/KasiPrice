@@ -1,15 +1,14 @@
 {
-  "id": "/",
-  "name": "Nicole Beauty Parlour",
+  "name": "Nicole Beauty Parlour — Look Good • Feel Good • Be You",
   "short_name": "Nicole Parlour",
-  "description": "Look Good • Feel Good • Be You — Botswana Hair Braiding Marketplace, Online Booking, Salon Messaging & Promo Studio.",
-  "start_url": "/?source=pwa",
+  "description": "Couture Hair Braiding Marketplace, Virtual Style Mirror, Instant VIP Chair Booking, Salon Chat & Ad Studio in Gaborone, Botswana.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#071224",
-  "theme_color": "#0A1931",
-  "categories": ["lifestyle", "beauty", "shopping"],
+  "background_color": "#040914",
+  "theme_color": "#040914",
+  "categories": ["beauty", "lifestyle", "shopping"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -28,29 +27,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Book a Hairstyle",
-      "short_name": "Book Now",
-      "description": "Reserve your braiding appointment in BWP",
-      "url": "/?tab=book",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Message Nicole",
-      "short_name": "Messages",
-      "description": "Chat with Nicole Beauty Parlour",
-      "url": "/?tab=messages",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Salon Studio & Ads",
-      "short_name": "Studio",
-      "description": "Add hairstyles & launch promo adverts",
-      "url": "/?tab=studio",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

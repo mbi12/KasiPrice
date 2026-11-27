@@ -7,8 +7,8 @@ import {
   INITIAL_THREADS
 } from './data.js';
 
-const STORAGE_KEY = 'nicole_beauty_parlour_state_v1';
-const CHANNEL_NAME = 'nicole_beauty_parlour_channel_v1';
+const STORAGE_KEY = 'nicole_beauty_parlour_state_v2';
+const CHANNEL_NAME = 'nicole_beauty_parlour_channel_v2';
 
 function clone(val) {
   return JSON.parse(JSON.stringify(val));
@@ -23,16 +23,16 @@ function getDefaultState() {
     notifications: [
       {
         id: 'notif-welcome',
-        title: 'Welcome to Nicole Beauty Parlour 👑',
-        body: 'Use promo code SLAY15 for 15% OFF S-Medium & Small Knotless Braids!',
+        title: 'Welcome to Nicole Beauty Parlour',
+        body: 'Apply code SLAY15 for 15% OFF S-Medium & Small Knotless Braids — or try our new Virtual Style Mirror!',
         time: 'Just now',
         unread: true,
         type: 'promo'
       },
       {
         id: 'notif-flat250',
-        title: "Pick n' Drop / Softdread = P250",
-        body: 'Official flat-rate deal open all week — book your chair in 60 seconds.',
+        title: "Pick n' Drop & Softdread • Flat P250",
+        body: 'Official P250 rate open all week — book Chair 01, 02, or 03 with instant VIP pass.',
         time: '1 hr ago',
         unread: false,
         type: 'deal'
@@ -103,14 +103,12 @@ export class SalonStore {
       const serverData = await res.json();
       if (!serverData || !Array.isArray(serverData.styles)) return;
 
-      // Merge custom styles, promos & bookings so neither server nor local work is lost
       const mergeById = (localArr = [], serverArr = []) => {
         const map = new Map();
         for (const item of serverArr) map.set(item.id, item);
         for (const item of localArr) {
           if (!map.has(item.id)) map.set(item.id, item);
           else {
-            // Preserve local 'saved' toggle or updated status
             const srv = map.get(item.id);
             map.set(item.id, { ...srv, ...item });
           }
@@ -170,8 +168,8 @@ export class SalonStore {
 
     this.state.styles.unshift(newStyle);
     this.addNotification({
-      title: 'New Hairstyle Published ✨',
-      body: `"${newStyle.name}" is now live in the Nicole Beauty Parlour Market!`,
+      title: 'New Couture Style Published',
+      body: `"${newStyle.name}" is now live across Runway, Gallery & Booking!`,
       type: 'style'
     });
 
@@ -213,14 +211,13 @@ export class SalonStore {
 
     this.state.promotions.unshift(promo);
 
-    // Broadcast into VIP Deals chat thread immediately!
     const promoThread = this.state.threads.find((t) => t.id === 'thread-promos');
     if (promoThread) {
       promoThread.messages.push({
         id: `m-promo-${Date.now()}`,
         sender: 'salon',
         senderName: 'Nicole Promo Studio',
-        text: `📣 NEW ADVERT: ${promo.title}! ${promo.subtitle} — Apply code ${promo.code} for ${promo.discountPercent}% OFF (valid until ${promo.validUntil}).`,
+        text: `NEW CAMPAIGN: ${promo.title} — ${promo.subtitle} Apply code ${promo.code} for ${promo.discountPercent}% OFF (until ${promo.validUntil}).`,
         image: promo.image,
         badge: `PROMO • ${promo.code}`,
         timestamp: new Date().toTimeString().slice(0, 5),
@@ -230,8 +227,8 @@ export class SalonStore {
     }
 
     this.addNotification({
-      title: `Advert Live: ${promo.title} 🔥`,
-      body: `Code ${promo.code} (${promo.discountPercent}% OFF) broadcasted to Home & VIP Messages!`,
+      title: `Campaign Live: ${promo.title}`,
+      body: `Code ${promo.code} (${promo.discountPercent}% OFF) published to Runway & VIP Channel.`,
       type: 'promo'
     });
 
@@ -285,7 +282,6 @@ export class SalonStore {
 
     this.state.bookings.unshift(booking);
 
-    // Post booking confirmation card into Nicole's chat thread automatically!
     const mainThread = this.state.threads.find((t) => t.id === 'thread-nicole');
     if (mainThread) {
       const nowTime = new Date().toTimeString().slice(0, 5);
@@ -293,9 +289,9 @@ export class SalonStore {
         id: `m-bk-client-${Date.now()}`,
         sender: 'client',
         senderName: booking.clientName,
-        text: `📅 Booked: ${booking.styleName} (${booking.sizeLabel} • ${booking.lengthLabel}) for ${booking.date} at ${booking.time} — Total P${booking.total} (Ref: ${booking.id})`,
+        text: `Reserved VIP Chair: ${booking.styleName} (${booking.sizeLabel} • ${booking.lengthLabel}${booking.hairColor ? ` • ${booking.hairColor}` : ''}) on ${booking.date} at ${booking.time} — Total P${booking.total} (Pass ${booking.id})`,
         image: booking.styleImage,
-        badge: `BOOKING ${booking.id}`,
+        badge: `VIP PASS ${booking.id}`,
         timestamp: nowTime,
         status: 'read'
       });
@@ -303,7 +299,7 @@ export class SalonStore {
         id: `m-bk-salon-${Date.now() + 1}`,
         sender: 'salon',
         senderName: 'Nicole',
-        text: `Yay ${booking.clientName}! 🎉👑 Your chair with ${booking.stylistName} is confirmed for ${booking.date} at ${booking.time} (Ref: ${booking.id}). Deposit: P${booking.deposit} via ${booking.paymentMethod}. Can't wait to make you Look Good, Feel Good, Be You! 💙`,
+        text: `Confirmed, ${booking.clientName}! Your chair with ${booking.stylistName} is locked in for ${booking.date} at ${booking.time} (Pass ${booking.id}). 30% Deposit: P${booking.deposit} via ${booking.paymentMethod}. Get ready to Look Good, Feel Good, Be You!`,
         timestamp: nowTime,
         status: 'unread'
       });
@@ -311,8 +307,8 @@ export class SalonStore {
     }
 
     this.addNotification({
-      title: `Booking Confirmed (${booking.id}) 💙`,
-      body: `${booking.styleName} on ${booking.date} at ${booking.time} • Total P${booking.total}`,
+      title: `VIP Pass Issued (${booking.id})`,
+      body: `${booking.styleName} • ${booking.date} at ${booking.time} • P${booking.total}`,
       type: 'booking'
     });
 
@@ -360,32 +356,32 @@ export class SalonStore {
     const q = String(userText).toLowerCase();
     const activePromo = this.state.promotions.find((p) => p.active);
     const promoHint = activePromo
-      ? ` Use promo code ${activePromo.code} for ${activePromo.discountPercent}% OFF!`
+      ? ` Use code ${activePromo.code} for ${activePromo.discountPercent}% OFF!`
       : '';
 
     if (q.includes('price') || q.includes('how much') || q.includes('cost') || q.includes('pula') || q.includes('list')) {
-      return `Here is our official BWP Price Menu 👑:\n• Jumbo: P130 (Midback) | P160 (Butt) | P200 (Knee)\n• Large: P160 | P200 | P250\n• Medium: P180 | P250 | P300\n• S-Medium: P200 | P300 | P400\n• Small: P250 | P350 | P500\n• Pick n' Drop / Switch / Softdread: Flat P250! 💙${promoHint}`;
+      return `Official Nicole Beauty Parlour BWP Rates:\n• Jumbo: P130 (Midback) | P160 (Butt) | P200 (Knee)\n• Large: P160 | P200 | P250\n• Medium: P180 | P250 | P300\n• S-Medium: P200 | P300 | P400\n• Small: P250 | P350 | P500\n• Pick n' Drop / Switch / Softdread: Flat P250.${promoHint}`;
     }
     if (q.includes('where') || q.includes('location') || q.includes('address') || q.includes('house')) {
-      return `We're in ${SALON_INFO.location}, open ${SALON_INFO.hours}! 📍 Want us to braid you at home? Select "VIP House-Call (+P80)" when booking, or call/WhatsApp ${SALON_INFO.phoneDisplay}.`;
+      return `We are located in ${SALON_INFO.location} (${SALON_INFO.hours}). Prefer to be braided at home? Tick "VIP Private House-Call (+P80)" when booking, or WhatsApp ${SALON_INFO.phoneDisplay}.`;
     }
-    if (q.includes('pack') || q.includes('hair') || q.includes('buy') || q.includes('color')) {
-      return `For packs guide 🛍️:\n• Jumbo/Large: 4–5 packs\n• Medium: 5–6 packs\n• S-Medium/Small: 6–8 packs.\nOr tick "Braiding Hair Packs Provided (+P120)" in Book and we'll have your exact shade ready!`;
+    if (q.includes('pack') || q.includes('hair') || q.includes('buy') || q.includes('color') || q.includes('shade')) {
+      return `Hair Packs & Shade Guide:\n• Jumbo/Large: 4–5 packs\n• Medium: 5–6 packs\n• S-Medium/Small: 6–8 packs.\nOr select "Premium Braiding Packs Supplied (+P120)" during booking and we will prepare your exact shade (#1B, #27, #30, #99J, #613)!`;
     }
     if (q.includes('pay') || q.includes('deposit') || q.includes('orange') || q.includes('myzaka')) {
-      return `Deposits (30%) can be sent via Orange Money, MyZaka, or Smega to ${SALON_INFO.phoneRaw}, or select Pay at Salon! 💎`;
+      return `Your 30% chair deposit can be paid via Orange Money, MyZaka, Smega (${SALON_INFO.phoneRaw}), FNB eWallet, or Pay at Parlour.`;
     }
     if (q.includes('slot') || q.includes('available') || q.includes('today') || q.includes('tomorrow') || q.includes('weekend')) {
-      return `We have chairs open between 07:30 and 16:30! ✨ Tap "Book" below to pick your style, size & time — you'll receive an instant booking pass!${promoHint}`;
+      return `Chairs 01, 02 & 03 have openings between 07:30 and 16:30! Tap "Reserve" below to lock in your time and receive your holographic VIP Pass.${promoHint}`;
     }
     if (styleName) {
-      return `Gorgeous choice queen! 😍 "${styleName}" looks stunning in Midback, Butt Length, or Knee Length. Want me to reserve a chair for you? Tap "Book" or tell me your preferred day! 💙`;
+      return `Stunning choice! "${styleName}" can be tailored in Midback, Butt Length, or Knee Length with your favourite shade. Tap "Reserve" to customize and lock your slot!`;
     }
-    return `Got your message queen! 👑💙 Nicole's desk (${SALON_INFO.phoneDisplay}) is right here — ask about prices, braid packs, hair colors, or tap "Book" to lock in your appointment!`;
+    return `Received! Nicole's Concierge (${SALON_INFO.phoneDisplay}) is right here — ask about BWP pricing, shade blends, or tap "Reserve" to book your chair.`;
   }
 
   sendMessage({ threadId = 'thread-nicole', sender = 'client', senderName, text, image = null, badge = null, styleName = '' }) {
-    let thread = this.state.threads.find((t) => t.id === threadId);
+    const thread = this.state.threads.find((t) => t.id === threadId);
     if (!thread) return null;
 
     const nowTime = new Date().toTimeString().slice(0, 5);
@@ -403,7 +399,6 @@ export class SalonStore {
     thread.messages.push(msg);
     this.saveLocal();
 
-    // Sync to backend asynchronously
     fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
