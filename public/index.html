@@ -235,6 +235,15 @@
             </svg>
             <span id="notifBadge" class="orb-badge hidden">0</span>
           </button>
+
+          <button type="button" class="lux-pill-btn admin-pill-trigger" id="topbarAdminBtn" aria-label="Admin Panel" title="Salon Owner Admin Panel">
+            <svg id="topbarAdminLockIcon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <rect x="4.2" y="8.8" width="11.6" height="8.4" rx="2.2" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M6.8 8.8V6.4A3.2 3.2 0 0 1 13.2 6.4V8.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <span class="hide-xs" id="topbarAdminLabel">Admin</span>
+            <span id="topbarAdminLiveDot" class="admin-live-dot hidden" aria-hidden="true"></span>
+          </button>
         </div>
       </header>
 
@@ -341,23 +350,23 @@
               </div>
             </button>
 
-            <button type="button" class="couture-tile" id="quickAddStyleBtn">
+            <button type="button" class="couture-tile" id="quickPriceTileBtn">
               <div class="tile-icon-ring">
-                <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="4.5" width="17" height="15" rx="3.2" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M5.5 17.5L10.5 13L13.8 16L16.5 13.5L19 16.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5V7.5M16 5H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3.5" width="16" height="17" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M8 8.5H16M8 12.5H16M8 16.5H13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
               </div>
               <div class="tile-copy">
-                <strong>Add Hairstyle</strong>
-                <span>Upload to Market</span>
+                <strong>Official Prices</strong>
+                <span>P130 – P500 Matrix</span>
               </div>
             </button>
 
-            <button type="button" class="couture-tile" id="quickAdvertiseBtn">
+            <button type="button" class="couture-tile" id="quickAdminTileBtn">
               <div class="tile-icon-ring">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M4 13.5V9.5C4 8.4 4.9 7.5 6 7.5H9.5L17.5 4V19L9.5 15.5H6C4.9 15.5 4 14.6 4 13.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 15.5L8.8 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M20 8.5C21.2 9.8 21.2 13.2 20 14.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3L19 6V11.5C19 16.2 16 19.8 12 21C8 19.8 5 16.2 5 11.5V6L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.2 12.2L11.1 14.1L15 10.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
               <div class="tile-copy">
-                <strong>Launch Advert</strong>
-                <span>HD Poster &amp; Code</span>
+                <strong id="quickAdminTileTitle">Admin Panel</strong>
+                <span id="quickAdminTileSub">Owner Login Vault</span>
               </div>
             </button>
           </section>
@@ -489,7 +498,7 @@
                 <span class="eyebrow-cyan">LIVE PARLOUR OFFERS</span>
                 <h2>VIP Campaigns &amp; Promo Codes</h2>
               </div>
-              <button type="button" class="ghost-link-btn" id="newPromoFromHomeBtn">
+              <button type="button" class="ghost-link-btn admin-only-el hidden" id="newPromoFromHomeBtn">
                 <span>+ Create Advert</span>
               </button>
             </div>
@@ -535,7 +544,7 @@
               <button type="button" class="btn-couture-glass sm" id="marketMirrorBtn">
                 <span>Style Mirror</span>
               </button>
-              <button type="button" class="btn-couture-primary sm" id="marketAddStyleBtn">
+              <button type="button" class="btn-couture-primary sm admin-only-el hidden" id="marketAddStyleBtn">
                 <span>+ Add Style</span>
               </button>
             </div>
@@ -754,7 +763,7 @@
 
                 <div class="conv-identity" id="activeThreadHeader"></div>
 
-                <div class="role-mode-switch" title="Test replying both as Client and as Salon Owner!">
+                <div class="role-mode-switch admin-only-el hidden" id="roleModeSwitchWrap" title="Owner Mode: Reply as Client or as Nicole Salon Desk">
                   <button type="button" class="role-pill active" id="modeClientBtn">Client</button>
                   <button type="button" class="role-pill" id="modeSalonBtn">Nicole Desk</button>
                 </div>
@@ -795,59 +804,331 @@
           </div>
         </section>
 
-        <!-- ==================== TAB 5: NICOLE OWNER STUDIO (ADD STYLES & ADVERTS) ==================== -->
-        <section id="view-studio" class="app-view" aria-label="Salon Owner Studio">
-          <div class="studio-command-hero">
-            <div class="studio-hero-copy">
-              <span class="eyebrow-cyan">PARLOUR CREATIVE &amp; OWNER SUITE</span>
-              <h2>Grow Nicole Beauty Parlour</h2>
-              <p>
-                Publish new hairstyles straight from your phone camera, design 1080×1350 branded promo posters with live discount codes, and manage client chairs.
-              </p>
-              <div class="studio-cta-row">
-                <button type="button" class="btn-couture-primary" id="studioAddStyleBtn">
-                  <span>+ Upload New Hairstyle</span>
+        <!-- ==================== TAB 5: PROTECTED NICOLE ADMIN PANEL ==================== -->
+        <section id="view-studio" class="app-view" aria-label="Salon Owner Admin Panel">
+          <!-- STATE 1: PHONE NUMBER + PASSWORD ADMIN LOGIN GATE (SHOWN FIRST!) -->
+          <div id="adminLoginGate" class="admin-vault-stage">
+            <div class="admin-vault-card" id="adminVaultCard">
+              <div class="admin-vault-glow" aria-hidden="true"></div>
+
+              <div class="admin-vault-brand">
+                <div class="admin-shield-orb" aria-hidden="true">
+                  <svg viewBox="0 0 28 28" fill="none">
+                    <path d="M14 3L23 6.8V13.6C23 19.4 19.2 23.8 14 25.4C8.8 23.8 5 19.4 5 13.6V6.8L14 3Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+                    <rect x="10.2" y="12.6" width="7.6" height="6.2" rx="1.6" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M11.8 12.6V10.8A2.2 2.2 0 0 1 16.2 10.8V12.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  </svg>
+                </div>
+
+                <img
+                  src="/images/nicole-logo-light.png"
+                  alt="Nicole Beauty Parlour"
+                  class="admin-vault-logo logo-for-dark"
+                />
+                <img
+                  src="/images/nicole-logo-transparent.png"
+                  alt="Nicole Beauty Parlour"
+                  class="admin-vault-logo logo-for-light"
+                />
+
+                <span class="eyebrow-cyan">PROTECTED EXECUTIVE PORTAL</span>
+                <h2>Salon Owner Admin Login</h2>
+                <p>
+                  Sign in with your registered parlour phone number and password to manage reservations, BWP pricing, hairstyles, adverts, and client messages.
+                </p>
+              </div>
+
+              <form id="adminLoginForm" class="admin-login-form" autocomplete="on">
+                <div class="admin-field-group">
+                  <label class="micro-label" for="adminPhoneInput">Admin Phone Number *</label>
+                  <div class="phone-vault-input">
+                    <span class="country-dial-pill" aria-hidden="true">🇧🇼 +267</span>
+                    <input
+                      type="tel"
+                      id="adminPhoneInput"
+                      name="phone"
+                      inputmode="tel"
+                      autocomplete="username"
+                      required
+                      placeholder="72 517 904"
+                    />
+                  </div>
+                </div>
+
+                <div class="admin-field-group">
+                  <label class="micro-label" for="adminPasswordInput">Admin Password *</label>
+                  <div class="password-vault-input">
+                    <input
+                      type="password"
+                      id="adminPasswordInput"
+                      name="password"
+                      autocomplete="current-password"
+                      required
+                      placeholder="Enter salon password"
+                    />
+                    <button
+                      type="button"
+                      id="toggleAdminPassBtn"
+                      class="pass-eye-btn"
+                      aria-label="Show or hide password"
+                      title="Show / Hide Password"
+                    >
+                      <svg id="eyeOpenIcon" viewBox="0 0 20 20" fill="none">
+                        <path d="M2.2 10C3.8 6.4 6.7 4.5 10 4.5C13.3 4.5 16.2 6.4 17.8 10C16.2 13.6 13.3 15.5 10 15.5C6.7 15.5 3.8 13.6 2.2 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6"/>
+                      </svg>
+                      <svg id="eyeClosedIcon" class="hidden" viewBox="0 0 20 20" fill="none">
+                        <path d="M3 3L17 17M8.2 8.3A2.6 2.6 0 0 0 11.7 11.8M6.2 6.3C4.5 7.3 3.1 8.8 2.2 10C3.8 13.6 6.7 15.5 10 15.5C11.6 15.5 13.1 15 14.4 14.1M9.5 4.6C9.7 4.5 9.8 4.5 10 4.5C13.3 4.5 16.2 6.4 17.8 10C17.2 11.3 16.4 12.4 15.4 13.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="admin-login-options">
+                  <label class="remember-check-row">
+                    <input type="checkbox" id="adminRememberCheckbox" checked />
+                    <span>Keep me signed in on this device</span>
+                  </label>
+                  <button type="button" class="text-action-cyan" id="toggleStarterCredsBtn">
+                    Starter Login?
+                  </button>
+                </div>
+
+                <div id="starterCredsBox" class="starter-creds-drawer hidden">
+                  <div>
+                    <strong>Default Owner Credentials</strong>
+                    <span>Number: <code>72517904</code> • Password: <code>Nicole2026</code></span>
+                    <small>(Changeable anytime inside Security Settings after login)</small>
+                  </div>
+                  <button type="button" class="lux-pill-btn" id="fillStarterCredsBtn">Auto-Fill</button>
+                </div>
+
+                <div id="adminLoginError" class="admin-error-banner hidden" role="alert"></div>
+
+                <button type="submit" id="adminLoginSubmitBtn" class="btn-couture-primary full-width lg">
+                  <span>Sign In to Admin Panel</span>
+                  <svg viewBox="0 0 20 20" fill="none">
+                    <path d="M4.5 10H15.5M15.5 10L10.5 5M15.5 10L10.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </button>
-                <button type="button" class="btn-couture-glass" id="studioLaunchPromoBtn">
-                  <span>Design Advert &amp; Promo</span>
+              </form>
+
+              <div class="admin-vault-footer">
+                <button type="button" class="ghost-link-btn" data-goto-tab="discover">
+                  ← Return to Public Client Storefront
                 </button>
               </div>
             </div>
-            <div class="studio-kpi-grid" id="studioStatsGrid"></div>
           </div>
 
-          <div class="studio-panels-grid">
-            <div class="studio-panel-card">
-              <div class="section-heading-row compact">
-                <div>
-                  <span class="eyebrow-cyan">CAMPAIGNS &amp; POSTERS</span>
-                  <h3>Active Adverts &amp; Promo Codes</h3>
+          <!-- STATE 2: UNLOCKED EXECUTIVE ADMIN CONTROL SUITE -->
+          <div id="adminUnlockedSuite" class="admin-suite-wrap hidden">
+            <!-- Executive Command Header -->
+            <div class="studio-command-hero admin-exec-hero">
+              <div class="studio-hero-copy">
+                <div class="admin-session-strip">
+                  <span class="admin-verified-pill">
+                    <span class="pulse-dot"></span>
+                    ADMIN UNLOCKED
+                  </span>
+                  <span class="admin-owner-meta" id="adminIdentityBadge">
+                    Nicole • Parlour Owner (+267 72517904)
+                  </span>
                 </div>
-                <button type="button" class="text-action-cyan" id="studioNewAdInlineBtn">+ New Campaign</button>
+                <h2>Nicole Executive Control Center</h2>
+                <p>
+                  Monitor BWP revenue &amp; chair utilization, confirm or add walk-in bookings, edit hairstyle prices, launch 1080×1350 adverts, and manage admin credentials.
+                </p>
+                <div class="studio-cta-row">
+                  <button type="button" class="btn-couture-primary" id="studioAddStyleBtn">
+                    <span>+ Upload Hairstyle</span>
+                  </button>
+                  <button type="button" class="btn-couture-glass" id="studioLaunchPromoBtn">
+                    <span>+ Design Advert</span>
+                  </button>
+                  <button type="button" class="btn-couture-glass" id="adminOpenWalkInBtn">
+                    <span>+ Walk-In Booking</span>
+                  </button>
+                  <button type="button" class="btn-admin-logout" id="adminLogoutBtn" title="Lock Admin Panel">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M7.5 17H4.8C3.8 17 3 16.2 3 15.2V4.8C3 3.8 3.8 3 4.8 3H7.5M13 14L17 10M17 10L13 6M17 10H7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>Lock Admin</span>
+                  </button>
+                </div>
               </div>
-              <div id="studioPromosList" class="studio-items-stack"></div>
+              <div class="studio-kpi-grid" id="studioStatsGrid"></div>
             </div>
 
-            <div class="studio-panel-card">
-              <div class="section-heading-row compact">
-                <div>
-                  <span class="eyebrow-cyan">MARKETPLACE CATALOG</span>
-                  <h3>Uploaded &amp; Signature Hairstyles</h3>
-                </div>
-                <button type="button" class="text-action-cyan" id="studioNewStyleInlineBtn">+ Add Look</button>
-              </div>
-              <div id="studioStylesList" class="studio-items-stack"></div>
+            <!-- 5 Executive Admin Sub-Navigation Tabs -->
+            <div class="admin-subnav-ribbon" id="adminSubNav" role="tablist" aria-label="Admin Sections">
+              <button type="button" class="admin-subtab active" data-admin-pane="overview">
+                Overview &amp; Analytics
+              </button>
+              <button type="button" class="admin-subtab" data-admin-pane="bookings">
+                Reservations <span class="subtab-count" id="adminTabBookingsCount">0</span>
+              </button>
+              <button type="button" class="admin-subtab" data-admin-pane="styles">
+                Catalog &amp; Prices <span class="subtab-count" id="adminTabStylesCount">16</span>
+              </button>
+              <button type="button" class="admin-subtab" data-admin-pane="promos">
+                Adverts &amp; Posters <span class="subtab-count" id="adminTabPromosCount">3</span>
+              </button>
+              <button type="button" class="admin-subtab" data-admin-pane="security">
+                Inbox &amp; Security
+              </button>
             </div>
-          </div>
 
-          <div class="studio-panel-card mt-20">
-            <div class="section-heading-row compact">
-              <div>
-                <span class="eyebrow-cyan">CHAIR SCHEDULE</span>
-                <h3>Client Reservations &amp; VIP Passes</h3>
+            <!-- ADMIN PANE 1: OVERVIEW & CHAIR ANALYTICS -->
+            <div class="admin-pane active" id="admin-pane-overview">
+              <div class="studio-panels-grid">
+                <div class="studio-panel-card">
+                  <div class="section-heading-row compact">
+                    <div>
+                      <span class="eyebrow-cyan">REVENUE &amp; CHAIR DEMAND</span>
+                      <h3>Chair Performance Breakdown</h3>
+                    </div>
+                  </div>
+                  <div id="adminChairAnalytics" class="chair-analytics-stack"></div>
+                </div>
+
+                <div class="studio-panel-card">
+                  <div class="section-heading-row compact">
+                    <div>
+                      <span class="eyebrow-cyan">LATEST CLIENT BOOKINGS</span>
+                      <h3>Upcoming Parlour Schedule</h3>
+                    </div>
+                    <button type="button" class="text-action-cyan" data-goto-admin-pane="bookings">
+                      Manage All →
+                    </button>
+                  </div>
+                  <div id="adminRecentBookingsPreview" class="studio-items-stack"></div>
+                </div>
               </div>
             </div>
-            <div id="studioBookingsList" class="studio-items-stack"></div>
+
+            <!-- ADMIN PANE 2: CLIENT RESERVATIONS & WALK-INS -->
+            <div class="admin-pane hidden" id="admin-pane-bookings">
+              <div class="studio-panel-card">
+                <div class="admin-toolbar-row">
+                  <div>
+                    <span class="eyebrow-cyan">CHAIR SCHEDULE &amp; DEPOSITS</span>
+                    <h3>Client Reservations &amp; VIP Passes</h3>
+                  </div>
+                  <div class="admin-toolbar-actions">
+                    <input
+                      type="search"
+                      id="adminBookingSearchInput"
+                      class="glass-input sm"
+                      placeholder="Search client, phone, NBP pass..."
+                    />
+                    <select id="adminBookingStatusFilter" class="glass-select">
+                      <option value="All">All Statuses</option>
+                      <option value="Confirmed">Confirmed</option>
+                      <option value="In Chair">In Chair</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <button type="button" class="btn-couture-primary sm" id="adminWalkInInlineBtn">
+                      + Add Walk-In
+                    </button>
+                  </div>
+                </div>
+                <div id="studioBookingsList" class="studio-items-stack"></div>
+              </div>
+            </div>
+
+            <!-- ADMIN PANE 3: CATALOG & PRICE MANAGER -->
+            <div class="admin-pane hidden" id="admin-pane-styles">
+              <div class="studio-panel-card">
+                <div class="admin-toolbar-row">
+                  <div>
+                    <span class="eyebrow-cyan">MARKETPLACE CATALOG</span>
+                    <h3>Edit Hairstyles, BWP Prices &amp; 3D Runway</h3>
+                  </div>
+                  <div class="admin-toolbar-actions">
+                    <input
+                      type="search"
+                      id="adminStyleSearchInput"
+                      class="glass-input sm"
+                      placeholder="Filter catalog..."
+                    />
+                    <button type="button" class="btn-couture-primary sm" id="studioNewStyleInlineBtn">
+                      + Upload Look
+                    </button>
+                  </div>
+                </div>
+                <div id="studioStylesList" class="studio-items-stack admin-catalog-stack"></div>
+              </div>
+            </div>
+
+            <!-- ADMIN PANE 4: ADVERTS, PROMOS & HD POSTERS -->
+            <div class="admin-pane hidden" id="admin-pane-promos">
+              <div class="studio-panel-card">
+                <div class="section-heading-row compact">
+                  <div>
+                    <span class="eyebrow-cyan">CAMPAIGNS &amp; 1080×1350 POSTERS</span>
+                    <h3>Active Adverts &amp; Promo Codes</h3>
+                  </div>
+                  <button type="button" class="btn-couture-primary sm" id="studioNewAdInlineBtn">
+                    + New Campaign
+                  </button>
+                </div>
+                <div id="studioPromosList" class="studio-items-stack"></div>
+              </div>
+            </div>
+
+            <!-- ADMIN PANE 5: LIVE INBOX DESK & SECURITY CREDENTIALS -->
+            <div class="admin-pane hidden" id="admin-pane-security">
+              <div class="studio-panels-grid">
+                <div class="studio-panel-card">
+                  <div class="section-heading-row compact">
+                    <div>
+                      <span class="eyebrow-cyan">SALON OWNER MESSAGING</span>
+                      <h3>Live Concierge Desk</h3>
+                    </div>
+                  </div>
+                  <p class="admin-helper-copy">
+                    Jump straight into the live parlour messenger switched to <strong>Nicole Desk</strong> mode to reply personally to client enquiries and style inspiration photos.
+                  </p>
+                  <div id="adminInboxSummary" class="admin-inbox-summary"></div>
+                  <button type="button" class="btn-couture-primary full-width mt-14" id="adminJumpToSalonChatBtn">
+                    Open Concierge as Nicole Desk →
+                  </button>
+                </div>
+
+                <div class="studio-panel-card">
+                  <div class="section-heading-row compact">
+                    <div>
+                      <span class="eyebrow-cyan">LOGIN PHONE &amp; PASSWORD</span>
+                      <h3>Admin Security Settings</h3>
+                    </div>
+                  </div>
+                  <form id="adminCredentialsForm" class="modal-form-stack">
+                    <div>
+                      <label class="micro-label" for="credOwnerNameInput">Owner Display Name</label>
+                      <input type="text" id="credOwnerNameInput" class="glass-input" placeholder="Nicole • Parlour Owner" />
+                    </div>
+                    <div>
+                      <label class="micro-label" for="credNewPhoneInput">Admin Login Phone Number *</label>
+                      <input type="tel" id="credNewPhoneInput" class="glass-input" required placeholder="72517904" />
+                    </div>
+                    <div class="two-col-inputs">
+                      <div>
+                        <label class="micro-label" for="credCurrentPasswordInput">Current Password *</label>
+                        <input type="password" id="credCurrentPasswordInput" class="glass-input" required placeholder="Current password" />
+                      </div>
+                      <div>
+                        <label class="micro-label" for="credNewPasswordInput">New Password (optional)</label>
+                        <input type="password" id="credNewPasswordInput" class="glass-input" placeholder="Min. 6 characters" />
+                      </div>
+                    </div>
+                    <p id="credFeedbackMsg" class="promo-feedback-msg"></p>
+                    <button type="submit" class="btn-couture-primary full-width">
+                      Save New Login Credentials
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
@@ -880,8 +1161,14 @@
         </button>
 
         <button type="button" class="dock-item" data-tab="studio">
-          <svg viewBox="0 0 22 22" fill="none"><path d="M11 3.5V18.5M3.5 11H18.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6"/></svg>
-          <span>Studio</span>
+          <div class="dock-icon-rel">
+            <svg viewBox="0 0 22 22" fill="none">
+              <path d="M11 2.6L18.2 5.8V11.2C18.2 15.8 15.2 19.2 11 20.5C6.8 19.2 3.8 15.8 3.8 11.2V5.8L11 2.6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M8.6 11.2L10.3 12.9L13.8 9.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="adminDockBadge" class="dock-lock-dot" aria-hidden="true"></span>
+          </div>
+          <span>Admin</span>
         </button>
       </nav>
     </div>
@@ -1303,6 +1590,149 @@
             <p>In Safari, tap <strong>Share</strong> → <strong>Add to Home Screen</strong> for full-screen native iOS mode, or build <code>ios/App/App.xcodeproj</code> in Xcode.</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 11. ADMIN EDIT HAIRSTYLE & PRICING MODAL -->
+    <div id="editStyleModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Edit Hairstyle and Pricing">
+      <div class="modal-sheet modal-md">
+        <button type="button" class="modal-close-orb" data-close-modal="editStyleModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">ADMIN CATALOG EDITOR</span>
+          <h3>Edit Hairstyle &amp; BWP Rate</h3>
+        </div>
+        <form id="editStyleForm" class="modal-form-stack">
+          <input type="hidden" id="editStyleIdInput" />
+          <div>
+            <label class="micro-label" for="editStyleNameInput">Hairstyle Title *</label>
+            <input type="text" id="editStyleNameInput" class="glass-input" required />
+          </div>
+          <div class="two-col-inputs">
+            <div>
+              <label class="micro-label" for="editStyleCategorySelect">Category</label>
+              <select id="editStyleCategorySelect" class="glass-select full-width">
+                <option value="Knotless Braids">Knotless Braids</option>
+                <option value="Boho & Goddess">Boho &amp; Goddess</option>
+                <option value="Twists & Softdread">Twists &amp; Softdread</option>
+                <option value="Pick n' Drop & Switch">Pick n' Drop &amp; Switch</option>
+                <option value="Cornrows & Updos">Cornrows &amp; Updos</option>
+              </select>
+            </div>
+            <div>
+              <label class="micro-label" for="editStyleBadgeInput">Spotlight Tag</label>
+              <input type="text" id="editStyleBadgeInput" class="glass-input" placeholder="e.g. Best Seller" />
+            </div>
+          </div>
+
+          <div class="two-col-inputs">
+            <div>
+              <label class="micro-label" for="editStylePricingMode">Pricing Mode</label>
+              <select id="editStylePricingMode" class="glass-select full-width">
+                <option value="matrix">Official Size × Length Matrix</option>
+                <option value="flat">Flat Specialty Rate (BWP)</option>
+              </select>
+            </div>
+            <div>
+              <label class="micro-label" for="editStyleFlatPriceInput">Flat Rate or Matrix Extra (P)</label>
+              <input type="number" id="editStyleFlatPriceInput" class="glass-input" min="0" max="2500" value="250" />
+            </div>
+          </div>
+
+          <div class="two-col-inputs">
+            <div>
+              <label class="micro-label" for="editStyleDurationInput">Duration</label>
+              <input type="text" id="editStyleDurationInput" class="glass-input" placeholder="4 – 5 hrs" />
+            </div>
+            <div>
+              <label class="micro-label" for="editStylePacksInput">Hair Packs Needed</label>
+              <input type="text" id="editStylePacksInput" class="glass-input" placeholder="5–6 packs" />
+            </div>
+          </div>
+
+          <div>
+            <label class="micro-label" for="editStyleDescInput">Description</label>
+            <textarea id="editStyleDescInput" class="glass-textarea" rows="2"></textarea>
+          </div>
+
+          <label class="remember-check-row">
+            <input type="checkbox" id="editStyleFeaturedCheck" />
+            <span>Feature on 3D Interactive Runway Stage</span>
+          </label>
+
+          <button type="submit" class="btn-couture-primary full-width">
+            Save Hairstyle Updates
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 12. ADMIN WALK-IN / PHONE RESERVATION MODAL -->
+    <div id="walkInModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Log Walk-In or Phone Booking">
+      <div class="modal-sheet modal-md">
+        <button type="button" class="modal-close-orb" data-close-modal="walkInModal" aria-label="Close">×</button>
+        <div class="modal-header-lux">
+          <span class="eyebrow-cyan">ADMIN DESK BOOKING</span>
+          <h3>Log Walk-In / Phone Reservation</h3>
+        </div>
+        <form id="walkInForm" class="modal-form-stack">
+          <div class="two-col-inputs">
+            <div>
+              <label class="micro-label" for="walkInClientName">Client Name *</label>
+              <input type="text" id="walkInClientName" class="glass-input" required placeholder="e.g. Neo M." />
+            </div>
+            <div>
+              <label class="micro-label" for="walkInClientPhone">Client Mobile *</label>
+              <input type="tel" id="walkInClientPhone" class="glass-input" required placeholder="+267 7X XXX XXX" />
+            </div>
+          </div>
+
+          <div>
+            <label class="micro-label" for="walkInStyleSelect">Hairstyle</label>
+            <select id="walkInStyleSelect" class="glass-select full-width"></select>
+          </div>
+
+          <div class="two-col-inputs">
+            <div>
+              <label class="micro-label" for="walkInStylistSelect">Assigned Chair</label>
+              <select id="walkInStylistSelect" class="glass-select full-width"></select>
+            </div>
+            <div>
+              <label class="micro-label" for="walkInPriceInput">Agreed Total (Pula) *</label>
+              <input type="number" id="walkInPriceInput" class="glass-input" min="50" max="3000" required value="250" />
+            </div>
+          </div>
+
+          <div class="two-col-inputs">
+            <div>
+              <label class="micro-label" for="walkInDateInput">Date *</label>
+              <input type="date" id="walkInDateInput" class="glass-input" required />
+            </div>
+            <div>
+              <label class="micro-label" for="walkInTimeSelect">Time</label>
+              <select id="walkInTimeSelect" class="glass-select full-width">
+                <option value="07:30">07:30</option>
+                <option value="09:00">09:00</option>
+                <option value="10:30">10:30</option>
+                <option value="12:30">12:30</option>
+                <option value="14:30">14:30</option>
+                <option value="16:30">16:30</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="micro-label" for="walkInStatusSelect">Initial Chair Status</label>
+            <select id="walkInStatusSelect" class="glass-select full-width">
+              <option value="In Chair">In Chair Right Now</option>
+              <option value="Confirmed">Confirmed Appointment</option>
+              <option value="Completed">Completed &amp; Paid</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-couture-primary full-width">
+            Create Reservation &amp; Issue VIP Pass
+          </button>
+        </form>
       </div>
     </div>
 

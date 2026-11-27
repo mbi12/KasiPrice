@@ -110,3 +110,103 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
     server.close();
   }
 });
+
+test('Admin Phone + Password authentication, session token, style editing & credential rotation', async () => {
+  const app = createApp();
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+  const { port } = server.address();
+  const base = `http://127.0.0.1:${port}`;
+
+  try {
+    // 1. Public /api/state never exposes admin passwordHash
+    const stateRes = await fetch(`${base}/api/state`);
+    const pubState = await stateRes.json();
+    assert.equal(pubState.admin, undefined);
+
+    // 2. Wrong password must fail with 401
+    const badRes = await fetch(`${base}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: '72517904', password: 'WrongPassword!' })
+    });
+    assert.equal(badRes.status, 401);
+
+    // 3. Valid Botswana formatted phone + password succeeds and returns token
+    const loginRes = await fetch(`${base}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: '+267 72 517 904', password: 'Nicole2026' })
+    });
+    assert.equal(loginRes.status, 200);
+    const loginBody = await loginRes.json();
+    assert.equal(loginBody.ok, true);
+    assert.ok(loginBody.token);
+    assert.equal(loginBody.admin.phone, '72517904');
+
+    // 4. Verify /api/admin/session with Bearer token
+    const sesRes = await fetch(`${base}/api/admin/session`, {
+      headers: { Authorization: `Bearer ${loginBody.token}` }
+    });
+    assert.equal(sesRes.status, 200);
+    const sesBody = await sesRes.json();
+    assert.equal(sesBody.authenticated, true);
+
+    // 5. Edit a hairstyle via PATCH /api/styles/:id
+    const editRes = await fetch(`${base}/api/styles/style-01`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${loginBody.token}`
+      },
+      body: JSON.stringify({ badge: 'VIP Favorite' })
+    });
+    assert.equal(editRes.status, 200);
+    const edited = await editRes.json();
+    assert.equal(edited.badge, 'VIP Favorite');
+
+    // Restore original badge
+    await fetch(`${base}/api/styles/style-01`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${loginBody.token}`
+      },
+      body: JSON.stringify({ badge: 'Best Seller' })
+    });
+
+    // 6. Rotate admin credentials and restore back to defaults
+    const rotRes = await fetch(`${base}/api/admin/credentials`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${loginBody.token}`
+      },
+      body: JSON.stringify({
+        currentPassword: 'Nicole2026',
+        newPhone: '71999888',
+        newPassword: 'NewVaultPassword99'
+      })
+    });
+    assert.equal(rotRes.status, 200);
+    const rotBody = await rotRes.json();
+    assert.equal(rotBody.admin.phone, '71999888');
+
+    // Restore default phone & password
+    const restoreRes = await fetch(`${base}/api/admin/credentials`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${rotBody.token}`
+      },
+      body: JSON.stringify({
+        currentPassword: 'NewVaultPassword99',
+        newPhone: '72517904',
+        newPassword: 'Nicole2026'
+      })
+    });
+    assert.equal(restoreRes.status, 200);
+  } finally {
+    server.close();
+  }
+});

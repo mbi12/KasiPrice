@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,8 +19,71 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'runtime-db.json');
 
+const DEFAULT_ADMIN_PHONE = process.env.ADMIN_PHONE || '72517904';
+const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Nicole2026';
+const TOKEN_SECRET =
+  process.env.ADMIN_TOKEN_SECRET || 'nbp-couture-hmac-secret-26772517904-v2';
+
+export function normalizePhone(raw = '') {
+  const digits = String(raw).replace(/\D/g, '');
+  if (digits.startsWith('267') && digits.length > 8) {
+    return digits.slice(3);
+  }
+  if (digits.startsWith('0') && digits.length > 8) {
+    return digits.slice(1);
+  }
+  return digits;
+}
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  const derived = crypto.scryptSync(String(password), salt, 64).toString('hex');
+  return `${salt}:${derived}`;
+}
+
+function verifyPassword(password, storedHash) {
+  if (!storedHash || !storedHash.includes(':')) return false;
+  const [salt, keyHex] = storedHash.split(':');
+  const derived = crypto.scryptSync(String(password), salt, 64);
+  const keyBuf = Buffer.from(keyHex, 'hex');
+  if (derived.length !== keyBuf.length) return false;
+  return crypto.timingSafeEqual(derived, keyBuf);
+}
+
+function signAdminToken(phone) {
+  const payload = Buffer.from(
+    JSON.stringify({
+      phone: normalizePhone(phone),
+      role: 'owner',
+      exp: Date.now() + 7 * 24 * 60 * 60 * 1000
+    })
+  ).toString('base64url');
+  const sig = crypto.createHmac('sha256', TOKEN_SECRET).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+
+function verifyAdminToken(token) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  const [payload, sig] = token.split('.');
+  const expected = crypto.createHmac('sha256', TOKEN_SECRET).update(payload).digest('base64url');
+  if (sig !== expected) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    if (!parsed || parsed.exp < Date.now()) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 function createInitialDb() {
   return {
+    admin: {
+      phone: normalizePhone(DEFAULT_ADMIN_PHONE),
+      displayPhone: SALON_INFO.phoneDisplay,
+      name: 'Nicole • Parlour Owner',
+      passwordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
+      updatedAt: new Date().toISOString()
+    },
     styles: structuredClone(INITIAL_HAIRSTYLES),
     promotions: structuredClone(INITIAL_PROMOTIONS),
     bookings: structuredClone(INITIAL_BOOKINGS),
@@ -31,7 +95,12 @@ function loadDb() {
   try {
     if (fs.existsSync(DB_FILE)) {
       const parsed = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-      if (parsed && Array.isArray(parsed.styles)) return parsed;
+      if (parsed && Array.isArray(parsed.styles)) {
+        if (!parsed.admin || !parsed.admin.passwordHash) {
+          parsed.admin = createInitialDb().admin;
+        }
+        return parsed;
+      }
     }
   } catch {
     // Fall back to fresh initial state
@@ -46,8 +115,17 @@ function saveDb() {
     fs.mkdirSync(DATA_DIR, { recursive: true });
     fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
   } catch {
-    // Read-only serverless filesystem gracefully keeps in-memory state
+    // Read-only serverless filesystem keeps in-memory state gracefully
   }
+}
+
+function publicStatePayload() {
+  return {
+    styles: db.styles,
+    promotions: db.promotions,
+    bookings: db.bookings,
+    threads: db.threads
+  };
 }
 
 export function generateSmartSalonReply(userText = '', context = {}) {
@@ -58,24 +136,24 @@ export function generateSmartSalonReply(userText = '', context = {}) {
     : '';
 
   if (q.includes('price') || q.includes('how much') || q.includes('cost') || q.includes('pula')) {
-    return `Our official Knotless, Box Braids & Twists prices are:\n• Jumbo: P130 (Midback) | P160 (Butt) | P200 (Knee)\n• Large: P160 | P200 | P250\n• Medium: P180 | P250 | P300\n• S-Medium: P200 | P300 | P400\n• Small: P250 | P350 | P500\n• Pick n' Drop / Switch / Softdread: Flat P250! 💙${promoHint}`;
+    return `Our official Knotless, Box Braids & Twists prices are:\n• Jumbo: P130 (Midback) | P160 (Butt) | P200 (Knee)\n• Large: P160 | P200 | P250\n• Medium: P180 | P250 | P300\n• S-Medium: P200 | P300 | P400\n• Small: P250 | P350 | P500\n• Pick n' Drop / Switch / Softdread: Flat P250!${promoHint}`;
   }
   if (q.includes('location') || q.includes('where') || q.includes('address') || q.includes('gaborone') || q.includes('house')) {
-    return `We are based in ${SALON_INFO.location} (${SALON_INFO.hours})! 🚗 Need us to come to you? Select "VIP House-Call (P80)" when booking, or WhatsApp/call us on ${SALON_INFO.phoneDisplay}.`;
+    return `We are based in ${SALON_INFO.location} (${SALON_INFO.hours})! Need us to come to you? Select "VIP Private House-Call (+P80)" when booking, or WhatsApp/call us on ${SALON_INFO.phoneDisplay}.`;
   }
   if (q.includes('pack') || q.includes('hair') || q.includes('expression') || q.includes('bring')) {
-    return `Great question queen! 🛍️ Usually:\n• Jumbo/Large: 4–5 packs\n• Medium: 5–6 packs\n• S-Medium/Small: 6–8 packs.\nWant us to supply the hair for you? Just tick "Braiding Hair Packs Provided (+P120)" in the Book tab!`;
+    return `Packs guide:\n• Jumbo/Large: 4–5 packs\n• Medium: 5–6 packs\n• S-Medium/Small: 6–8 packs.\nWant us to supply the hair for you? Tick "Premium Braiding Packs Supplied (+P120)" in Reserve!`;
   }
   if (q.includes('deposit') || q.includes('pay') || q.includes('orange') || q.includes('myzaka') || q.includes('smega')) {
-    return `You can secure your chair with a 30% deposit via Orange Money, MyZaka, or Smega to ${SALON_INFO.phoneRaw} (${SALON_INFO.name}), or choose Pay at Salon! 💎`;
+    return `You can secure your chair with a 30% deposit via Orange Money, MyZaka, or Smega to ${SALON_INFO.phoneRaw} (${SALON_INFO.name}), or choose Pay at Parlour!`;
   }
   if (q.includes('available') || q.includes('slot') || q.includes('today') || q.includes('tomorrow') || q.includes('book')) {
-    return `Yes queen, we have open chairs from 07:30 to 16:30! 📅 Tap the "Book" tab below to lock in your exact style, size, length & stylist — you'll get an instant Digital Appointment Pass!${promoHint}`;
+    return `We have open chairs from 07:30 to 16:30! Tap "Reserve" below to lock in your exact style, size, length & stylist — you'll receive an instant Holographic VIP Pass!${promoHint}`;
   }
   if (context.styleName) {
-    return `Love your taste! 😍 "${context.styleName}" is one of our absolute favourites. Would you like Midback, Butt Length, or Knee Length? I can help you lock in a chair right away! 💙`;
+    return `Gorgeous choice! "${context.styleName}" is one of our signature looks. Would you like Midback, Butt Length, or Knee Length? Tap "Reserve" anytime to lock your chair!`;
   }
-  return `Thank you love! 👑💙 We've received your message at Nicole Beauty Parlour (${SALON_INFO.phoneDisplay}). Let me know your preferred braid style, size & date — or tap "Book" anytime to reserve your chair!`;
+  return `Thank you! We've received your message at Nicole Beauty Parlour (${SALON_INFO.phoneDisplay}). Let us know your preferred braid style, size & date — or tap "Reserve" anytime!`;
 }
 
 export function createApp() {
@@ -84,11 +162,10 @@ export function createApp() {
   app.disable('x-powered-by');
   app.use(express.json({ limit: '12mb' }));
 
-  // Permissive CORS & iframe-friendly headers for Arena live preview & mobile WebViews
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     next();
   });
@@ -105,6 +182,92 @@ export function createApp() {
     });
   });
 
+  /* ================= ADMIN AUTHENTICATION ENDPOINTS ================= */
+  app.post('/api/admin/login', (req, res) => {
+    const { phone, password } = req.body || {};
+    const normalizedInput = normalizePhone(phone);
+    if (!normalizedInput || !password) {
+      return res.status(400).json({ error: 'Phone number and password are required.' });
+    }
+
+    const expectedPhone = normalizePhone(db.admin?.phone || DEFAULT_ADMIN_PHONE);
+    const passwordOk = verifyPassword(password, db.admin?.passwordHash);
+
+    if (normalizedInput !== expectedPhone || !passwordOk) {
+      return res.status(401).json({ error: 'Invalid admin phone number or password.' });
+    }
+
+    const token = signAdminToken(expectedPhone);
+    return res.json({
+      ok: true,
+      token,
+      admin: {
+        name: db.admin?.name || 'Nicole • Parlour Owner',
+        phone: expectedPhone,
+        displayPhone: `+267 ${expectedPhone}`
+      }
+    });
+  });
+
+  app.get('/api/admin/session', (req, res) => {
+    const authHeader = String(req.headers.authorization || '');
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    const decoded = verifyAdminToken(token);
+    if (!decoded) {
+      return res.status(401).json({ authenticated: false });
+    }
+    return res.json({
+      authenticated: true,
+      admin: {
+        name: db.admin?.name || 'Nicole • Parlour Owner',
+        phone: decoded.phone,
+        displayPhone: `+267 ${decoded.phone}`
+      }
+    });
+  });
+
+  app.patch('/api/admin/credentials', (req, res) => {
+    const authHeader = String(req.headers.authorization || '');
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    const decoded = verifyAdminToken(token);
+    if (!decoded) {
+      return res.status(401).json({ error: 'Admin authentication required.' });
+    }
+
+    const { currentPassword, newPhone, newPassword, ownerName } = req.body || {};
+    if (!currentPassword || !verifyPassword(currentPassword, db.admin?.passwordHash)) {
+      return res.status(403).json({ error: 'Current password is incorrect.' });
+    }
+
+    if (newPhone && normalizePhone(newPhone).length >= 7) {
+      db.admin.phone = normalizePhone(newPhone);
+      db.admin.displayPhone = `+267 ${db.admin.phone}`;
+    }
+    if (newPassword) {
+      if (String(newPassword).length < 6) {
+        return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+      }
+      db.admin.passwordHash = hashPassword(newPassword);
+    }
+    if (ownerName && String(ownerName).trim()) {
+      db.admin.name = String(ownerName).trim();
+    }
+    db.admin.updatedAt = new Date().toISOString();
+    saveDb();
+
+    const freshToken = signAdminToken(db.admin.phone);
+    return res.json({
+      ok: true,
+      token: freshToken,
+      admin: {
+        name: db.admin.name,
+        phone: db.admin.phone,
+        displayPhone: db.admin.displayPhone
+      }
+    });
+  });
+
+  /* ================= CATALOG, PROMOTIONS, BOOKINGS & CHAT ================= */
   app.get('/api/pricing', (_req, res) => {
     res.json({
       currency: SALON_INFO.currency,
@@ -114,7 +277,7 @@ export function createApp() {
   });
 
   app.get('/api/state', (_req, res) => {
-    res.json(db);
+    res.json(publicStatePayload());
   });
 
   app.post('/api/styles', (req, res) => {
@@ -135,7 +298,7 @@ export function createApp() {
       priceOffset: Number(body.priceOffset || 0),
       rating: Number(body.rating || 5.0),
       reviewsCount: Number(body.reviewsCount || 1),
-      badge: body.badge || 'New Drop ✨',
+      badge: body.badge || 'New Drop',
       featured: Boolean(body.featured ?? true),
       saved: Boolean(body.saved ?? false),
       isCustom: true,
@@ -156,6 +319,33 @@ export function createApp() {
     db.styles.unshift(newStyle);
     saveDb();
     res.status(201).json(newStyle);
+  });
+
+  app.patch('/api/styles/:id', (req, res) => {
+    const item = db.styles.find((s) => s.id === req.params.id);
+    if (!item) return res.status(404).json({ error: 'Style not found' });
+    const allowed = [
+      'name',
+      'category',
+      'badge',
+      'featured',
+      'pricingMode',
+      'flatPrice',
+      'priceOffset',
+      'defaultSize',
+      'defaultLength',
+      'duration',
+      'packs',
+      'description',
+      'image'
+    ];
+    for (const key of allowed) {
+      if (req.body && req.body[key] !== undefined) {
+        item[key] = req.body[key];
+      }
+    }
+    saveDb();
+    res.json(item);
   });
 
   app.delete('/api/styles/:id', (req, res) => {
@@ -192,22 +382,21 @@ export function createApp() {
       priceHighlight: body.priceHighlight || `${Number(body.discountPercent || 15)}% OFF`,
       originalPrice: body.originalPrice || 'Limited Slots',
       validUntil: body.validUntil || '2026-12-31',
-      theme: body.theme || 'royal-sky',
+      theme: body.theme || 'obsidian-sapphire',
       active: true,
-      badge: body.badge || 'NEW ADVERT',
+      badge: body.badge || 'NEW CAMPAIGN',
       createdAt: new Date().toISOString()
     };
 
     db.promotions.unshift(promo);
 
-    // Also broadcast to VIP Deals thread automatically!
     const promoThread = db.threads.find((t) => t.id === 'thread-promos');
     if (promoThread) {
       promoThread.messages.push({
         id: `m-promo-${Date.now()}`,
         sender: 'salon',
         senderName: 'Nicole Promo Studio',
-        text: `📣 ${promo.title.toUpperCase()}! ${promo.subtitle} — Use code ${promo.code} (${promo.discountPercent}% OFF) before ${promo.validUntil}!`,
+        text: `${promo.title.toUpperCase()}! ${promo.subtitle} — Use code ${promo.code} (${promo.discountPercent}% OFF) before ${promo.validUntil}!`,
         image: promo.image,
         badge: `CODE: ${promo.code}`,
         timestamp: new Date().toTimeString().slice(0, 5),
@@ -255,6 +444,7 @@ export function createApp() {
       sizeLabel: body.sizeLabel || 'Medium',
       length: body.length || 'midback',
       lengthLabel: body.lengthLabel || 'Midback',
+      hairColor: body.hairColor || '#1B Natural Jet Black',
       stylistId: body.stylistId || 'nicole',
       stylistName: body.stylistName || 'Nicole',
       date: body.date,
@@ -287,8 +477,16 @@ export function createApp() {
   });
 
   app.post('/api/messages', (req, res) => {
-    const { threadId = 'thread-nicole', sender = 'client', senderName, text, image, badge, autoReply = true, styleName } =
-      req.body || {};
+    const {
+      threadId = 'thread-nicole',
+      sender = 'client',
+      senderName,
+      text,
+      image,
+      badge,
+      autoReply = true,
+      styleName
+    } = req.body || {};
     if (!text && !image) {
       return res.status(400).json({ error: 'Message text or image is required' });
     }
@@ -340,11 +538,9 @@ export function createApp() {
     res.status(201).json({ message, replyMessage, thread });
   });
 
-  // Static PWA & Assets
   const publicDir = path.join(__dirname, 'public');
   app.use(express.static(publicDir, { extensions: ['html'] }));
 
-  // SPA fallback
   app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
       return res.status(404).json({ error: 'API route not found' });

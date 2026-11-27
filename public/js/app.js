@@ -56,7 +56,12 @@ const ui = {
   mobileConvOpen: true,
   senderMode: 'client',
   pendingChatAttachment: null,
-  // Studio & modals
+  // Studio & Admin Vault state
+  adminPane: 'overview',
+  adminBookingQuery: '',
+  adminBookingStatus: 'All',
+  adminStyleQuery: '',
+  pendingAdminCallback: null,
   newStyleImage: '/images/style-01-honey-curly-knotless.jpg',
   newPromoCustomImage: null,
   lastFlyerBlob: null,
@@ -1619,26 +1624,224 @@ async function openFlyerPreviewModal(promo) {
   openModal('flyerModal');
 }
 
+function requireAdminAuth(callback) {
+  if (store.isAdmin()) {
+    if (typeof callback === 'function') callback();
+    return true;
+  }
+  ui.pendingAdminCallback = typeof callback === 'function' ? callback : null;
+  switchTab('studio');
+  showToast('Sign in with your Admin number & password first');
+  setTimeout(() => {
+    document.getElementById('adminPhoneInput')?.focus();
+  }, 120);
+  return false;
+}
+
+function switchAdminPane(paneId) {
+  ui.adminPane = paneId;
+  document.querySelectorAll('.admin-subtab[data-admin-pane]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.adminPane === paneId);
+  });
+  document.querySelectorAll('.admin-pane').forEach((pane) => {
+    pane.classList.toggle('hidden', pane.id !== `admin-pane-${paneId}`);
+  });
+}
+
+function openEditStyleModal(styleId) {
+  const s = store.state.styles.find((item) => item.id === styleId);
+  if (!s) return;
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  };
+  setVal('editStyleIdInput', s.id);
+  setVal('editStyleNameInput', s.name || '');
+  setVal('editStyleCategorySelect', s.category || 'Knotless Braids');
+  setVal('editStyleBadgeInput', s.badge || '');
+  setVal('editStylePricingMode', s.pricingMode || 'matrix');
+  setVal(
+    'editStyleFlatPriceInput',
+    s.pricingMode === 'flat' ? Number(s.flatPrice || 250) : Number(s.priceOffset || 0)
+  );
+  setVal('editStyleDurationInput', s.duration || '4 – 5 hrs');
+  setVal('editStylePacksInput', s.packs || '5–6 packs');
+  setVal('editStyleDescInput', s.description || '');
+  const featEl = document.getElementById('editStyleFeaturedCheck');
+  if (featEl) featEl.checked = Boolean(s.featured);
+  openModal('editStyleModal');
+}
+
+function openWalkInBookingModal() {
+  const styleSel = document.getElementById('walkInStyleSelect');
+  if (styleSel) {
+    styleSel.innerHTML = store.state.styles
+      .map(
+        (s) =>
+          `<option value="${esc(s.id)}">${esc(s.name)} (${formatPula(
+            calculateStylePrice(s, s.defaultSize, s.defaultLength)
+          )})</option>`
+      )
+      .join('');
+  }
+  const chairSel = document.getElementById('walkInStylistSelect');
+  if (chairSel) {
+    chairSel.innerHTML = STYLISTS.map(
+      (st) => `<option value="${esc(st.id)}">${esc(st.chair)} • ${esc(st.name)}</option>`
+    ).join('');
+  }
+  const dateInp = document.getElementById('walkInDateInput');
+  if (dateInp && !dateInp.value) {
+    dateInp.value = new Date().toISOString().slice(0, 10);
+  }
+  const firstStyle = store.state.styles[0];
+  const priceInp = document.getElementById('walkInPriceInput');
+  if (priceInp && firstStyle) {
+    priceInp.value = String(calculateStylePrice(firstStyle, firstStyle.defaultSize, firstStyle.defaultLength));
+  }
+  openModal('walkInModal');
+}
+
+function syncAdminUiState() {
+  const unlocked = store.isAdmin();
+  const gate = document.getElementById('adminLoginGate');
+  const suite = document.getElementById('adminUnlockedSuite');
+  if (gate) gate.classList.toggle('hidden', unlocked);
+  if (suite) suite.classList.toggle('hidden', !unlocked);
+
+  // Toggle admin-only controls in public client tabs
+  document.querySelectorAll('.admin-only-el').forEach((el) => {
+    el.classList.toggle('hidden', !unlocked);
+  });
+
+  if (!unlocked && ui.senderMode === 'salon') {
+    ui.senderMode = 'client';
+  }
+
+  // Topbar & Dock status badges
+  const topBtn = document.getElementById('topbarAdminBtn');
+  const topLbl = document.getElementById('topbarAdminLabel');
+  const topDot = document.getElementById('topbarAdminLiveDot');
+  const dockDot = document.getElementById('adminDockBadge');
+  const tileTitle = document.getElementById('quickAdminTileTitle');
+  const tileSub = document.getElementById('quickAdminTileSub');
+
+  if (topBtn) topBtn.classList.toggle('unlocked', unlocked);
+  if (topLbl) topLbl.textContent = unlocked ? 'Admin Live' : 'Admin';
+  if (topDot) topDot.classList.toggle('hidden', !unlocked);
+  if (dockDot) dockDot.classList.toggle('unlocked', unlocked);
+  if (tileTitle) tileTitle.textContent = unlocked ? 'Executive Suite' : 'Admin Panel';
+  if (tileSub) tileSub.textContent = unlocked ? 'Unlocked • Manage Salon' : 'Phone + Password Login';
+
+  if (unlocked && store.adminSession?.admin) {
+    const adm = store.adminSession.admin;
+    const idBadge = document.getElementById('adminIdentityBadge');
+    if (idBadge) {
+      idBadge.textContent = `${adm.name || 'Nicole • Parlour Owner'} (${adm.displayPhone || `+267 ${adm.phone}`})`;
+    }
+    const nameInp = document.getElementById('credOwnerNameInput');
+    const phoneInp = document.getElementById('credNewPhoneInput');
+    if (nameInp && !nameInp.value) nameInp.value = adm.name || 'Nicole • Parlour Owner';
+    if (phoneInp && !phoneInp.value) phoneInp.value = adm.phone || '72517904';
+  }
+}
+
+function getStatusPillClass(status = '') {
+  const s = status.toLowerCase();
+  if (s.includes('chair')) return 'inchair';
+  if (s.includes('complete')) return 'completed';
+  if (s.includes('cancel')) return 'cancelled';
+  return 'confirmed';
+}
+
 function renderStudioView() {
+  syncAdminUiState();
+  if (!store.isAdmin()) return;
+
+  switchAdminPane(ui.adminPane);
+
   const kpiEl = document.getElementById('studioStatsGrid');
   const promosList = document.getElementById('studioPromosList');
   const stylesList = document.getElementById('studioStylesList');
   const bookingsList = document.getElementById('studioBookingsList');
+  const chairAnalyticsEl = document.getElementById('adminChairAnalytics');
+  const recentBookingsEl = document.getElementById('adminRecentBookingsPreview');
+  const inboxSummaryEl = document.getElementById('adminInboxSummary');
 
   const styles = store.state.styles;
   const promos = store.state.promotions;
   const bookings = store.state.bookings;
-  const totalValue = bookings.reduce((sum, b) => sum + Number(b.total || 0), 0);
+  const activeBookings = bookings.filter((b) => b.status !== 'Cancelled');
+  const totalValue = activeBookings.reduce((sum, b) => sum + Number(b.total || 0), 0);
+  const totalDeposits = activeBookings.reduce((sum, b) => sum + Number(b.deposit || Math.round((b.total || 0) * 0.3)), 0);
+
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(val);
+  };
+  setTxt('adminTabBookingsCount', bookings.length);
+  setTxt('adminTabStylesCount', styles.length);
+  setTxt('adminTabPromosCount', promos.length);
 
   if (kpiEl) {
     kpiEl.innerHTML = `
-      <div class="kpi-glass-box"><span>Live Hairstyles</span><strong>${styles.length}</strong></div>
-      <div class="kpi-glass-box"><span>Active Adverts</span><strong>${promos.filter((p) => p.active).length}</strong></div>
-      <div class="kpi-glass-box"><span>VIP Reservations</span><strong>${bookings.length}</strong></div>
       <div class="kpi-glass-box"><span>Booked Volume</span><strong>${formatPula(totalValue)}</strong></div>
+      <div class="kpi-glass-box"><span>30% Chair Deposits</span><strong>${formatPula(totalDeposits)}</strong></div>
+      <div class="kpi-glass-box"><span>VIP Reservations</span><strong>${bookings.length}</strong></div>
+      <div class="kpi-glass-box"><span>Styles / Live Promos</span><strong>${styles.length} / ${promos.filter((p) => p.active).length}</strong></div>
     `;
   }
 
+  // Chair Performance Breakdown
+  if (chairAnalyticsEl) {
+    const maxChairRev = Math.max(
+      500,
+      ...STYLISTS.map((st) =>
+        activeBookings
+          .filter((b) => b.stylistId === st.id || (b.stylistName && b.stylistName.includes(st.name.split(' ')[0])))
+          .reduce((s, b) => s + Number(b.total || 0), 0)
+      )
+    );
+
+    chairAnalyticsEl.innerHTML = STYLISTS.map((st) => {
+      const chairBookings = activeBookings.filter(
+        (b) => b.stylistId === st.id || (b.stylistName && b.stylistName.includes(st.name.split(' ')[0]))
+      );
+      const rev = chairBookings.reduce((s, b) => s + Number(b.total || 0), 0);
+      const pct = Math.max(12, Math.min(100, Math.round((rev / maxChairRev) * 100)));
+      return `
+        <div class="chair-metric-card">
+          <div class="chair-metric-top">
+            <strong>${esc(st.chair)} • ${esc(st.name)}</strong>
+            <span>${formatPula(rev)}</span>
+          </div>
+          <div class="chair-bar-track">
+            <div class="chair-bar-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="chair-metric-sub">
+            <span>${esc(st.specialty)}</span>
+            <span>${chairBookings.length} appointment${chairBookings.length === 1 ? '' : 's'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Recent Bookings Preview on Overview
+  if (recentBookingsEl) {
+    recentBookingsEl.innerHTML = bookings.slice(0, 4).map((bk) => `
+      <div class="studio-row-card">
+        <img src="${esc(bk.styleImage || '/images/style-01-honey-curly-knotless.jpg')}" alt="${esc(bk.styleName)}" />
+        <div class="studio-row-info">
+          <strong>${esc(bk.clientName)} • ${esc(bk.id)}</strong>
+          <span>${esc(bk.styleName)} • ${esc(bk.date)} ${esc(bk.time)} • ${formatPula(bk.total)}</span>
+        </div>
+        <span class="status-pill-tag ${getStatusPillClass(bk.status)}">${esc(bk.status)}</span>
+      </div>
+    `).join('');
+  }
+
+  // Promo style select inside Add Promo modal
   const promoSel = document.getElementById('promoStyleSelect');
   if (promoSel) {
     promoSel.innerHTML = styles
@@ -1646,6 +1849,7 @@ function renderStudioView() {
       .join('');
   }
 
+  // Campaigns & Posters Pane
   if (promosList) {
     promosList.innerHTML = promos
       .map(
@@ -1654,12 +1858,12 @@ function renderStudioView() {
         <img src="${esc(p.image)}" alt="${esc(p.title)}" />
         <div class="studio-row-info">
           <strong>${esc(p.title)}</strong>
-          <span>Code: ${esc(p.code)} • ${p.discountPercent}% OFF • ${p.active ? 'Live' : 'Paused'}</span>
+          <span>Code: <strong>${esc(p.code)}</strong> • ${p.discountPercent}% OFF • Valid until ${esc(p.validUntil || 'Ongoing')} • ${p.active ? 'LIVE' : 'Paused'}</span>
         </div>
         <div class="studio-row-actions">
-          <button type="button" class="mini-action-chip" data-st-flyer="${esc(p.id)}">Poster</button>
+          <button type="button" class="mini-action-chip" data-st-flyer="${esc(p.id)}">HD Poster</button>
           <button type="button" class="mini-action-chip" data-st-toggle-promo="${esc(p.id)}">${p.active ? 'Pause' : 'Resume'}</button>
-          <button type="button" class="mini-action-chip danger" data-st-del-promo="${esc(p.id)}">×</button>
+          <button type="button" class="mini-action-chip danger" data-st-del-promo="${esc(p.id)}">Delete</button>
         </div>
       </div>`
       )
@@ -1685,70 +1889,128 @@ function renderStudioView() {
     });
   }
 
+  // Catalog & Prices Pane
   if (stylesList) {
-    stylesList.innerHTML = styles
-      .slice(0, 12)
+    const q = ui.adminStyleQuery.trim().toLowerCase();
+    const filteredStyles = styles.filter(
+      (s) =>
+        !q ||
+        s.name.toLowerCase().includes(q) ||
+        (s.category || '').toLowerCase().includes(q) ||
+        (s.badge || '').toLowerCase().includes(q)
+    );
+
+    stylesList.innerHTML = filteredStyles
       .map(
         (s) => `
       <div class="studio-row-card">
         <img src="${esc(s.image)}" alt="${esc(s.name)}" />
         <div class="studio-row-info">
-          <strong>${esc(s.name)}</strong>
-          <span>${esc(s.category)} • From ${formatPula(calculateStylePrice(s, s.defaultSize, s.defaultLength))}</span>
+          <strong>${esc(s.name)} ${s.featured ? '★' : ''}</strong>
+          <span>${esc(s.category)} • ${s.pricingMode === 'flat' ? `Flat ${formatPula(s.flatPrice || 250)}` : `From ${formatPula(calculateStylePrice(s, s.defaultSize, s.defaultLength))}`} • ${esc(s.duration)}</span>
         </div>
         <div class="studio-row-actions">
-          <button type="button" class="mini-action-chip" data-st-view-style="${esc(s.id)}">View</button>
-          ${
-            s.isCustom
-              ? `<button type="button" class="mini-action-chip danger" data-st-del-style="${esc(s.id)}">Delete</button>`
-              : ''
-          }
+          <button type="button" class="mini-action-chip" data-st-feat-style="${esc(s.id)}" title="Toggle 3D Runway Spotlight">${s.featured ? 'Runway ★' : '+ Runway'}</button>
+          <button type="button" class="mini-action-chip" data-st-edit-style="${esc(s.id)}">Edit / Price</button>
+          <button type="button" class="mini-action-chip danger" data-st-del-style="${esc(s.id)}">Delete</button>
         </div>
       </div>`
       )
       .join('');
 
-    stylesList.querySelectorAll('[data-st-view-style]').forEach((b) => {
-      b.addEventListener('click', () => openStyleConfigurator(b.dataset.stViewStyle));
+    stylesList.querySelectorAll('[data-st-feat-style]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        const target = styles.find((x) => x.id === b.dataset.stFeatStyle);
+        if (!target) return;
+        await store.updateStyle(target.id, { featured: !target.featured });
+        showToast(target.featured ? 'Added to 3D Runway!' : 'Removed from 3D Runway');
+      });
+    });
+    stylesList.querySelectorAll('[data-st-edit-style]').forEach((b) => {
+      b.addEventListener('click', () => openEditStyleModal(b.dataset.stEditStyle));
     });
     stylesList.querySelectorAll('[data-st-del-style]').forEach((b) => {
       b.addEventListener('click', async () => {
+        if (styles.length <= 2) {
+          showToast('Keep at least 2 hairstyles in catalog');
+          return;
+        }
         await store.deleteStyle(b.dataset.stDelStyle);
-        showToast('Custom hairstyle deleted');
+        showToast('Hairstyle removed from catalog');
       });
     });
   }
 
+  // Reservations & Walk-Ins Pane
   if (bookingsList) {
-    bookingsList.innerHTML = bookings
-      .map(
-        (bk) => `
-      <div class="studio-row-card">
-        <img src="${esc(bk.styleImage || '/images/style-01-honey-curly-knotless.jpg')}" alt="${esc(bk.styleName)}" />
-        <div class="studio-row-info">
-          <strong>${esc(bk.clientName)} • ${esc(bk.styleName)} (${esc(bk.id)})</strong>
-          <span>${esc(bk.date)} at ${esc(bk.time)} • ${esc(bk.stylistName)} • ${formatPula(bk.total)} • <strong>${esc(bk.status)}</strong></span>
-        </div>
-        <div class="studio-row-actions">
-          <button type="button" class="mini-action-chip" data-st-pass="${esc(bk.id)}">VIP Pass</button>
-          <button type="button" class="mini-action-chip" data-st-complete="${esc(bk.id)}">Mark Done</button>
-        </div>
-      </div>`
-      )
-      .join('');
+    const bq = ui.adminBookingQuery.trim().toLowerCase();
+    const filteredBookings = bookings.filter((bk) => {
+      if (ui.adminBookingStatus !== 'All' && bk.status !== ui.adminBookingStatus) return false;
+      if (!bq) return true;
+      return (
+        (bk.clientName || '').toLowerCase().includes(bq) ||
+        (bk.clientPhone || '').toLowerCase().includes(bq) ||
+        (bk.id || '').toLowerCase().includes(bq) ||
+        (bk.styleName || '').toLowerCase().includes(bq)
+      );
+    });
 
+    bookingsList.innerHTML = filteredBookings.length
+      ? filteredBookings
+          .map((bk) => {
+            const cleanWa = String(bk.clientPhone || SALON_INFO.phoneRaw).replace(/\D/g, '');
+            const waDest = cleanWa.length === 8 ? `267${cleanWa}` : cleanWa || SALON_INFO.phoneIntl;
+            return `
+          <div class="studio-row-card">
+            <img src="${esc(bk.styleImage || '/images/style-01-honey-curly-knotless.jpg')}" alt="${esc(bk.styleName)}" />
+            <div class="studio-row-info">
+              <strong>${esc(bk.clientName)} (${esc(bk.clientPhone || 'Walk-in')}) • <span style="color:var(--cyan)">${esc(bk.id)}</span></strong>
+              <span>${esc(bk.styleName)} • ${esc(bk.date)} at ${esc(bk.time)} • ${esc(bk.stylistName)} • <strong>${formatPula(bk.total)}</strong> (Dep: ${formatPula(bk.deposit || Math.round((bk.total || 0) * 0.3))})</span>
+            </div>
+            <div class="studio-row-actions">
+              <select class="glass-select" data-st-status-sel="${esc(bk.id)}" aria-label="Booking status">
+                ${['Confirmed', 'In Chair', 'Completed', 'Cancelled']
+                  .map((st) => `<option value="${st}" ${bk.status === st ? 'selected' : ''}>${st}</option>`)
+                  .join('')}
+              </select>
+              <button type="button" class="mini-action-chip" data-st-pass="${esc(bk.id)}">VIP Pass</button>
+              <a href="https://wa.me/${waDest}?text=${encodeURIComponent(`Dumelang ${bk.clientName}! Nicole Beauty Parlour here regarding your appointment ${bk.id} (${bk.styleName} on ${bk.date} at ${bk.time}).`)}" target="_blank" rel="noopener noreferrer" class="mini-action-chip">WhatsApp</a>
+            </div>
+          </div>`;
+          })
+          .join('')
+      : `<p class="admin-helper-copy">No reservations match the current filter.</p>`;
+
+    bookingsList.querySelectorAll('[data-st-status-sel]').forEach((sel) => {
+      sel.addEventListener('change', async (e) => {
+        const newStatus = e.target.value;
+        await store.updateBookingStatus(sel.dataset.stStatusSel, { status: newStatus });
+        showToast(`Booking ${sel.dataset.stStatusSel} → ${newStatus}`);
+      });
+    });
     bookingsList.querySelectorAll('[data-st-pass]').forEach((b) => {
       b.addEventListener('click', () => {
         const bk = bookings.find((x) => x.id === b.dataset.stPass);
         if (bk) openBookingPassModal(bk);
       });
     });
-    bookingsList.querySelectorAll('[data-st-complete]').forEach((b) => {
-      b.addEventListener('click', async () => {
-        await store.updateBookingStatus(b.dataset.stComplete, { status: 'Completed' });
-        showToast('Chair appointment marked Completed');
-      });
-    });
+  }
+
+  // Inbox Summary inside Security & Inbox Pane
+  if (inboxSummaryEl) {
+    inboxSummaryEl.innerHTML = store.state.threads
+      .map((t) => {
+        const last = t.messages[t.messages.length - 1];
+        return `
+        <div class="inbox-mini-row">
+          <div>
+            <strong>${esc(t.name)}</strong>
+            <span>${esc((last?.text || 'No messages yet').slice(0, 68))}</span>
+          </div>
+          <span class="status-pill-tag confirmed">${t.messages.length} msgs</span>
+        </div>`;
+      })
+      .join('');
   }
 }
 
@@ -1856,11 +2118,247 @@ function bindEvents() {
   document.getElementById('marketMirrorBtn')?.addEventListener('click', () => openMirrorModal('quiz'));
 
   document.getElementById('openPriceSheetBtn')?.addEventListener('click', () => openModal('priceSheetModal'));
+  document.getElementById('quickPriceTileBtn')?.addEventListener('click', () => openModal('priceSheetModal'));
   document.getElementById('viewPosterInlineBtn')?.addEventListener('click', () => openModal('priceSheetModal'));
   document.getElementById('marketPriceCardLink')?.addEventListener('click', () => openModal('priceSheetModal'));
   document.getElementById('bookFromPriceModalBtn')?.addEventListener('click', () => {
     closeModal('priceSheetModal');
     switchTab('book');
+  });
+
+  // Topbar & Runway Admin Panel triggers
+  document.getElementById('topbarAdminBtn')?.addEventListener('click', () => switchTab('studio'));
+  document.getElementById('quickAdminTileBtn')?.addEventListener('click', () => switchTab('studio'));
+
+  // ================= ADMIN PHONE + PASSWORD LOGIN GATE EVENTS =================
+  document.getElementById('toggleAdminPassBtn')?.addEventListener('click', () => {
+    const inp = document.getElementById('adminPasswordInput');
+    const openIcon = document.getElementById('eyeOpenIcon');
+    const closedIcon = document.getElementById('eyeClosedIcon');
+    if (!inp) return;
+    const reveal = inp.type === 'password';
+    inp.type = reveal ? 'text' : 'password';
+    openIcon?.classList.toggle('hidden', reveal);
+    closedIcon?.classList.toggle('hidden', !reveal);
+  });
+
+  document.getElementById('toggleStarterCredsBtn')?.addEventListener('click', () => {
+    document.getElementById('starterCredsBox')?.classList.toggle('hidden');
+  });
+
+  document.getElementById('fillStarterCredsBtn')?.addEventListener('click', () => {
+    const ph = document.getElementById('adminPhoneInput');
+    const pw = document.getElementById('adminPasswordInput');
+    if (ph) ph.value = '72517904';
+    if (pw) pw.value = 'Nicole2026';
+    document.getElementById('adminLoginError')?.classList.add('hidden');
+    showToast('Starter credentials filled — tap Sign In!');
+  });
+
+  document.getElementById('adminLoginForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phone = document.getElementById('adminPhoneInput')?.value.trim() || '';
+    const password = document.getElementById('adminPasswordInput')?.value || '';
+    const remember = Boolean(document.getElementById('adminRememberCheckbox')?.checked);
+    const errEl = document.getElementById('adminLoginError');
+    const submitBtn = document.getElementById('adminLoginSubmitBtn');
+    const card = document.getElementById('adminVaultCard');
+
+    if (errEl) errEl.classList.add('hidden');
+    if (submitBtn) submitBtn.disabled = true;
+
+    const result = await store.loginAdmin({ phone, password, remember });
+    if (submitBtn) submitBtn.disabled = false;
+
+    if (!result.ok) {
+      if (errEl) {
+        errEl.textContent = result.error || 'Incorrect phone number or password.';
+        errEl.classList.remove('hidden');
+      }
+      if (card) {
+        card.classList.remove('shake');
+        void card.offsetWidth;
+        card.classList.add('shake');
+      }
+      return;
+    }
+
+    const pwInput = document.getElementById('adminPasswordInput');
+    if (pwInput) pwInput.value = '';
+    launchIceConfetti();
+    showToast(`Welcome back, ${result.admin?.name || 'Nicole'}!`);
+    renderAll();
+
+    if (typeof ui.pendingAdminCallback === 'function') {
+      const cb = ui.pendingAdminCallback;
+      ui.pendingAdminCallback = null;
+      cb();
+    }
+  });
+
+  document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+    store.logoutAdmin();
+    ui.senderMode = 'client';
+    showToast('Admin Panel locked');
+    renderAll();
+  });
+
+  // Admin Sub-navigation & Filters
+  document.querySelectorAll('.admin-subtab[data-admin-pane]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      ui.adminPane = btn.dataset.adminPane;
+      renderStudioView();
+    });
+  });
+  document.querySelectorAll('[data-goto-admin-pane]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      ui.adminPane = btn.dataset.gotoAdminPane;
+      renderStudioView();
+    });
+  });
+
+  document.getElementById('adminBookingSearchInput')?.addEventListener('input', (e) => {
+    ui.adminBookingQuery = e.target.value;
+    renderStudioView();
+  });
+  document.getElementById('adminBookingStatusFilter')?.addEventListener('change', (e) => {
+    ui.adminBookingStatus = e.target.value;
+    renderStudioView();
+  });
+  document.getElementById('adminStyleSearchInput')?.addEventListener('input', (e) => {
+    ui.adminStyleQuery = e.target.value;
+    renderStudioView();
+  });
+
+  // Admin Edit Hairstyle Form
+  document.getElementById('editStyleForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!requireAdminAuth()) return;
+    const styleId = document.getElementById('editStyleIdInput')?.value;
+    if (!styleId) return;
+    const pricingMode = document.getElementById('editStylePricingMode')?.value || 'matrix';
+    const numVal = Number(document.getElementById('editStyleFlatPriceInput')?.value || 0);
+    const patch = {
+      name: document.getElementById('editStyleNameInput')?.value.trim(),
+      category: document.getElementById('editStyleCategorySelect')?.value,
+      badge: document.getElementById('editStyleBadgeInput')?.value.trim(),
+      pricingMode,
+      flatPrice: pricingMode === 'flat' ? Math.max(50, numVal || 250) : undefined,
+      priceOffset: pricingMode === 'matrix' ? numVal : 0,
+      duration: document.getElementById('editStyleDurationInput')?.value.trim(),
+      packs: document.getElementById('editStylePacksInput')?.value.trim(),
+      description: document.getElementById('editStyleDescInput')?.value.trim(),
+      featured: Boolean(document.getElementById('editStyleFeaturedCheck')?.checked)
+    };
+    await store.updateStyle(styleId, patch);
+    closeModal('editStyleModal');
+    showToast(`Updated "${patch.name}"!`);
+  });
+
+  // Admin Walk-In Booking Modal
+  document.getElementById('adminOpenWalkInBtn')?.addEventListener('click', () =>
+    requireAdminAuth(openWalkInBookingModal)
+  );
+  document.getElementById('adminWalkInInlineBtn')?.addEventListener('click', () =>
+    requireAdminAuth(openWalkInBookingModal)
+  );
+  document.getElementById('walkInStyleSelect')?.addEventListener('change', (e) => {
+    const st = store.state.styles.find((x) => x.id === e.target.value);
+    const prInp = document.getElementById('walkInPriceInput');
+    if (st && prInp) {
+      prInp.value = String(calculateStylePrice(st, st.defaultSize, st.defaultLength));
+    }
+  });
+  document.getElementById('walkInForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!requireAdminAuth()) return;
+    const clientName = document.getElementById('walkInClientName')?.value.trim();
+    const clientPhone = document.getElementById('walkInClientPhone')?.value.trim();
+    const styleId = document.getElementById('walkInStyleSelect')?.value;
+    const stylistId = document.getElementById('walkInStylistSelect')?.value;
+    const total = Math.max(50, Number(document.getElementById('walkInPriceInput')?.value || 250));
+    const date = document.getElementById('walkInDateInput')?.value;
+    const time = document.getElementById('walkInTimeSelect')?.value || '09:00';
+    const status = document.getElementById('walkInStatusSelect')?.value || 'In Chair';
+
+    const style = store.state.styles.find((s) => s.id === styleId) || store.state.styles[0];
+    const stylist = STYLISTS.find((s) => s.id === stylistId) || STYLISTS[0];
+
+    const bk = await store.createBooking({
+      clientName,
+      clientPhone,
+      styleId: style.id,
+      styleName: style.name,
+      styleImage: style.image,
+      size: style.defaultSize || 'medium',
+      sizeLabel: 'Parlour Desk',
+      length: style.defaultLength || 'midback',
+      lengthLabel: 'Standard',
+      hairColor: '#1B Natural Jet Black',
+      stylistId: stylist.id,
+      stylistName: stylist.name,
+      date,
+      time,
+      addOns: [],
+      subtotal: total,
+      discount: 0,
+      total,
+      deposit: Math.round(total * 0.3),
+      status,
+      paymentMethod: 'Admin Walk-In / Parlour Desk'
+    });
+    closeModal('walkInModal');
+    e.target.reset();
+    ui.adminPane = 'bookings';
+    renderStudioView();
+    showToast(`Walk-In Pass ${bk.id} created!`);
+  });
+
+  // Admin Jump to Live Concierge as Nicole Desk
+  document.getElementById('adminJumpToSalonChatBtn')?.addEventListener('click', () => {
+    if (!requireAdminAuth()) return;
+    ui.senderMode = 'salon';
+    ui.activeThreadId = 'thread-nicole';
+    switchTab('messages');
+    renderMessenger();
+    showToast('Switched to Nicole Salon Desk mode');
+  });
+
+  // Admin Security Credentials Form (Update Phone Number & Password)
+  document.getElementById('adminCredentialsForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!requireAdminAuth()) return;
+    const ownerName = document.getElementById('credOwnerNameInput')?.value.trim();
+    const newPhone = document.getElementById('credNewPhoneInput')?.value.trim();
+    const currentPassword = document.getElementById('credCurrentPasswordInput')?.value || '';
+    const newPassword = document.getElementById('credNewPasswordInput')?.value || '';
+    const msgEl = document.getElementById('credFeedbackMsg');
+
+    const res = await store.updateAdminCredentials({
+      currentPassword,
+      newPhone,
+      newPassword,
+      ownerName
+    });
+
+    if (!res.ok) {
+      if (msgEl) {
+        msgEl.style.color = '#f87171';
+        msgEl.textContent = res.error || 'Failed to update credentials.';
+      }
+      return;
+    }
+
+    if (msgEl) {
+      msgEl.style.color = '#4ade80';
+      msgEl.textContent = `Saved! Active Admin Login Number: ${res.admin.phone}`;
+    }
+    const curInp = document.getElementById('credCurrentPasswordInput');
+    const newInp = document.getElementById('credNewPasswordInput');
+    if (curInp) curInp.value = '';
+    if (newInp) newInp.value = '';
+    showToast('Admin login number & password updated!');
+    renderAll();
   });
 
   document.getElementById('openNotificationsBtn')?.addEventListener('click', () => {
@@ -2091,9 +2589,8 @@ function bindEvents() {
     }
   });
 
-  // Add Hairstyle Modal triggers & submission
-  const openAddStyle = () => openModal('addStyleModal');
-  document.getElementById('quickAddStyleBtn')?.addEventListener('click', openAddStyle);
+  // Add Hairstyle Modal triggers & submission (Protected behind Admin Auth!)
+  const openAddStyle = () => requireAdminAuth(() => openModal('addStyleModal'));
   document.getElementById('marketAddStyleBtn')?.addEventListener('click', openAddStyle);
   document.getElementById('studioAddStyleBtn')?.addEventListener('click', openAddStyle);
   document.getElementById('studioNewStyleInlineBtn')?.addEventListener('click', openAddStyle);
@@ -2144,13 +2641,13 @@ function bindEvents() {
     e.target.reset();
   });
 
-  // Launch Advert & Live Poster Studio triggers
-  const openPromoStudio = () => {
-    ui.newPromoCustomImage = null;
-    openModal('addPromoModal');
-    refreshLivePromoCanvas();
-  };
-  document.getElementById('quickAdvertiseBtn')?.addEventListener('click', openPromoStudio);
+  // Launch Advert & Live Poster Studio triggers (Protected behind Admin Auth!)
+  const openPromoStudio = () =>
+    requireAdminAuth(() => {
+      ui.newPromoCustomImage = null;
+      openModal('addPromoModal');
+      refreshLivePromoCanvas();
+    });
   document.getElementById('newPromoFromHomeBtn')?.addEventListener('click', openPromoStudio);
   document.getElementById('studioLaunchPromoBtn')?.addEventListener('click', openPromoStudio);
   document.getElementById('studioNewAdInlineBtn')?.addEventListener('click', openPromoStudio);

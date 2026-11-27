@@ -1,4 +1,4 @@
-// Hybrid Persistent Store: LocalStorage + REST API + Live BroadcastChannel Cross-Tab Sync
+// Hybrid Persistent Store: LocalStorage + REST API + Admin Phone/Password Auth + BroadcastChannel Sync
 import {
   SALON_INFO,
   INITIAL_HAIRSTYLES,
@@ -7,8 +7,34 @@ import {
   INITIAL_THREADS
 } from './data.js';
 
-const STORAGE_KEY = 'nicole_beauty_parlour_state_v2';
-const CHANNEL_NAME = 'nicole_beauty_parlour_channel_v2';
+const STORAGE_KEY = 'nicole_beauty_parlour_state_v3';
+const CHANNEL_NAME = 'nicole_beauty_parlour_channel_v3';
+const ADMIN_SESSION_KEY = 'nbp_admin_session_v3';
+const ADMIN_LOCAL_CRED_KEY = 'nbp_admin_offline_cred_v3';
+
+export function normalizePhoneClient(raw = '') {
+  const digits = String(raw).replace(/\D/g, '');
+  if (digits.startsWith('267') && digits.length > 8) return digits.slice(3);
+  if (digits.startsWith('0') && digits.length > 8) return digits.slice(1);
+  return digits;
+}
+
+async function sha256Hex(input) {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const buf = new TextEncoder().encode(input);
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+  // Simple fallback if subtle crypto unavailable on non-HTTPS LAN IP
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return String(h >>> 0);
+}
 
 function clone(val) {
   return JSON.parse(JSON.stringify(val));
@@ -24,7 +50,7 @@ function getDefaultState() {
       {
         id: 'notif-welcome',
         title: 'Welcome to Nicole Beauty Parlour',
-        body: 'Apply code SLAY15 for 15% OFF S-Medium & Small Knotless Braids — or try our new Virtual Style Mirror!',
+        body: 'Apply code SLAY15 for 15% OFF S-Medium & Small Knotless Braids — or try our Virtual Style Mirror!',
         time: 'Just now',
         unread: true,
         type: 'promo'
@@ -45,6 +71,7 @@ export class SalonStore {
   constructor() {
     this.listeners = new Set();
     this.state = this.loadLocal();
+    this.adminSession = this.loadAdminSession();
     this.channel =
       typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
 
@@ -52,12 +79,232 @@ export class SalonStore {
       this.channel.onmessage = (event) => {
         if (event.data && event.data.type === 'STATE_UPDATED') {
           this.state = this.loadLocal();
+          this.adminSession = this.loadAdminSession();
           this.emit();
         }
       };
     }
   }
 
+  /* ================= ADMIN AUTHENTICATION ================= */
+  loadAdminSession() {
+    try {
+      const raw =
+        localStorage.getItem(ADMIN_SESSION_KEY) || sessionStorage.getItem(ADMIN_SESSION_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.authenticated) return parsed;
+      }
+    } catch {
+      // Ignore storage error
+    }
+    return { authenticated: false, token: null, admin: null };
+  }
+
+  saveAdminSession(session, remember = true) {
+    this.adminSession = session;
+    try {
+      localStorage.removeItem(ADMIN_SESSION_KEY);
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      if (session && session.authenticated) {
+        const target = remember ? localStorage : sessionStorage;
+        target.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+      }
+      if (this.channel) {
+        this.channel.postMessage({ type: 'STATE_UPDATED', ts: Date.now() });
+      }
+    } catch {
+      // Ignore
+    }
+    this.emit();
+  }
+
+  isAdmin() {
+    return Boolean(this.adminSession?.authenticated);
+  }
+
+  getAuthHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    if (this.adminSession?.token) {
+      headers.Authorization = `Bearer ${this.adminSession.token}`;
+    }
+    return headers;
+  }
+
+  async ensureLocalCredentialSeed() {
+    try {
+      const existing = localStorage.getItem(ADMIN_LOCAL_CRED_KEY);
+      if (existing) return JSON.parse(existing);
+      const digest = await sha256Hex('72517904::Nicole2026::nbp_salt');
+      const seed = {
+        phone: '72517904',
+        name: 'Nicole • Parlour Owner',
+        digest
+      };
+      localStorage.setItem(ADMIN_LOCAL_CRED_KEY, JSON.stringify(seed));
+      return seed;
+    } catch {
+      return { phone: '72517904', name: 'Nicole • Parlour Owner', digest: '' };
+    }
+  }
+
+  async loginAdmin({ phone, password, remember = true }) {
+    const cleanPhone = normalizePhoneClient(phone);
+    if (!cleanPhone || !password) {
+      return { ok: false, error: 'Please enter both your admin phone number and password.' };
+    }
+
+    // 1. Try server verification first
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: cleanPhone, password })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const digest = await sha256Hex(`${cleanPhone}::${password}::nbp_salt`);
+        try {
+          localStorage.setItem(
+            ADMIN_LOCAL_CRED_KEY,
+            JSON.stringify({ phone: cleanPhone, name: data.admin?.name || 'Nicole', digest })
+          );
+        } catch {
+          // Ignore
+        }
+        const session = {
+          authenticated: true,
+          token: data.token,
+          admin: data.admin || {
+            name: 'Nicole • Parlour Owner',
+            phone: cleanPhone,
+            displayPhone: `+267 ${cleanPhone}`
+          }
+        };
+        this.saveAdminSession(session, remember);
+        return { ok: true, admin: session.admin };
+      }
+
+      // Check if local custom password was set on serverless cold-start
+      const localCred = await this.ensureLocalCredentialSeed();
+      const candidateDigest = await sha256Hex(`${cleanPhone}::${password}::nbp_salt`);
+      if (localCred.phone === cleanPhone && localCred.digest === candidateDigest) {
+        const session = {
+          authenticated: true,
+          token: 'local-verified-session',
+          admin: {
+            name: localCred.name || 'Nicole • Parlour Owner',
+            phone: cleanPhone,
+            displayPhone: `+267 ${cleanPhone}`
+          }
+        };
+        this.saveAdminSession(session, remember);
+        return { ok: true, admin: session.admin };
+      }
+
+      const errData = await res.json().catch(() => ({}));
+      return { ok: false, error: errData.error || 'Incorrect phone number or password.' };
+    } catch {
+      // Offline native APK / iOS fallback
+      const localCred = await this.ensureLocalCredentialSeed();
+      const candidateDigest = await sha256Hex(`${cleanPhone}::${password}::nbp_salt`);
+      if (localCred.phone === cleanPhone && localCred.digest === candidateDigest) {
+        const session = {
+          authenticated: true,
+          token: 'offline-owner-session',
+          admin: {
+            name: localCred.name || 'Nicole • Parlour Owner',
+            phone: cleanPhone,
+            displayPhone: `+267 ${cleanPhone}`
+          }
+        };
+        this.saveAdminSession(session, remember);
+        return { ok: true, admin: session.admin };
+      }
+      return { ok: false, error: 'Incorrect phone number or password.' };
+    }
+  }
+
+  logoutAdmin() {
+    this.saveAdminSession({ authenticated: false, token: null, admin: null }, true);
+  }
+
+  async updateAdminCredentials({ currentPassword, newPhone, newPassword, ownerName }) {
+    const cleanPhone = normalizePhoneClient(
+      newPhone || this.adminSession?.admin?.phone || '72517904'
+    );
+    if (cleanPhone.length < 7) {
+      return { ok: false, error: 'Please enter a valid phone number (at least 7 digits).' };
+    }
+    if (newPassword && String(newPassword).length < 6) {
+      return { ok: false, error: 'New password must be at least 6 characters.' };
+    }
+
+    // Verify against server if reachable
+    try {
+      const res = await fetch('/api/admin/credentials', {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ currentPassword, newPhone: cleanPhone, newPassword, ownerName })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const finalPass = newPassword || currentPassword;
+        const digest = await sha256Hex(`${cleanPhone}::${finalPass}::nbp_salt`);
+        localStorage.setItem(
+          ADMIN_LOCAL_CRED_KEY,
+          JSON.stringify({ phone: cleanPhone, name: data.admin.name, digest })
+        );
+        this.saveAdminSession(
+          {
+            authenticated: true,
+            token: data.token,
+            admin: data.admin
+          },
+          true
+        );
+        return { ok: true, admin: data.admin };
+      }
+      const errBody = await res.json().catch(() => ({}));
+      if (res.status === 403 || res.status === 400) {
+        return { ok: false, error: errBody.error || 'Could not update credentials.' };
+      }
+    } catch {
+      // Offline fallback below
+    }
+
+    // Local verification fallback (for serverless cold resets or offline native app)
+    const localCred = await this.ensureLocalCredentialSeed();
+    const curDigest = await sha256Hex(`${localCred.phone}::${currentPassword}::nbp_salt`);
+    if (curDigest !== localCred.digest) {
+      return { ok: false, error: 'Current password is incorrect.' };
+    }
+
+    const finalPass = newPassword || currentPassword;
+    const newDigest = await sha256Hex(`${cleanPhone}::${finalPass}::nbp_salt`);
+    const updatedName = (ownerName && ownerName.trim()) || localCred.name || 'Nicole • Parlour Owner';
+    localStorage.setItem(
+      ADMIN_LOCAL_CRED_KEY,
+      JSON.stringify({ phone: cleanPhone, name: updatedName, digest: newDigest })
+    );
+    const admin = {
+      name: updatedName,
+      phone: cleanPhone,
+      displayPhone: `+267 ${cleanPhone}`
+    };
+    this.saveAdminSession(
+      {
+        authenticated: true,
+        token: this.adminSession?.token || 'local-verified-session',
+        admin
+      },
+      true
+    );
+    return { ok: true, admin };
+  }
+
+  /* ================= STATE PERSISTENCE ================= */
   loadLocal() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -124,7 +371,7 @@ export class SalonStore {
       }
       this.saveLocal(false);
     } catch {
-      // Offline / native WebView mode works seamlessly from local store
+      // Offline mode works seamlessly
     }
   }
 
@@ -176,7 +423,7 @@ export class SalonStore {
     try {
       await fetch('/api/styles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(newStyle)
       });
     } catch {
@@ -186,11 +433,31 @@ export class SalonStore {
     return newStyle;
   }
 
+  async updateStyle(styleId, patch) {
+    const item = this.state.styles.find((s) => s.id === styleId);
+    if (!item) return null;
+    Object.assign(item, patch);
+    this.saveLocal();
+    try {
+      await fetch(`/api/styles/${encodeURIComponent(styleId)}`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(patch)
+      });
+    } catch {
+      // Synced locally
+    }
+    return item;
+  }
+
   async deleteStyle(styleId) {
     this.state.styles = this.state.styles.filter((s) => s.id !== styleId);
     this.saveLocal();
     try {
-      await fetch(`/api/styles/${encodeURIComponent(styleId)}`, { method: 'DELETE' });
+      await fetch(`/api/styles/${encodeURIComponent(styleId)}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
     } catch {
       // Removed locally
     }
@@ -235,7 +502,7 @@ export class SalonStore {
     try {
       await fetch('/api/promotions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(promo)
       });
     } catch {
@@ -253,7 +520,7 @@ export class SalonStore {
     try {
       await fetch(`/api/promotions/${encodeURIComponent(promoId)}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({ active: promo.active })
       });
     } catch {
@@ -266,7 +533,10 @@ export class SalonStore {
     this.state.promotions = this.state.promotions.filter((p) => p.id !== promoId);
     this.saveLocal();
     try {
-      await fetch(`/api/promotions/${encodeURIComponent(promoId)}`, { method: 'DELETE' });
+      await fetch(`/api/promotions/${encodeURIComponent(promoId)}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
     } catch {
       // Removed locally
     }
@@ -333,7 +603,7 @@ export class SalonStore {
     try {
       await fetch(`/api/bookings/${encodeURIComponent(bookingId)}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(patch)
       });
     } catch {

@@ -68,6 +68,15 @@ create table if not exists public.nbp_messages (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.nbp_admins (
+  id uuid primary key default gen_random_uuid(),
+  phone text unique not null,
+  owner_name text not null default 'Nicole • Parlour Owner',
+  password_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.nbp_admins enable row level security;
 alter table public.nbp_styles enable row level security;
 alter table public.nbp_promotions enable row level security;
 alter table public.nbp_bookings enable row level security;
