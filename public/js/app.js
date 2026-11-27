@@ -1904,26 +1904,27 @@ async function runAnimatedSplashScreen() {
     setTimeout(() => splash.remove(), 520);
   };
 
-  // Allow tap-to-skip after initial signature sweep
+  // Allow tap-to-skip after the opening signature sweep begins
   setTimeout(() => {
     splash.addEventListener('click', finishSplash, { once: true });
   }, 850);
 
-  const duration = 2450;
+  const duration = 10000;
   const start = performance.now();
 
   const tick = (now) => {
     if (dismissed) return;
     const elapsed = now - start;
     const progress = Math.min(1, elapsed / duration);
-    const eased = 1 - Math.pow(1 - progress, 2.2);
+    // Gentle ease so the bar advances smoothly over the full 10 seconds
+    const eased = 1 - Math.pow(1 - progress, 3);
     const pct = Math.round(eased * 100);
 
     if (fillEl) fillEl.style.width = `${pct}%`;
     if (pctEl) pctEl.textContent = `${pct}%`;
     if (statusEl) {
-      if (pct < 40) statusEl.textContent = 'Preparing salon services...';
-      else if (pct < 82) statusEl.textContent = 'Syncing live chair availability...';
+      if (pct < 30) statusEl.textContent = 'Preparing salon services...';
+      else if (pct < 70) statusEl.textContent = 'Syncing live chair availability...';
       else statusEl.textContent = 'Welcome to Nicole Beauty Parlour';
     }
 

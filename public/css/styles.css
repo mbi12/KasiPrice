@@ -257,39 +257,39 @@ button {
   transform: scale(0);
 }
 
-/* Choreographed Keyframes Triggered on .is-playing */
+/* Choreographed Keyframes Triggered on .is-playing — slow, 10-second timeline */
 .splash-screen.is-playing .layer-script {
-  animation: animScriptWrite 920ms var(--ease-out) 60ms forwards;
+  animation: animScriptWrite 2400ms var(--ease-out) 300ms forwards;
 }
 
 .splash-screen.is-playing .layer-script-sheen {
-  animation: animScriptSheen 1050ms ease-in-out 260ms forwards;
+  animation: animScriptSheen 2000ms ease-in-out 1100ms forwards;
 }
 
 .splash-screen.is-playing .layer-idot {
-  animation: animIdotPop 440ms var(--ease-out) 640ms forwards;
+  animation: animIdotPop 900ms var(--ease-out) 2700ms forwards;
 }
 
 .splash-screen.is-playing .layer-crown {
-  animation: animCrownDrop 620ms var(--ease-out) 780ms forwards;
+  animation: animCrownDrop 1200ms var(--ease-out) 3900ms forwards;
 }
 
 .splash-screen.is-playing .layer-subtitle {
-  animation: animSubtitleRise 480ms var(--ease-out) 1080ms forwards;
+  animation: animSubtitleRise 1100ms var(--ease-out) 5600ms forwards;
 }
 
 .splash-screen.is-playing .layer-tagwords {
-  animation: animTaglineWipe 760ms var(--ease-out) 1320ms forwards;
+  animation: animTaglineWipe 1600ms var(--ease-out) 7000ms forwards;
 }
 
 .splash-screen.is-playing .layer-heart-left {
-  animation: animHeartPop 520ms var(--ease-out) 1500ms forwards,
-    animHeartPulse 1500ms ease-in-out 2020ms infinite;
+  animation: animHeartPop 900ms var(--ease-out) 8500ms forwards,
+    animHeartPulse 2200ms ease-in-out 9400ms infinite;
 }
 
 .splash-screen.is-playing .layer-heart-right {
-  animation: animHeartPop 520ms var(--ease-out) 1780ms forwards,
-    animHeartPulse 1500ms ease-in-out 2300ms infinite;
+  animation: animHeartPop 900ms var(--ease-out) 9000ms forwards,
+    animHeartPulse 2200ms ease-in-out 9900ms infinite;
 }
 
 @keyframes animScriptWrite {
