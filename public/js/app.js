@@ -825,14 +825,7 @@ function syncAdminAuthUi() {
   document.getElementById('adminLoginGate')?.classList.toggle('hidden', unlocked);
   document.getElementById('adminUnlockedSuite')?.classList.toggle('hidden', !unlocked);
 
-  const topBtn = document.getElementById('topbarAdminBtn');
-  const topLbl = document.getElementById('topbarAdminLabel');
-  const topDot = document.getElementById('topbarAdminDot');
   const dockDot = document.getElementById('adminDockBadge');
-
-  topBtn?.classList.toggle('unlocked', unlocked);
-  if (topLbl) topLbl.textContent = unlocked ? 'Admin' : 'Admin';
-  topDot?.classList.toggle('hidden', !unlocked);
   dockDot?.classList.toggle('unlocked', unlocked);
 
   if (unlocked && store.adminSession?.admin) {
@@ -1295,7 +1288,6 @@ function bindEvents() {
   document.querySelectorAll('[data-goto-tab]').forEach((btn) => {
     btn.addEventListener('click', () => switchTab(btn.dataset.gotoTab));
   });
-  document.getElementById('topbarAdminBtn')?.addEventListener('click', () => switchTab('studio'));
 
   document.querySelectorAll('[data-close-modal]').forEach((btn) => {
     btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
@@ -1917,6 +1909,17 @@ function init() {
   store.subscribe(() => renderAll());
   renderAll();
   store.syncFromServer();
+
+  // Hash routing: visiting /#admin (or /#studio) opens the Admin login gate
+  // directly — no topbar button needed. Admin signs in with phone number + password.
+  const applyHash = () => {
+    const h = (window.location.hash || '').toLowerCase();
+    if (h === '#admin' || h === '#studio') {
+      switchTab('studio');
+    }
+  };
+  window.addEventListener('hashchange', applyHash);
+  applyHash();
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
