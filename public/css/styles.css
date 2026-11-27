@@ -2372,19 +2372,6 @@ button {
   border: 1px solid var(--border);
 }
 
-.install-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.install-head img {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-}
-
 /* Toast */
 .toast-stack {
   position: fixed;

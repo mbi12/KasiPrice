@@ -69,8 +69,7 @@ const ui = {
   // Studio uploads & flyers
   newStyleImage: '/images/style-01-honey-curly-knotless.jpg',
   lastFlyerBlob: null,
-  lastFlyerPromo: null,
-  deferredInstallPrompt: null
+  lastFlyerPromo: null
 };
 
 function esc(value) {
@@ -1831,23 +1830,6 @@ function bindEvents() {
     document.getElementById('credNewPasswordInput').value = '';
     showToast('Admin credentials updated');
     renderAll();
-  });
-
-  // Install App Modal
-  document.getElementById('openInstallModalBtn')?.addEventListener('click', () =>
-    openModal('installModal')
-  );
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    ui.deferredInstallPrompt = e;
-    document.getElementById('nativeInstallPromptBtn')?.classList.remove('hidden');
-  });
-  document.getElementById('nativeInstallPromptBtn')?.addEventListener('click', async () => {
-    if (!ui.deferredInstallPrompt) return;
-    ui.deferredInstallPrompt.prompt();
-    await ui.deferredInstallPrompt.userChoice;
-    ui.deferredInstallPrompt = null;
-    closeModal('installModal');
   });
 }
 
