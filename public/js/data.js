@@ -70,7 +70,7 @@ export function calculateStylePrice(style, sizeId = 'medium', lengthId = 'midbac
 }
 
 export const CATEGORIES = [
-  { id: 'all', label: 'All Couture' },
+  { id: 'all', label: 'All Services' },
   { id: 'Knotless', label: 'Knotless' },
   { id: 'Box Braids', label: 'Box Braids' },
   { id: 'Twists', label: 'Twists' },

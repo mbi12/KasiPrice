@@ -36,7 +36,7 @@ const DURATION_BY_SIZE = {
 const ui = {
   activeTab: 'services',
   // Catalog filters
-  selectedCategory: 'All',
+  selectedCategory: 'all',
   searchQuery: '',
   sortBy: 'featured',
   // Quick estimator
@@ -207,10 +207,11 @@ function renderServicesCatalog() {
 
   const catStrip = document.getElementById('categoryStrip');
   if (catStrip) {
-    catStrip.innerHTML = CATEGORIES.map(
-      (cat) =>
-        `<button type="button" class="cat-chip ${ui.selectedCategory === cat ? 'active' : ''}" data-cat="${esc(cat)}">${esc(cat)}</button>`
-    ).join('');
+    catStrip.innerHTML = CATEGORIES.map((cat) => {
+      const catId = typeof cat === 'object' ? cat.id : cat;
+      const catLbl = typeof cat === 'object' ? cat.label : cat;
+      return `<button type="button" class="cat-chip ${ui.selectedCategory === catId ? 'active' : ''}" data-cat="${esc(catId)}">${esc(catLbl)}</button>`;
+    }).join('');
     catStrip.querySelectorAll('[data-cat]').forEach((btn) => {
       btn.addEventListener('click', () => {
         ui.selectedCategory = btn.dataset.cat;
@@ -227,7 +228,7 @@ function renderServicesCatalog() {
   const visibleStyles = store.state.styles.filter((s) => s.active !== false);
 
   let items = visibleStyles.filter((s) => {
-    if (ui.selectedCategory !== 'All' && s.category !== ui.selectedCategory) return false;
+    if (ui.selectedCategory !== 'all' && s.category !== ui.selectedCategory) return false;
     if (!q) return true;
     const startP = calculateStylePrice(s, s.defaultSize, s.defaultLength);
     const hay = `${s.name} ${s.category} ${s.description || ''} ${s.badge || ''} p${startP}`.toLowerCase();
@@ -265,7 +266,7 @@ function renderServicesCatalog() {
         <button type="button" class="btn btn-secondary btn-sm" id="resetCatalogFiltersBtn">Reset Filters</button>
       </div>`;
     document.getElementById('resetCatalogFiltersBtn')?.addEventListener('click', () => {
-      ui.selectedCategory = 'All';
+      ui.selectedCategory = 'all';
       ui.searchQuery = '';
       const inp = document.getElementById('serviceSearchInput');
       if (inp) inp.value = '';
