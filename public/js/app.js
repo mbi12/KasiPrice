@@ -1851,7 +1851,95 @@ function bindEvents() {
   });
 }
 
+/* ================= SCREEN RESOLUTION & ANIMATED LOGO STARTUP ENGINE ================= */
+function initViewportEngine() {
+  const updateViewportVars = () => {
+    const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    document.documentElement.style.setProperty('--app-height', `${Math.round(vh)}px`);
+  };
+  updateViewportVars();
+  window.addEventListener('resize', updateViewportVars, { passive: true });
+  window.addEventListener('orientationchange', updateViewportVars, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateViewportVars, { passive: true });
+  }
+}
+
+async function runAnimatedSplashScreen() {
+  const splash = document.getElementById('splashLoader');
+  if (!splash) {
+    document.body.classList.remove('splash-locked');
+    return;
+  }
+
+  const fillEl = document.getElementById('splashProgressFill');
+  const pctEl = document.getElementById('splashPercentText');
+  const statusEl = document.getElementById('splashStatusText');
+  const imgs = Array.from(splash.querySelectorAll('img.anim-layer'));
+
+  // Ensure all 7 transparent logo layers decode cleanly before frame 0 starts
+  const decodeAll = Promise.all(
+    imgs.map((img) => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      if (typeof img.decode === 'function') return img.decode().catch(() => {});
+      return new Promise((res) => {
+        img.addEventListener('load', res, { once: true });
+        img.addEventListener('error', res, { once: true });
+      });
+    })
+  );
+  await Promise.race([decodeAll, new Promise((r) => setTimeout(r, 550))]);
+
+  // Trigger the 7-part choreographed logo animation
+  splash.classList.add('is-playing');
+
+  let dismissed = false;
+  const finishSplash = () => {
+    if (dismissed) return;
+    dismissed = true;
+    if (fillEl) fillEl.style.width = '100%';
+    if (pctEl) pctEl.textContent = '100%';
+    splash.classList.add('splash-exit');
+    document.body.classList.remove('splash-locked');
+    setTimeout(() => splash.remove(), 520);
+  };
+
+  // Allow tap-to-skip after initial signature sweep
+  setTimeout(() => {
+    splash.addEventListener('click', finishSplash, { once: true });
+  }, 850);
+
+  const duration = 2450;
+  const start = performance.now();
+
+  const tick = (now) => {
+    if (dismissed) return;
+    const elapsed = now - start;
+    const progress = Math.min(1, elapsed / duration);
+    const eased = 1 - Math.pow(1 - progress, 2.2);
+    const pct = Math.round(eased * 100);
+
+    if (fillEl) fillEl.style.width = `${pct}%`;
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    if (statusEl) {
+      if (pct < 40) statusEl.textContent = 'Preparing salon services...';
+      else if (pct < 82) statusEl.textContent = 'Syncing live chair availability...';
+      else statusEl.textContent = 'Welcome to Nicole Beauty Parlour';
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      setTimeout(finishSplash, 140);
+    }
+  };
+
+  requestAnimationFrame(tick);
+}
+
 function init() {
+  initViewportEngine();
+  runAnimatedSplashScreen();
   bindEvents();
   store.subscribe(() => renderAll());
   renderAll();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nicole-beauty-parlour-v6';
+const CACHE_NAME = 'nicole-beauty-parlour-v7';
 const CORE_ASSETS = [
   '/',
   '/index.html',
@@ -13,6 +13,13 @@ const CORE_ASSETS = [
   '/images/nicole-logo-light.png',
   '/images/nicole-wordmark-dark.png',
   '/images/nicole-wordmark-light.png',
+  '/images/anim/logo-script.png',
+  '/images/anim/logo-idot.png',
+  '/images/anim/logo-crown.png',
+  '/images/anim/logo-subtitle.png',
+  '/images/anim/logo-tagwords.png',
+  '/images/anim/logo-heart-left.png',
+  '/images/anim/logo-heart-right.png',
   '/images/price-menu-card.jpg',
   '/icons/icon-192.png',
   '/icons/icon-512.png'

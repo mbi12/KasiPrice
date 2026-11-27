@@ -21,6 +21,15 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 
+    <!-- Preload Animated Logo Layers for Zero-Delay Frame-0 Playback -->
+    <link rel="preload" as="image" href="/images/anim/logo-script.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-idot.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-crown.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-subtitle.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-tagwords.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-heart-left.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-heart-right.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -31,7 +40,72 @@
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
 
-  <body>
+  <body class="splash-locked">
+    <!-- ================= START-UP ANIMATED LOGO LOADING SCREEN ================= -->
+    <div id="splashLoader" class="splash-screen" role="status" aria-live="polite" aria-label="Loading Nicole Beauty Parlour">
+      <div class="splash-ambient-glow" aria-hidden="true"></div>
+
+      <div class="splash-center">
+        <!-- Authentic 7-Layer Pixel-Exact Animated Nicole Logo (920x598 coordinate space) -->
+        <div class="anim-logo-stage" id="animLogoStage">
+          <img
+            src="/images/anim/logo-script.png"
+            alt=""
+            class="anim-layer layer-script"
+            decoding="sync"
+          />
+          <div class="anim-layer layer-script-sheen" aria-hidden="true"></div>
+
+          <img
+            src="/images/anim/logo-idot.png"
+            alt=""
+            class="anim-layer layer-idot"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-crown.png"
+            alt=""
+            class="anim-layer layer-crown"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-subtitle.png"
+            alt="Nicole Beauty Parlour"
+            class="anim-layer layer-subtitle"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-tagwords.png"
+            alt="Look Good, Feel Good, Be You"
+            class="anim-layer layer-tagwords"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-heart-left.png"
+            alt=""
+            class="anim-layer layer-heart-left"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-heart-right.png"
+            alt=""
+            class="anim-layer layer-heart-right"
+            decoding="sync"
+          />
+        </div>
+
+        <div class="splash-progress-wrap">
+          <div class="splash-progress-track">
+            <div class="splash-progress-fill" id="splashProgressFill"></div>
+          </div>
+          <div class="splash-meta-row">
+            <span id="splashStatusText">Preparing salon services...</span>
+            <strong id="splashPercentText">0%</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="app-shell">
       <!-- ================= CLEAN PROFESSIONAL TOP HEADER ================= -->
       <header class="topbar">
