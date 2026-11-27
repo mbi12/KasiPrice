@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0A1931" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nicole Parlour" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="Nicole Beauty Parlour — Look Good, Feel Good, Be You. Botswana Hair Braiding Market, Online Booking, Live Messaging & Promo Studio."
+    />
+
+    <title>Nicole Beauty Parlour • Look Good 💙 Feel Good 💙 Be You</title>
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="/icons/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <!-- ================= ANIMATED HAIRSTYLE SPLASH / LOADING SCREEN ================= -->
+    <div id="splashScreen" class="splash-screen" role="status" aria-live="polite">
+      <div class="splash-aurora"></div>
+      <div class="splash-sparkles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="splash-inner">
+        <button id="skipSplashBtn" type="button" class="splash-skip-btn">Skip ›</button>
+
+        <div class="splash-crown-wrap">
+          <svg class="splash-crown-svg" viewBox="0 0 80 54" fill="none" aria-hidden="true">
+            <path
+              d="M8 42L14 16L29 29L40 9L51 29L66 16L72 42H8Z"
+              stroke="url(#crownGold)"
+              stroke-width="3.2"
+              stroke-linejoin="round"
+            />
+            <path d="M11 48H69" stroke="url(#crownGold)" stroke-width="3.4" stroke-linecap="round" />
+            <circle cx="40" cy="7" r="3.5" fill="#FBBF24" />
+            <circle cx="13" cy="14" r="3" fill="#38BDF8" />
+            <circle cx="67" cy="14" r="3" fill="#38BDF8" />
+            <defs>
+              <linearGradient id="crownGold" x1="8" y1="9" x2="72" y2="48" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#FDE68A" />
+                <stop offset="0.5" stop-color="#F59E0B" />
+                <stop offset="1" stop-color="#38BDF8" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="splash-logo-card">
+          <img src="/images/nicole-logo.jpg" alt="Nicole Beauty Parlour Logo" />
+        </div>
+
+        <p class="splash-tagline">Look Good <span>💙</span> Feel Good <span>💙</span> Be You</p>
+
+        <!-- Animated Gliding Hairstyle Filmstrip -->
+        <div class="splash-marquee-shell" aria-hidden="true">
+          <div class="splash-marquee-track">
+            <div class="splash-hair-card">
+              <img src="/images/style-01-honey-curly-knotless.jpg" alt="" />
+              <span>Honey Curly • P180</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-14-burgundy-french-curl.jpg" alt="" />
+              <span>French Curl • P250</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-05-caramel-high-pony.jpg" alt="" />
+              <span>Caramel Pony • P250</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-13-passion-curly-twists.jpg" alt="" />
+              <span>Softdread • P250</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-06-golden-velvet-updo.jpg" alt="" />
+              <span>Golden Glam • P180</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-11-goddess-boho-knee.jpg" alt="" />
+              <span>Boho Knee • P400</span>
+            </div>
+            <!-- Duplicated seamlessly for infinite glide -->
+            <div class="splash-hair-card">
+              <img src="/images/style-01-honey-curly-knotless.jpg" alt="" />
+              <span>Honey Curly • P180</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-14-burgundy-french-curl.jpg" alt="" />
+              <span>French Curl • P250</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-05-caramel-high-pony.jpg" alt="" />
+              <span>Caramel Pony • P250</span>
+            </div>
+            <div class="splash-hair-card">
+              <img src="/images/style-13-passion-curly-twists.jpg" alt="" />
+              <span>Softdread • P250</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="splash-loader-box">
+          <div class="splash-progress-bar">
+            <div id="splashProgressFill" class="splash-progress-fill"></div>
+          </div>
+          <div class="splash-status-row">
+            <span id="splashStatusText">Sectioning crisp knotless parts...</span>
+            <strong id="splashPercent">0%</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MAIN NATIVE APP SHELL ================= -->
+    <div id="appShell" class="app-shell">
+      <!-- Top Glass App Header -->
+      <header class="app-topbar">
+        <button type="button" class="brand-header-btn" id="brandHomeBtn" aria-label="Nicole Beauty Parlour Home">
+          <div class="brand-logo-thumb">
+            <img src="/images/nicole-logo.jpg" alt="Nicole Beauty Parlour" />
+          </div>
+          <div class="brand-header-copy">
+            <div class="brand-title-row">
+              <h1>Nicole <span>Beauty Parlour</span></h1>
+              <span class="verified-crown" title="Official Salon">👑</span>
+            </div>
+            <p><span class="live-dot"></span> Gaborone • 72517904</p>
+          </div>
+        </button>
+
+        <div class="topbar-actions">
+          <button type="button" class="pill-action-btn" id="openPriceSheetBtn" title="Official Price List">
+            <span>💎</span>
+            <span class="hide-xs">Prices</span>
+          </button>
+          <button type="button" class="pill-action-btn install-pill" id="openInstallModalBtn" title="Get Mobile App">
+            <span>📲</span>
+            <span class="hide-xs">Get App</span>
+          </button>
+          <button type="button" class="icon-circle-btn" id="openNotificationsBtn" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 2.75a5.25 5.25 0 0 1 5.25 5.25v2.68c0 .74.24 1.47.69 2.06l1.39 1.85a1 1 0 0 1-.8 1.6H5.47a1 1 0 0 1-.8-1.6l1.39-1.85c.45-.59.69-1.32.69-2.06V8A5.25 5.25 0 0 1 12 2.75Zm-2.25 15a2.25 2.25 0 0 0 4.5 0h-4.5Z"
+              />
+            </svg>
+            <span id="notifBadge" class="badge-counter hidden">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ================= TAB 1: DISCOVER (HOME & MARKET) ================= -->
+      <main class="views-container">
+        <section id="view-discover" class="app-view active" aria-label="Discover">
+          <!-- Salon Story Highlights Strip -->
+          <div class="stories-strip" id="storiesStrip" aria-label="Salon Highlights"></div>
+
+          <!-- Dynamic Animated Promo / Advert Banner Carousel -->
+          <div class="promo-carousel-wrap">
+            <div id="promoCarousel" class="promo-carousel"></div>
+            <div id="promoDots" class="promo-dots"></div>
+          </div>
+
+          <!-- Quick Action Tiles -->
+          <div class="quick-actions-grid">
+            <button type="button" class="quick-tile" data-goto="book">
+              <span class="qt-icon sky">📅</span>
+              <div>
+                <strong>Book Chair</strong>
+                <small>Instant Pass</small>
+              </div>
+            </button>
+            <button type="button" class="quick-tile" id="quickAddStyleBtn">
+              <span class="qt-icon gold">➕</span>
+              <div>
+                <strong>Add Style</strong>
+                <small>Upload Look</small>
+              </div>
+            </button>
+            <button type="button" class="quick-tile" id="quickAdvertiseBtn">
+              <span class="qt-icon berry">📣</span>
+              <div>
+                <strong>Advertise</strong>
+                <small>Launch Promo</small>
+              </div>
+            </button>
+            <button type="button" class="quick-tile" data-goto="messages">
+              <span class="qt-icon emerald">💬</span>
+              <div>
+                <strong>Chat Salon</strong>
+                <small>Live Desk</small>
+              </div>
+            </button>
+          </div>
+
+          <!-- Interactive Official BWP Price Calculator -->
+          <section class="glass-card calc-card">
+            <div class="card-head">
+              <div>
+                <span class="eyebrow-chip">OFFICIAL @NICOLE_BEAUTY_PARLOUR RATES</span>
+                <h2>Instant Braid Price Calculator</h2>
+              </div>
+              <button type="button" class="link-chip" id="viewOriginalPosterBtn">View Poster 🖼️</button>
+            </div>
+
+            <div class="calc-type-toggle" id="calcTypeToggle">
+              <button type="button" class="seg-btn active" data-mode="matrix">
+                Knotless / Box / Twist
+              </button>
+              <button type="button" class="seg-btn" data-mode="flat">
+                Pick n' Drop / Softdread
+              </button>
+            </div>
+
+            <div id="calcMatrixControls" class="calc-controls-wrap">
+              <div class="calc-group">
+                <label>1. Select Braid Size</label>
+                <div class="pill-selector" id="calcSizePills"></div>
+              </div>
+              <div class="calc-group">
+                <label>2. Select Length</label>
+                <div class="pill-selector three-col" id="calcLengthPills"></div>
+              </div>
+            </div>
+
+            <div class="calc-result-bar">
+              <div class="calc-price-box">
+                <span class="calc-label">Estimated Salon Price</span>
+                <div class="calc-price-row">
+                  <strong id="calcPriceDisplay">P180</strong>
+                  <span id="calcMetaDisplay" class="calc-meta-pill">4 – 5 hrs • 5–6 packs</span>
+                </div>
+              </div>
+              <button type="button" class="primary-cta" id="calcBookNowBtn">
+                Book This Rate ›
+              </button>
+            </div>
+          </section>
+
+          <!-- Featured Hairstyles Section -->
+          <section class="section-block">
+            <div class="section-title-bar">
+              <div>
+                <span class="mini-label">CROWN COLLECTION</span>
+                <h2>Signature Styles in BWP</h2>
+              </div>
+              <button type="button" class="text-link-btn" data-goto="styles">See all 16+ ›</button>
+            </div>
+            <div id="featuredStylesGrid" class="styles-grid"></div>
+          </section>
+
+          <!-- Meet the Stylists Strip -->
+          <section class="section-block">
+            <div class="section-title-bar">
+              <div>
+                <span class="mini-label">GABORONE TEAM</span>
+                <h2>Master Braiders</h2>
+              </div>
+              <span class="subtle-pill">Pain-Free Guarantee 💙</span>
+            </div>
+            <div id="stylistsRow" class="stylists-scroll"></div>
+          </section>
+        </section>
+
+        <!-- ================= TAB 2: STYLES MARKETPLACE ================= -->
+        <section id="view-styles" class="app-view" aria-label="Hairstyles Market">
+          <div class="glass-card market-toolbar">
+            <div class="market-top-row">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M10.5 3a7.5 7.5 0 1 1 0 15a7.5 7.5 0 0 1 0-15Zm0 2a5.5 5.5 0 1 0 0 11a5.5 5.5 0 0 0 0-11Zm7.1 17.4 2.6 2.6-1.4 1.4-2.6-2.6 1.4-1.4Z"
+                  />
+                </svg>
+                <input
+                  id="styleSearchInput"
+                  type="search"
+                  placeholder="Search knotless, french curl, twists, boho..."
+                  aria-label="Search hairstyles"
+                />
+              </div>
+              <button type="button" class="primary-cta compact" id="marketAddStyleBtn">
+                ＋ Add Style
+              </button>
+            </div>
+
+            <div class="category-chips-scroll" id="marketCategoryChips"></div>
+
+            <div class="market-filter-footer">
+              <span id="marketCountLabel" class="count-text">16 hairstyles</span>
+              <div class="market-right-controls">
+                <button type="button" class="wish-filter-btn" id="savedOnlyToggle">
+                  ♥ Saved
+                </button>
+                <select id="marketSortSelect" aria-label="Sort hairstyles">
+                  <option value="featured">Featured first</option>
+                  <option value="price-asc">Lowest price (P130+)</option>
+                  <option value="price-desc">Luxury / Extra Long</option>
+                  <option value="rating">Top rated</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="marketStylesGrid" class="styles-grid"></div>
+        </section>
+
+        <!-- ================= TAB 3: INTERACTIVE BOOKING & APPOINTMENTS ================= -->
+        <section id="view-book" class="app-view" aria-label="Book Appointment">
+          <div class="booking-layout">
+            <form id="bookingForm" class="glass-card booking-wizard" novalidate>
+              <div class="card-head">
+                <div>
+                  <span class="eyebrow-chip">RESERVE YOUR CHAIR</span>
+                  <h2>Book Appointment</h2>
+                </div>
+                <span class="badge-soft-sky">Instant Confirmation</span>
+              </div>
+
+              <!-- 1. Choose Hairstyle -->
+              <div class="form-step">
+                <div class="step-label-row">
+                  <label>1. Choose Hairstyle</label>
+                  <button type="button" class="link-chip" data-goto="styles">Browse Gallery</button>
+                </div>
+                <div id="bookingSelectedPreview" class="selected-style-banner"></div>
+                <div id="bookingStyleStrip" class="mini-style-strip"></div>
+              </div>
+
+              <!-- 2. Size & Length -->
+              <div id="bookingSizeLengthWrap" class="form-step two-col-grid">
+                <div>
+                  <label for="bookSizeSelect">2. Braid Size</label>
+                  <select id="bookSizeSelect"></select>
+                </div>
+                <div>
+                  <label for="bookLengthSelect">3. Braid Length</label>
+                  <select id="bookLengthSelect"></select>
+                </div>
+              </div>
+
+              <!-- 3. Stylist -->
+              <div class="form-step">
+                <label>4. Choose Stylist</label>
+                <div id="bookStylistCards" class="mini-stylist-grid"></div>
+              </div>
+
+              <!-- 4. Date & Time -->
+              <div class="form-step">
+                <div class="step-label-row">
+                  <label for="bookDateInput">5. Pick Date & Time Slot</label>
+                  <input type="date" id="bookDateInput" class="inline-date-picker" />
+                </div>
+                <div id="bookDateRibbon" class="date-ribbon"></div>
+                <div id="bookTimeSlots" class="time-slots-grid"></div>
+              </div>
+
+              <!-- 5. Optional Add-Ons -->
+              <div class="form-step">
+                <label>6. Salon Add-Ons (Optional)</label>
+                <div id="bookAddOnsList" class="addons-grid"></div>
+              </div>
+
+              <!-- 6. Promo Code -->
+              <div class="form-step">
+                <label for="bookPromoInput">7. Promo / Advert Code</label>
+                <div class="promo-input-row">
+                  <input
+                    type="text"
+                    id="bookPromoInput"
+                    placeholder="e.g. SLAY15 or CROWN250"
+                    autocomplete="off"
+                  />
+                  <button type="button" class="secondary-btn" id="applyPromoBtn">Apply</button>
+                </div>
+                <div id="activePromoChips" class="promo-chips-row"></div>
+                <small id="promoFeedback" class="promo-feedback"></small>
+              </div>
+
+              <!-- 7. Client Details & Payment -->
+              <div class="form-step two-col-grid">
+                <div>
+                  <label for="bookClientName">Your Full Name *</label>
+                  <input
+                    type="text"
+                    id="bookClientName"
+                    placeholder="e.g. Boitumelo K."
+                    required
+                  />
+                </div>
+                <div>
+                  <label for="bookClientPhone">Phone / WhatsApp *</label>
+                  <input
+                    type="tel"
+                    id="bookClientPhone"
+                    placeholder="+267 7X XXX XXX"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-step two-col-grid">
+                <div>
+                  <label for="bookPaymentSelect">Deposit / Payment Method</label>
+                  <select id="bookPaymentSelect">
+                    <option value="Orange Money (72517904)">Orange Money • 72517904</option>
+                    <option value="MyZaka (72517904)">MyZaka • 72517904</option>
+                    <option value="Smega (72517904)">Smega • 72517904</option>
+                    <option value="Pay Cash at Salon">Pay Cash at Salon</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="bookNotesInput">Hair Color / Special Notes</label>
+                  <input
+                    type="text"
+                    id="bookNotesInput"
+                    placeholder="e.g. Color #1B with #30 tips"
+                  />
+                </div>
+              </div>
+
+              <!-- Live Booking Price Summary -->
+              <div class="booking-summary-box">
+                <div class="sum-row">
+                  <span>Style & Add-Ons Subtotal</span>
+                  <strong id="sumSubtotal">P180</strong>
+                </div>
+                <div class="sum-row discount-row hidden" id="sumDiscountRow">
+                  <span id="sumDiscountLabel">Promo Discount</span>
+                  <strong id="sumDiscountVal">-P0</strong>
+                </div>
+                <div class="sum-row total-row">
+                  <div>
+                    <span>Total Amount (BWP)</span>
+                    <small id="sumDepositNote">30% seat deposit: P54</small>
+                  </div>
+                  <strong id="sumTotal">P180</strong>
+                </div>
+                <button type="submit" class="primary-cta full-width lg">
+                  Confirm Appointment & Get Pass 👑
+                </button>
+              </div>
+            </form>
+
+            <!-- My Appointments List -->
+            <div class="bookings-sidebar">
+              <div class="glass-card">
+                <div class="card-head">
+                  <div>
+                    <span class="eyebrow-chip">YOUR SCHEDULE</span>
+                    <h3>My Appointments</h3>
+                  </div>
+                  <span id="bookingsCountBadge" class="badge-soft-sky">1</span>
+                </div>
+                <div id="myBookingsList" class="bookings-list"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 4: REAL-TIME TWO-WAY SALON MESSAGES ================= -->
+        <section id="view-messages" class="app-view" aria-label="Salon Messages">
+          <div class="chat-workspace glass-card">
+            <!-- Left / Top Threads List -->
+            <aside id="chatThreadsPane" class="chat-threads-pane">
+              <div class="threads-header">
+                <div>
+                  <span class="eyebrow-chip">SALON INBOX</span>
+                  <h2>Messages</h2>
+                </div>
+                <a
+                  href="https://wa.me/26772517904?text=Hi%20Nicole%20Beauty%20Parlour!%20I%27d%20love%20to%20book%20a%20hairstyle%20%F0%9F%92%99"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="whatsapp-pill-btn"
+                >
+                  WhatsApp ↗
+                </a>
+              </div>
+              <div id="threadsList" class="threads-list"></div>
+            </aside>
+
+            <!-- Active Conversation Pane -->
+            <div id="chatConversationPane" class="chat-conv-pane">
+              <div class="chat-conv-header">
+                <div class="conv-left">
+                  <button
+                    type="button"
+                    class="mobile-back-threads"
+                    id="backToThreadsBtn"
+                    aria-label="Back to inbox"
+                  >
+                    ‹
+                  </button>
+                  <img
+                    id="activeThreadAvatar"
+                    src="/images/nicole-logo.jpg"
+                    alt="Nicole"
+                    class="conv-avatar"
+                  />
+                  <div>
+                    <h3 id="activeThreadTitle">Nicole • Booking & Style Desk</h3>
+                    <p id="activeThreadSub">Online • +267 72 517 904</p>
+                  </div>
+                </div>
+
+                <!-- Interactive Sender Mode Toggle so Owner OR Client can message! -->
+                <div class="sender-mode-switch" title="Switch between Client view and Salon Owner reply mode">
+                  <button type="button" class="mode-chip active" data-sender="client">
+                    👤 Client
+                  </button>
+                  <button type="button" class="mode-chip" data-sender="salon">
+                    👑 Salon Reply
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Inquiry Chips -->
+              <div class="quick-prompts-bar" id="chatQuickPrompts">
+                <button type="button" data-prompt="Can you send the full BWP price list?">
+                  💎 Full Price List
+                </button>
+                <button type="button" data-prompt="Do you have open slots tomorrow morning?">
+                  📅 Open Slots?
+                </button>
+                <button type="button" data-prompt="How many packs of braiding hair do I need?">
+                  🛍️ Hair Packs Guide
+                </button>
+                <button type="button" data-prompt="How do I pay my deposit with Orange Money?">
+                  📲 Orange Money Info
+                </button>
+                <button type="button" id="attachStyleCardChatBtn" class="accent-chip">
+                  ✨ Share a Style
+                </button>
+              </div>
+
+              <!-- Messages Scroll Feed -->
+              <div id="messagesFeed" class="messages-feed" aria-live="polite"></div>
+
+              <!-- Typing Indicator -->
+              <div id="typingIndicator" class="typing-indicator hidden">
+                <span>Nicole is typing</span>
+                <i></i><i></i><i></i>
+              </div>
+
+              <!-- Attachment Preview Bar -->
+              <div id="chatAttachmentPreview" class="chat-attach-preview hidden">
+                <img id="chatAttachImg" src="" alt="Attachment preview" />
+                <span id="chatAttachLabel">Photo attached</span>
+                <button type="button" id="clearChatAttachBtn" aria-label="Remove attachment">×</button>
+              </div>
+
+              <!-- Message Composer -->
+              <form id="chatComposerForm" class="chat-composer">
+                <label class="attach-photo-btn" title="Upload hairstyle photo">
+                  📷
+                  <input type="file" id="chatPhotoInput" accept="image/*" hidden />
+                </label>
+                <input
+                  type="text"
+                  id="chatMessageInput"
+                  placeholder="Write a message to Nicole Beauty Parlour..."
+                  autocomplete="off"
+                />
+                <button type="submit" class="send-msg-btn" aria-label="Send message">
+                  ➤
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 5: ADVERTISE & ADD HAIRSTYLE STUDIO ================= -->
+        <section id="view-studio" class="app-view" aria-label="Advertise and Salon Studio">
+          <div class="studio-hero glass-card">
+            <div class="studio-hero-copy">
+              <span class="eyebrow-chip gold">SALON OWNER & MARKETING HUB</span>
+              <h2>Grow Nicole Beauty Parlour 👑</h2>
+              <p>
+                Upload new client hairstyles to the live marketplace, launch flash promotional
+                adverts, and download branded WhatsApp &amp; Instagram poster flyers in one tap.
+              </p>
+              <div class="studio-cta-row">
+                <button type="button" class="primary-cta" id="studioAddStyleBtn">
+                  ＋ Add New Hairstyle
+                </button>
+                <button type="button" class="gold-cta" id="studioCreatePromoBtn">
+                  📣 Launch New Advert
+                </button>
+              </div>
+            </div>
+            <div class="studio-metrics-grid" id="studioMetrics"></div>
+          </div>
+
+          <!-- Active Advertisements & Poster Flyer Generator -->
+          <section class="section-block">
+            <div class="section-title-bar">
+              <div>
+                <span class="mini-label">LIVE MARKETING CAMPAIGNS</span>
+                <h3>Active Advertisements &amp; Flyers</h3>
+              </div>
+              <button type="button" class="link-chip" id="newPromoInlineBtn">
+                ＋ New Campaign
+              </button>
+            </div>
+            <div id="studioPromosGrid" class="studio-promos-grid"></div>
+          </section>
+
+          <!-- Manage Hairstyles Catalog -->
+          <section class="section-block">
+            <div class="section-title-bar">
+              <div>
+                <span class="mini-label">MARKETPLACE CATALOG</span>
+                <h3>Manage Hairstyles</h3>
+              </div>
+              <button type="button" class="link-chip" id="newStyleInlineBtn">
+                ＋ Upload Style
+              </button>
+            </div>
+            <div id="studioStylesList" class="studio-styles-list"></div>
+          </section>
+        </section>
+      </main>
+
+      <!-- ================= FLOATING NATIVE BOTTOM NAVIGATION ================= -->
+      <nav class="bottom-tabbar" aria-label="Primary navigation">
+        <button type="button" class="tab-btn active" data-tab="discover">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3.2 4 9.6V20a1 1 0 0 0 1 1h5.2v-6h3.6v6H19a1 1 0 0 0 1-1V9.6L12 3.2Z"
+            />
+          </svg>
+          <span>Discover</span>
+        </button>
+
+        <button type="button" class="tab-btn" data-tab="styles">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"
+            />
+          </svg>
+          <span>Styles</span>
+        </button>
+
+        <button type="button" class="tab-btn center-book-btn" data-tab="book">
+          <div class="center-fab">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 19.5v-13A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1Zm12.5 7h-15v10.5c0 .28.22.5.5.5h14c.28 0 .5-.22.5-.5V9Zm-8.8 3.2 1.8 1.8 3.8-3.8 1.4 1.4-5.2 5.2-3.2-3.2 1.4-1.4Z"
+              />
+            </svg>
+          </div>
+          <span>Book</span>
+        </button>
+
+        <button type="button" class="tab-btn" data-tab="messages">
+          <div class="tab-icon-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-4.5 3.5A.8.8 0 0 1 2 20.8V6a2 2 0 0 1 2-2Z"
+              />
+            </svg>
+            <span id="navUnreadBadge" class="nav-dot-badge hidden">1</span>
+          </div>
+          <span>Messages</span>
+        </button>
+
+        <button type="button" class="tab-btn" data-tab="studio">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M19 4v12.5a1 1 0 0 1-1.5.86L12 14.2l-3.2 1.85.95 3.7a1 1 0 0 1-.97 1.25H6.5a1 1 0 0 1-.96-.73L4.1 15H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h9l5.5-3.86A1 1 0 0 1 19 4Zm2 4.5a3.5 3.5 0 0 1 0 5v-5Z"
+            />
+          </svg>
+          <span>Promote</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ================= UNIVERSAL ANIMATED POP-UP MODAL SYSTEM ================= -->
+
+    <!-- 1. Hairstyle Detail & Dynamic Price Configurator Modal -->
+    <div id="styleDetailModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="styleDetailModal"></div>
+      <div class="modal-sheet lg">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="styleDetailModal"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+        <div id="styleDetailBody"></div>
+      </div>
+    </div>
+
+    <!-- 2. Official Price Menu & Original Poster Modal -->
+    <div id="priceSheetModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="priceSheetModal"></div>
+      <div class="modal-sheet lg">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="priceSheetModal"
+          aria-label="Close price sheet"
+        >
+          ×
+        </button>
+        <div class="modal-pad">
+          <span class="eyebrow-chip">OFFICIAL @NICOLE_BEAUTY_PARLOUR MENU</span>
+          <h3>Braid &amp; Twist Price List (BWP)</h3>
+          <p class="muted-sub">Tap any price cell to jump straight into booking that exact size &amp; length!</p>
+
+          <div class="price-tabs-switch">
+            <button type="button" class="seg-btn active" id="priceTabInteractive">
+              Interactive Table
+            </button>
+            <button type="button" class="seg-btn" id="priceTabPoster">
+              Original Salon Poster 🖼️
+            </button>
+          </div>
+
+          <div id="interactivePriceTableWrap"></div>
+
+          <div id="originalPosterWrap" class="poster-img-wrap hidden">
+            <img src="/images/price-menu-card.jpg" alt="Nicole Beauty Parlour Official Price List" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Add New Hairstyle Modal -->
+    <div id="addStyleModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="addStyleModal"></div>
+      <div class="modal-sheet">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="addStyleModal"
+          aria-label="Close add hairstyle modal"
+        >
+          ×
+        </button>
+        <form id="addStyleForm" class="modal-pad modal-form">
+          <span class="eyebrow-chip gold">MARKETPLACE STUDIO</span>
+          <h3>Add New Hairstyle ✨</h3>
+          <p class="muted-sub">Upload a client hairstyle photo from your phone or choose from gallery presets.</p>
+
+          <div class="photo-upload-dropzone" id="styleUploadZone">
+            <img id="newStylePreviewImg" src="/images/style-01-honey-curly-knotless.jpg" alt="Preview" />
+            <div class="upload-overlay-actions">
+              <label class="upload-pill-btn">
+                📷 Upload / Take Photo
+                <input type="file" id="newStylePhotoInput" accept="image/*" hidden />
+              </label>
+            </div>
+          </div>
+
+          <div class="preset-thumbs-row" id="newStylePresetThumbs"></div>
+
+          <div class="two-col-grid">
+            <div>
+              <label for="newStyleName">Hairstyle Name *</label>
+              <input
+                type="text"
+                id="newStyleName"
+                placeholder="e.g. Waist-Length Boho Knotless"
+                required
+              />
+            </div>
+            <div>
+              <label for="newStyleCategory">Category</label>
+              <select id="newStyleCategory">
+                <option value="Knotless">Knotless</option>
+                <option value="Box Braids">Box Braids</option>
+                <option value="Twists">Twists</option>
+                <option value="Updos & Buns">Updos &amp; Buns</option>
+                <option value="Softdread & Switch">Pick n' Drop / Dread</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="two-col-grid">
+            <div>
+              <label for="newStylePricingMode">Pricing Type</label>
+              <select id="newStylePricingMode">
+                <option value="matrix">Official Size × Length Matrix</option>
+                <option value="flat">Custom Flat Price (BWP)</option>
+              </select>
+            </div>
+            <div id="newStyleFlatPriceWrap" class="hidden">
+              <label for="newStyleFlatPrice">Flat Price (Pula)</label>
+              <input type="number" id="newStyleFlatPrice" value="250" min="50" max="2500" />
+            </div>
+            <div id="newStyleDefaultSizeWrap">
+              <label for="newStyleDefaultSize">Default Displayed Size</label>
+              <select id="newStyleDefaultSize">
+                <option value="jumbo">Jumbo (from P130)</option>
+                <option value="large">Large (from P160)</option>
+                <option value="medium" selected>Medium (from P180)</option>
+                <option value="s_medium">S-Medium (from P200)</option>
+                <option value="small">Small (from P250)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="two-col-grid">
+            <div>
+              <label for="newStyleDuration">Sitting Time</label>
+              <input type="text" id="newStyleDuration" value="4 – 5 hrs" />
+            </div>
+            <div>
+              <label for="newStylePacks">Hair Packs Needed</label>
+              <input type="text" id="newStylePacks" value="5–6 packs" />
+            </div>
+          </div>
+
+          <div>
+            <label for="newStyleBadge">Highlight Badge</label>
+            <input type="text" id="newStyleBadge" value="New Drop ✨" placeholder="e.g. New Drop, Hot Look" />
+          </div>
+
+          <div>
+            <label for="newStyleDesc">Style Description</label>
+            <textarea
+              id="newStyleDesc"
+              rows="2"
+              placeholder="Describe parting, curls, color blend, or hair care..."
+            ></textarea>
+          </div>
+
+          <button type="submit" class="primary-cta full-width lg">
+            Publish Hairstyle to Market 🚀
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. Create Advertisement / Promo Campaign Modal -->
+    <div id="createPromoModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="createPromoModal"></div>
+      <div class="modal-sheet">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="createPromoModal"
+          aria-label="Close advertise modal"
+        >
+          ×
+        </button>
+        <form id="createPromoForm" class="modal-pad modal-form">
+          <span class="eyebrow-chip gold">ADVERTISE &amp; PROMOTE</span>
+          <h3>Launch Salon Advertisement 📣</h3>
+          <p class="muted-sub">
+            Publishes to the Home Banner Carousel, broadcasts to VIP Messages, and generates a
+            shareable WhatsApp/Instagram poster flyer!
+          </p>
+
+          <div class="photo-upload-dropzone compact">
+            <img id="promoPreviewImg" src="/images/style-14-burgundy-french-curl.jpg" alt="Promo visual" />
+            <div class="upload-overlay-actions">
+              <label class="upload-pill-btn">
+                📷 Custom Ad Photo
+                <input type="file" id="promoPhotoInput" accept="image/*" hidden />
+              </label>
+            </div>
+          </div>
+
+          <div class="two-col-grid">
+            <div>
+              <label for="promoStyleSelect">Or Pick Existing Style</label>
+              <select id="promoStyleSelect"></select>
+            </div>
+            <div>
+              <label for="promoThemeSelect">Banner Luxury Theme</label>
+              <select id="promoThemeSelect">
+                <option value="royal-sky">Royal Sapphire Sky 💙</option>
+                <option value="obsidian-gold">Obsidian Crown Gold 👑</option>
+                <option value="berry-velvet">Burgundy Velvet 🍷</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="promoTitleInput">Campaign Headline *</label>
+            <input
+              type="text"
+              id="promoTitleInput"
+              placeholder="e.g. Festive December Braids Bonanza!"
+              required
+            />
+          </div>
+
+          <div class="two-col-grid">
+            <div>
+              <label for="promoDiscountInput">Discount % *</label>
+              <input type="number" id="promoDiscountInput" value="20" min="5" max="75" required />
+            </div>
+            <div>
+              <label for="promoCodeInput">Promo Code *</label>
+              <input type="text" id="promoCodeInput" placeholder="e.g. QUEEN20" required />
+            </div>
+          </div>
+
+          <div class="two-col-grid">
+            <div>
+              <label for="promoHighlightInput">Price Callout</label>
+              <input type="text" id="promoHighlightInput" placeholder="e.g. From P140" value="From P145" />
+            </div>
+            <div>
+              <label for="promoValidUntilInput">Valid Until</label>
+              <input type="date" id="promoValidUntilInput" value="2026-12-31" />
+            </div>
+          </div>
+
+          <div>
+            <label for="promoSubtitleInput">Offer Details</label>
+            <textarea
+              id="promoSubtitleInput"
+              rows="2"
+              placeholder="e.g. 20% OFF all Knotless & French Curl bookings + free mousse finish!"
+            >20% OFF all Knotless &amp; French Curl bookings + free mousse finish!</textarea>
+          </div>
+
+          <button type="submit" class="gold-cta full-width lg">
+            Publish Advert &amp; Generate Flyer 🔥
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 5. Booking Confirmation & Digital Appointment Pass Modal -->
+    <div id="bookingPassModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="bookingPassModal"></div>
+      <div class="modal-sheet">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="bookingPassModal"
+          aria-label="Close appointment pass"
+        >
+          ×
+        </button>
+        <div id="bookingPassBody" class="modal-pad"></div>
+      </div>
+    </div>
+
+    <!-- 6. Generated Poster Flyer Preview & Share Modal -->
+    <div id="flyerPreviewModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="flyerPreviewModal"></div>
+      <div class="modal-sheet">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="flyerPreviewModal"
+          aria-label="Close flyer preview"
+        >
+          ×
+        </button>
+        <div class="modal-pad center-text">
+          <span class="eyebrow-chip gold">READY FOR WHATSAPP STATUS &amp; INSTAGRAM</span>
+          <h3>Branded Promo Poster Flyer 🎨</h3>
+          <div class="flyer-canvas-wrap">
+            <img id="generatedFlyerImg" src="" alt="Generated Nicole Beauty Parlour Promo Flyer" />
+          </div>
+          <div class="modal-btn-pair">
+            <a id="downloadFlyerLink" download="nicole-beauty-parlour-promo.png" class="primary-cta">
+              ⬇️ Download PNG
+            </a>
+            <button type="button" id="shareFlyerNativeBtn" class="gold-cta">
+              📤 Share to WhatsApp / Socials
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Full-Screen Story Viewer Modal -->
+    <div id="storyModal" class="modal-overlay story-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="storyModal"></div>
+      <div class="story-player-card">
+        <div id="storyProgressBars" class="story-progress-bars"></div>
+        <div class="story-top-meta">
+          <div class="story-author">
+            <img src="/images/nicole-logo.jpg" alt="Nicole" />
+            <div>
+              <strong id="storyTitle">Nicole Beauty Parlour</strong>
+              <small id="storySub">@NICOLE_BEAUTY_PARLOUR</small>
+            </div>
+          </div>
+          <button type="button" class="story-close-btn" data-close-modal="storyModal">×</button>
+        </div>
+
+        <div class="story-stage">
+          <button type="button" class="story-tap-zone prev" id="storyPrevBtn" aria-label="Previous story"></button>
+          <img id="storyMainImg" src="/images/style-01-honey-curly-knotless.jpg" alt="Story" />
+          <button type="button" class="story-tap-zone next" id="storyNextBtn" aria-label="Next story"></button>
+          <div class="story-caption-box">
+            <span id="storyPriceBadge" class="story-price-pill">From P180</span>
+            <p id="storyCaptionText"></p>
+            <button type="button" class="primary-cta full-width" id="storyBookBtn">
+              Book This Look Now 👑
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Notifications Drawer Modal -->
+    <div id="notificationsModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="notificationsModal"></div>
+      <div class="modal-sheet">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="notificationsModal"
+          aria-label="Close notifications"
+        >
+          ×
+        </button>
+        <div class="modal-pad">
+          <span class="eyebrow-chip">SALON UPDATES</span>
+          <h3>Notifications &amp; Deals 🔔</h3>
+          <div id="notificationsList" class="notifications-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Install App (Android APK / Play Store / Apple iOS) Modal -->
+    <div id="installAppModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" data-close-modal="installAppModal"></div>
+      <div class="modal-sheet">
+        <button
+          type="button"
+          class="modal-close-btn"
+          data-close-modal="installAppModal"
+          aria-label="Close install modal"
+        >
+          ×
+        </button>
+        <div class="modal-pad">
+          <div class="install-hero-logo">
+            <img src="/images/nicole-logo.jpg" alt="Nicole Beauty Parlour" />
+          </div>
+          <span class="eyebrow-chip">ANDROID • APPLE iOS • PLAY STORE READY</span>
+          <h3>Install Nicole Beauty Parlour 📲</h3>
+          <p class="muted-sub">
+            Works natively on both Android phones &amp; iPhones with offline access, full-screen
+            standalone mode, and Capacitor Play Store packaging.
+          </p>
+
+          <button type="button" id="triggerNativeInstallBtn" class="primary-cta full-width lg hidden">
+            ⚡ Install App on This Device Now
+          </button>
+
+          <div class="install-guides-stack">
+            <div class="install-platform-card">
+              <strong>🤖 Android &amp; Google Play Store</strong>
+              <p>
+                Tap browser menu <b>⋮ → Install app / Add to Home screen</b> for instant native install,
+                or build the signed <code>.apk</code> &amp; Play Store <code>.aab</code> bundle via our
+                included Capacitor Android project &amp; GitHub Actions workflow.
+              </p>
+            </div>
+            <div class="install-platform-card">
+              <strong>🍎 Apple iPhone &amp; iPad (iOS)</strong>
+              <p>
+                In Safari, tap the <b>Share icon (⬆️) → "Add to Home Screen"</b> to launch Nicole Beauty
+                Parlour full-screen from your iPhone home screen with the official crown icon!
+              </p>
+            </div>
+          </div>
+
+          <div class="modal-btn-pair" style="margin-top: 14px">
+            <button type="button" id="replaySplashBtn" class="secondary-btn full-width">
+              ✨ Replay Animated Loading Screen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animated Toast Stack -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>
