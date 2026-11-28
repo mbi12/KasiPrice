@@ -387,7 +387,7 @@
                 </div>
 
                 <div class="field mt-12">
-                  <label for="paymentMethodSelect">Deposit / Payment Method</label>
+                  <label for="paymentMethodSelect">Payment Method</label>
                   <select id="paymentMethodSelect" class="input-select">
                     <option value="Orange Money">Orange Money</option>
                     <option value="MyZaka">MyZaka</option>
@@ -457,15 +457,6 @@
                   <button type="button" class="seg-opt active" id="modeClientBtn">Client View</button>
                   <button type="button" class="seg-opt" id="modeSalonBtn">Reply as Nicole</button>
                 </div>
-                <a href="tel:+26772517904" class="btn btn-secondary btn-sm">Call</a>
-                <a
-                  href="https://wa.me/26772517904"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="btn btn-primary btn-sm"
-                >
-                  WhatsApp
-                </a>
               </div>
             </div>
 
@@ -510,7 +501,7 @@
                 <span class="tag-badge">OWNER PORTAL</span>
                 <h2>Admin Sign In</h2>
                 <p class="muted-text">
-                  Enter your salon phone number and password to manage bookings, deposits, prices, clients, and promotions.
+                  Enter your salon phone number and password to manage bookings, prices, clients, and promotions.
                 </p>
               </div>
 
@@ -618,7 +609,7 @@
                 Schedule &amp; Braiders
               </button>
               <button type="button" class="admin-tab" data-admin-pane="bookings">
-                Bookings &amp; Deposits <span id="adminTabBookingsCount" class="tab-num">0</span>
+                Bookings <span id="adminTabBookingsCount" class="tab-num">0</span>
               </button>
               <button type="button" class="admin-tab" data-admin-pane="styles">
                 Services &amp; Prices <span id="adminTabStylesCount" class="tab-num">16</span>
@@ -654,11 +645,11 @@
               </div>
             </div>
 
-            <!-- PANE 2: BOOKINGS & DEPOSIT TRACKER -->
+            <!-- PANE 2: BOOKINGS TRACKER -->
             <div class="admin-pane hidden" id="admin-pane-bookings">
               <div class="card">
                 <div class="toolbar">
-                  <h3>All Bookings &amp; Deposit Status</h3>
+                  <h3>All Bookings</h3>
                   <div class="toolbar-controls">
                     <input
                       type="search"
@@ -1089,21 +1080,13 @@
             </div>
           </div>
 
-          <div class="form-row-2">
-            <div class="field">
-              <label for="walkInStatusSelect">Status</label>
-              <select id="walkInStatusSelect" class="input-select">
-                <option value="In Chair">In Chair Now</option>
-                <option value="Confirmed">Confirmed</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-            <div class="field" style="justify-content:flex-end;">
-              <label class="checkbox-label" style="height:42px;">
-                <input type="checkbox" id="walkInDepositPaidCheck" checked />
-                <span>Deposit / Paid</span>
-              </label>
-            </div>
+          <div class="field">
+            <label for="walkInStatusSelect">Status</label>
+            <select id="walkInStatusSelect" class="input-select">
+              <option value="In Chair">In Chair Now</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Completed">Completed</option>
+            </select>
           </div>
 
           <button type="submit" class="btn btn-primary full-width">Save Booking</button>
@@ -1174,6 +1157,14 @@
           <button type="button" class="btn btn-primary full-width" id="downloadFlyerBtn">Download PNG</button>
           <button type="button" class="btn btn-secondary full-width" id="shareFlyerBtn">Share to WhatsApp</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 9. CONFIRMATION MODAL (service added / actions confirmed) -->
+    <div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="confirmModal" aria-label="Close">×</button>
+        <div id="confirmModalContent"></div>
       </div>
     </div>
 

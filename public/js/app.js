@@ -128,6 +128,31 @@ export function showToast(message) {
   }, 2600);
 }
 
+// Opens a confirmation modal (used after adding a service, etc.).
+function showConfirmModal({ title, message, confirmLabel = 'Done', onConfirm = null }) {
+  const host = document.getElementById('confirmModalContent');
+  if (!host) return;
+  host.innerHTML = `
+    <div class="confirm-modal-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M8 12.5l2.5 2.5L16 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h3 class="mb-8">${esc(title)}</h3>
+    <p class="muted-text" style="text-align:center;">${esc(message)}</p>
+    <button type="button" class="btn btn-primary full-width mt-14" id="confirmModalOkBtn">
+      ${esc(confirmLabel)}
+    </button>
+  `;
+  openModal('confirmModal');
+  const okBtn = document.getElementById('confirmModalOkBtn');
+  okBtn?.addEventListener('click', () => {
+    closeModal('confirmModal');
+    if (typeof onConfirm === 'function') onConfirm();
+  });
+}
+
 /* ================= NAVIGATION & MODALS ================= */
 function switchTab(tabId) {
   ui.activeTab = tabId;
@@ -337,7 +362,6 @@ function renderServiceDetailModal() {
   if (!host || !s) return;
 
   const price = calculateStylePrice(s, ui.detailSize, ui.detailLength);
-  const deposit = Math.round(price * 0.3);
 
   host.innerHTML = `
     <div class="detail-modal-hero">
@@ -349,7 +373,6 @@ function renderServiceDetailModal() {
         <div class="info-list">
           <div class="info-item"><span>Duration</span><strong>${esc(s.duration)}</strong></div>
           <div class="info-item"><span>Hair Packs</span><strong>${esc(s.packs)}</strong></div>
-          <div class="info-item"><span>30% Deposit</span><strong>${formatPula(deposit)}</strong></div>
         </div>
       </div>
     </div>
@@ -589,8 +612,7 @@ function getBookingCalculation() {
     ? Math.round(subtotal * (Number(ui.appliedPromo.discountPercent || 0) / 100))
     : 0;
   const total = Math.max(50, subtotal - discount);
-  const deposit = Math.round(total * 0.3);
-  return { style, basePrice, selectedAddOns, addOnsTotal, subtotal, discount, total, deposit };
+  return { style, basePrice, selectedAddOns, addOnsTotal, subtotal, discount, total };
 }
 
 function ensureOpenTimeSlot() {
@@ -607,7 +629,7 @@ function renderBookingView() {
   }
   ensureOpenTimeSlot();
 
-  const { style, basePrice, addOnsTotal, discount, total, deposit } = getBookingCalculation();
+  const { style, basePrice, addOnsTotal, discount, total } = getBookingCalculation();
 
   const styleSel = document.getElementById('bookStyleSelect');
   if (styleSel) {
@@ -754,7 +776,6 @@ function renderBookingView() {
       ${addOnsTotal ? `<div class="sum-row"><span>Selected Extras</span><strong>+${formatPula(addOnsTotal)}</strong></div>` : ''}
       ${discount ? `<div class="sum-row" style="color:var(--success)"><span>Discount (${esc(ui.appliedPromo.code)})</span><strong>-${formatPula(discount)}</strong></div>` : ''}
       <div class="sum-row total"><span>Total Amount</span><strong>${formatPula(total)}</strong></div>
-      <div class="sum-row"><span>30% Deposit to Confirm</span><strong>${formatPula(deposit)}</strong></div>
     `;
   }
 
@@ -806,7 +827,7 @@ function renderClientBookingsLookup() {
           ${
             b.status !== 'Cancelled' && b.status !== 'Completed'
               ? `<button type="button" class="btn btn-danger-outline btn-sm" data-cancel-bk="${esc(b.id)}">Cancel</button>`
-              : `<a href="https://wa.me/${SALON_INFO.phoneIntl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">WhatsApp</a>`
+              : `<button type="button" class="btn btn-secondary btn-sm" data-msg-booking="${esc(b.id)}">Message</button>`
           }
         </div>
       </div>`
@@ -825,15 +846,30 @@ function renderClientBookingsLookup() {
       showToast('Appointment cancelled & time slot released');
     });
   });
+  listEl.querySelectorAll('[data-msg-booking]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const bk = store.state.bookings.find((x) => x.id === btn.dataset.msgBooking);
+      if (!bk) return;
+      switchTab('messages');
+      const input = document.getElementById('chatMessageInput');
+      if (input) {
+        input.value = `Hi Nicole! I have a question about my appointment ${bk.id} (${bk.styleName} on ${bk.date}).`;
+        input.focus();
+      }
+    });
+  });
 }
 
 function openReceiptModal(bk) {
   const host = document.getElementById('bookingPassContent');
   if (!host) return;
 
-  const waUrl = `https://wa.me/${SALON_INFO.phoneIntl}?text=${encodeURIComponent(
-    `Hello Nicole Beauty Parlour! Confirming my appointment ${bk.id}:\n• Service: ${bk.styleName} (${bk.sizeLabel || 'Medium'}, ${bk.lengthLabel || 'Midback'})\n• Shade: ${bk.hairColor || '#1B'}\n• Braider: ${bk.stylistName}\n• Date & Time: ${bk.date} at ${bk.time}\n• Total: P${bk.total} (30% Deposit: P${bk.deposit} via ${bk.paymentMethod})`
-  )}`;
+  const receiptText = `Hello Nicole Beauty Parlour! Confirming my appointment ${bk.id}:
+• Service: ${bk.styleName} (${bk.sizeLabel || 'Medium'}, ${bk.lengthLabel || 'Midback'})
+• Shade: ${bk.hairColor || '#1B'}
+• Braider: ${bk.stylistName}
+• Date & Time: ${bk.date} at ${bk.time}
+• Total: P${bk.total}`;
 
   host.innerHTML = `
     <h3 class="mb-12">Booking Confirmation</h3>
@@ -850,14 +886,13 @@ function openReceiptModal(bk) {
         <div><span>Braider</span><strong>${esc(bk.stylistName)}</strong></div>
         <div><span>Date &amp; Time</span><strong>${esc(bk.date)} • ${esc(bk.time)}</strong></div>
         <div><span>Total Price</span><strong>${formatPula(bk.total)}</strong></div>
-        <div><span>30% Deposit (${bk.depositPaid ? 'Paid' : 'Send to 72517904'})</span><strong>${formatPula(bk.deposit)}</strong></div>
       </div>
     </div>
 
     <div class="form-row-2 mt-14">
-      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary full-width">
-        Send Receipt on WhatsApp
-      </a>
+      <button type="button" class="btn btn-primary full-width" id="receiptMessageBtn">
+        Message Salon in App
+      </button>
       <button type="button" class="btn btn-secondary full-width" id="closeReceiptDoneBtn">
         Done
       </button>
@@ -866,6 +901,15 @@ function openReceiptModal(bk) {
 
   document.getElementById('closeReceiptDoneBtn')?.addEventListener('click', () => {
     closeModal('bookingPassModal');
+  });
+  document.getElementById('receiptMessageBtn')?.addEventListener('click', () => {
+    closeModal('bookingPassModal');
+    switchTab('messages');
+    const input = document.getElementById('chatMessageInput');
+    if (input) {
+      input.value = receiptText;
+      input.focus();
+    }
   });
   openModal('bookingPassModal');
 }
@@ -983,12 +1027,7 @@ function renderAdminView() {
   const completedRevenue = bookings
     .filter((b) => b.status === 'Completed')
     .reduce((s, b) => s + Number(b.total || 0), 0);
-  const depositsPaid = activeBookings
-    .filter((b) => b.depositPaid)
-    .reduce((s, b) => s + Number(b.deposit || Math.round((b.total || 0) * 0.3)), 0);
-  const depositsPending = activeBookings
-    .filter((b) => !b.depositPaid && b.status !== 'Completed')
-    .reduce((s, b) => s + Number(b.deposit || Math.round((b.total || 0) * 0.3)), 0);
+  const completedCount = bookings.filter((b) => b.status === 'Completed').length;
 
   const setText = (id, v) => {
     const el = document.getElementById(id);
@@ -1012,9 +1051,9 @@ function renderAdminView() {
         <small>Completed: ${formatPula(completedRevenue)}</small>
       </div>
       <div class="kpi-card">
-        <span>Deposits Collected</span>
-        <strong style="color:var(--success)">${formatPula(depositsPaid)}</strong>
-        <small>Pending deposits: ${formatPula(depositsPending)}</small>
+        <span>Completed Appointments</span>
+        <strong style="color:var(--success)">${completedCount}</strong>
+        <small>Revenue from completed: ${formatPula(completedRevenue)}</small>
       </div>
       <div class="kpi-card">
         <span>Active Services</span>
@@ -1073,7 +1112,7 @@ function renderAdminView() {
     }).join('');
   }
 
-  // Pane 2: Bookings & Deposits Tracker
+  // Pane 2: Bookings Tracker
   const bkListEl = document.getElementById('studioBookingsList');
   if (bkListEl) {
     const bq = ui.adminBookingQuery.trim().toLowerCase();
@@ -1091,9 +1130,6 @@ function renderAdminView() {
     bkListEl.innerHTML = filtered.length
       ? filtered
           .map((bk) => {
-            const digits = normalizePhoneClient(bk.clientPhone);
-            const waPhone = digits.length === 8 ? `267${digits}` : digits || SALON_INFO.phoneIntl;
-            const depAmt = bk.deposit || Math.round((bk.total || 0) * 0.3);
             return `
           <div class="admin-row">
             <div class="admin-row-main">
@@ -1104,28 +1140,31 @@ function renderAdminView() {
               </div>
             </div>
             <div class="admin-row-actions">
-              <button type="button" class="deposit-btn ${bk.depositPaid ? 'paid' : 'unpaid'}" data-toggle-dep="${esc(bk.id)}">
-                ${bk.depositPaid ? `Dep Paid (${formatPula(depAmt)})` : `Dep Unpaid (${formatPula(depAmt)})`}
-              </button>
               <select class="input-select input-sm" style="width:130px" data-status-sel="${esc(bk.id)}">
                 ${['Confirmed', 'In Chair', 'Completed', 'Cancelled']
                   .map((st) => `<option value="${st}" ${bk.status === st ? 'selected' : ''}>${st}</option>`)
                   .join('')}
               </select>
               <button type="button" class="btn btn-secondary btn-sm" data-admin-receipt="${esc(bk.id)}">Receipt</button>
-              <a href="https://wa.me/${waPhone}?text=${encodeURIComponent(`Hello ${bk.clientName}, Nicole Beauty Parlour here regarding your booking ${bk.id} (${bk.styleName} on ${bk.date} at ${bk.time}).`)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">WhatsApp</a>
+              <button type="button" class="btn btn-primary btn-sm" data-admin-msg="${esc(bk.id)}">Message</button>
             </div>
           </div>`;
           })
           .join('')
       : `<p class="muted-text">No bookings match your search.</p>`;
 
-    bkListEl.querySelectorAll('[data-toggle-dep]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const bk = bookings.find((x) => x.id === btn.dataset.toggleDep);
+    bkListEl.querySelectorAll('[data-admin-msg]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const bk = bookings.find((x) => x.id === btn.dataset.adminMsg);
         if (!bk) return;
-        await store.updateBookingStatus(bk.id, { depositPaid: !bk.depositPaid });
-        showToast(bk.depositPaid ? 'Deposit marked Paid' : 'Deposit marked Unpaid');
+        switchTab('messages');
+        ui.senderMode = 'salon';
+        renderMessenger();
+        const input = document.getElementById('chatMessageInput');
+        if (input) {
+          input.value = `Hello ${bk.clientName}, Nicole Beauty Parlour here regarding your booking ${bk.id} (${bk.styleName} on ${bk.date} at ${bk.time}).`;
+          input.focus();
+        }
       });
     });
     bkListEl.querySelectorAll('[data-status-sel]').forEach((sel) => {
@@ -1226,9 +1265,7 @@ function renderAdminView() {
     const clients = Array.from(clientMap.values()).sort((a, b) => b.spent - a.spent);
     crmEl.innerHTML = clients.length
       ? clients
-          .map((c) => {
-            const d = normalizePhoneClient(c.phone);
-            const wa = d.length === 8 ? `267${d}` : d || SALON_INFO.phoneIntl;
+          .map((c, idx) => {
             return `
           <div class="admin-row">
             <div>
@@ -1236,13 +1273,27 @@ function renderAdminView() {
               <span class="muted-text">${esc(c.phone)} • ${c.visits} visit${c.visits === 1 ? '' : 's'} • Total: <strong>${formatPula(c.spent)}</strong></span>
             </div>
             <div class="admin-row-actions">
-              ${d ? `<a href="tel:+267${d}" class="btn btn-secondary btn-sm">Call</a>` : ''}
-              <a href="https://wa.me/${wa}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">WhatsApp</a>
+              <button type="button" class="btn btn-primary btn-sm" data-crm-msg="${idx}">Message</button>
             </div>
           </div>`;
           })
           .join('')
       : `<p class="muted-text">Client profiles appear automatically as appointments are booked.</p>`;
+
+    crmEl.querySelectorAll('[data-crm-msg]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const c = clients[Number(btn.dataset.crmMsg)];
+        if (!c) return;
+        switchTab('messages');
+        ui.senderMode = 'salon';
+        renderMessenger();
+        const input = document.getElementById('chatMessageInput');
+        if (input) {
+          input.value = `Hello ${c.name}, Nicole Beauty Parlour here. How can we help you with your next appointment?`;
+          input.focus();
+        }
+      });
+    });
   }
 
   const inboxEl = document.getElementById('adminInboxSummary');
@@ -1597,7 +1648,7 @@ function bindEvents() {
       return;
     }
 
-    const { style, selectedAddOns, subtotal, discount, total, deposit } = getBookingCalculation();
+    const { style, selectedAddOns, subtotal, discount, total } = getBookingCalculation();
     const sz = SIZE_OPTIONS.find((x) => x.id === ui.bookSize);
     const ln = LENGTH_OPTIONS.find((x) => x.id === ui.bookLength);
     const col = HAIR_COLORS.find((x) => x.id === ui.bookColorId) || HAIR_COLORS[0] || { code: '', name: '' };
@@ -1624,7 +1675,6 @@ function bindEvents() {
         subtotal,
         discount,
         total,
-        deposit,
         paymentMethod:
           document.getElementById('paymentMethodSelect')?.value || 'Orange Money',
         notes: document.getElementById('bookingNotesInput')?.value.trim() || ''
@@ -1857,7 +1907,12 @@ function bindEvents() {
     });
     closeModal('addStyleModal');
     e.target.reset();
-    showToast(`"${name}" added to services`);
+    ui.newStyleImage = '';
+    showConfirmModal({
+      title: 'Service Added',
+      message: `"${name}" has been confirmed and is now live in your services catalog.`,
+      confirmLabel: 'Done'
+    });
   });
 
   document.getElementById('editStyleForm')?.addEventListener('submit', async (e) => {
@@ -1907,7 +1962,6 @@ function bindEvents() {
     const date = document.getElementById('walkInDateInput')?.value;
     const time = document.getElementById('walkInTimeSelect')?.value || '09:00';
     const status = document.getElementById('walkInStatusSelect')?.value || 'In Chair';
-    const depositPaid = Boolean(document.getElementById('walkInDepositPaidCheck')?.checked);
 
     const style =
       store.state.styles.find((s) => s.id === styleId) ||
@@ -1931,8 +1985,6 @@ function bindEvents() {
         subtotal: total,
         discount: 0,
         total,
-        deposit: Math.round(total * 0.3),
-        depositPaid,
         status,
         paymentMethod: 'Salon Desk / Walk-In'
       });
@@ -1989,10 +2041,12 @@ function bindEvents() {
 
   document.getElementById('shareFlyerBtn')?.addEventListener('click', () => {
     const p = ui.lastFlyerPromo;
-    const text = encodeURIComponent(
-      `${p?.title || 'Special Offer'} at Nicole Beauty Parlour! Use code ${p?.code || ''} — Book or WhatsApp ${SALON_INFO.phoneDisplay}`
-    );
-    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener');
+    switchTab('messages');
+    const input = document.getElementById('chatMessageInput');
+    if (input) {
+      input.value = `${p?.title || 'Special Offer'} at Nicole Beauty Parlour! Use code ${p?.code || ''} to book your appointment.`;
+      input.focus();
+    }
   });
 
   // Jump to chat as Nicole

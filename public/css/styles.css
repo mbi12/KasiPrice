@@ -2286,26 +2286,6 @@ button {
 .status-completed { background: var(--success-soft); color: #34d399; }
 .status-cancelled { background: var(--danger-soft); color: #f87171; }
 
-.deposit-btn {
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 11.5px;
-  font-weight: 700;
-  border: 1px solid var(--border);
-}
-
-.deposit-btn.paid {
-  background: var(--success-soft);
-  border-color: rgba(16, 185, 129, 0.35);
-  color: #34d399;
-}
-
-.deposit-btn.unpaid {
-  background: var(--warning-soft);
-  border-color: rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
-}
-
 .chair-workload-list {
   display: flex;
   flex-direction: column;
@@ -2460,6 +2440,24 @@ button {
 
 .modal-close:hover {
   color: var(--text);
+}
+
+/* ================= CONFIRMATION MODAL ================= */
+.confirm-modal-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 4px auto 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--success);
+}
+
+.confirm-modal-icon svg {
+  width: 34px;
+  height: 34px;
 }
 
 .detail-modal-hero {

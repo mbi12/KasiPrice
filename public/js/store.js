@@ -589,7 +589,6 @@ export class SalonStore {
     const booking = {
       id: `NBP-${Math.floor(1000 + Math.random() * 9000)}`,
       status: 'Confirmed',
-      depositPaid: false,
       createdAt: new Date().toISOString(),
       ...bookingPayload
     };
@@ -617,7 +616,7 @@ export class SalonStore {
         id: `m-bk-salon-${Date.now() + 1}`,
         sender: 'salon',
         senderName: 'Salon',
-        text: `Thank you ${booking.clientName}! Your appointment with ${booking.stylistName} on ${booking.date} at ${booking.time} is confirmed (Ref: ${booking.id}). 30% Deposit: P${booking.deposit} via ${booking.paymentMethod}.`,
+        text: `Thank you ${booking.clientName}! Your appointment with ${booking.stylistName} on ${booking.date} at ${booking.time} is confirmed (Ref: ${booking.id}).`,
         timestamp: nowTime,
         status: 'unread'
       });

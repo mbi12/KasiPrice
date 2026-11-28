@@ -12,7 +12,6 @@ export const SALON_INFO = {
   hours: '',
   currency: '',
   symbol: '',
-  depositPercent: 0,
   logo: '',
   logoDarkInk: '',
   logoLightInk: '',
