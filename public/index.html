@@ -229,7 +229,7 @@
             <div class="card">
               <div class="card-head">
                 <div>
-                  <h3>Knotless • Box Braids • Senegalese Twists</h3>
+                  <h3>Knotless • Box Braids • Twists — Real Price Matrix</h3>
                   <p class="muted-text">Tap any price cell to book that exact size &amp; length.</p>
                 </div>
               </div>
@@ -242,7 +242,6 @@
                       <th>Midback</th>
                       <th>Butt Length</th>
                       <th>Knee Length</th>
-                      <th class="hide-xs">Packs Needed</th>
                     </tr>
                   </thead>
                   <tbody id="priceMatrixBody"></tbody>
@@ -256,61 +255,21 @@
                   <p class="muted-text">Standard Midback &amp; Butt Length (+P50 for extra-long Knee Length).</p>
                 </div>
                 <div class="flat-rate-right">
-                  <strong class="price-big"></strong>
+                  <strong class="price-big" id="flatSpecialtyPrice"></strong>
                   <button type="button" class="btn btn-primary btn-sm" id="bookFlatSpecialtyBtn">Book Specialty</button>
                 </div>
               </div>
             </div>
 
-            <!-- Right Column: Quick Estimator + Salon Info & Payment Details -->
-            <div class="side-stack">
-              <div class="card">
-                <h3>Quick Cost &amp; Deposit Calculator</h3>
-                <p class="muted-text mb-12">Check exact price, hair packs required, and 30% booking deposit.</p>
-
-                <div class="form-row-2">
-                  <div class="field">
-                    <label for="estSizeSelect">Braid Size</label>
-                    <select id="estSizeSelect" class="input-select"></select>
-                  </div>
-                  <div class="field">
-                    <label for="estLengthSelect">Length</label>
-                    <select id="estLengthSelect" class="input-select"></select>
-                  </div>
-                </div>
-
-                <div class="estimator-summary" id="estimatorSummaryBox"></div>
-
-                <button type="button" class="btn btn-primary full-width mt-12" id="estBookBtn">
-                  Book This Selection
-                </button>
-              </div>
-
-              <div class="card">
-                <h3>Parlour Details &amp; Payments</h3>
-                <div class="info-list">
-                  <div class="info-item">
-                    <span>Hours</span>
-                    <strong>Mon – Sun • 07:30 – 19:00</strong>
-                  </div>
-                  <div class="info-item">
-                    <span>Location</span>
-                    <strong>Gaborone, Botswana (+ House-Calls)</strong>
-                  </div>
-                  <div class="info-item">
-                    <span>Phone / WhatsApp</span>
-                    <strong><a href="tel:+26772517904">+267 72 517 904</a></strong>
-                  </div>
-                  <div class="info-item">
-                    <span>Deposit Number</span>
-                    <strong>72517904 (Orange Money / MyZaka / Smega)</strong>
-                  </div>
-                  <div class="info-item">
-                    <span>Instagram / TikTok</span>
-                    <strong>@NICOLE_BEAUTY_PARLOUR</strong>
-                  </div>
+            <!-- Hairstyle Photo Gallery with Real Prices -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>Our Hairstyles — Real Photos &amp; Prices</h3>
+                  <p class="muted-text">Browse the gallery and tap a style to book it at the listed price.</p>
                 </div>
               </div>
+              <div class="services-grid" id="pricesPhotoGallery"></div>
             </div>
           </div>
         </section>

@@ -1136,6 +1136,17 @@ button {
   color: var(--text);
 }
 
+.card-note {
+  font-size: clamp(11.5px, 0.9vw, 12.5px);
+  color: var(--text-muted);
+  margin: -2px 0 4px;
+  line-height: 1.35;
+}
+
+.mt-8 {
+  margin-top: 8px;
+}
+
 /* ================= VIEW 2: OFFICIAL PRICE TABLE & SALON INFO ================= */
 .prices-layout {
   display: grid;

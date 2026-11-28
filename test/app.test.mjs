@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   OFFICIAL_PRICE_MATRIX,
+  SIZE_OPTIONS,
+  LENGTH_OPTIONS,
+  PHOTO_GALLERY,
   SPECIALTY_FLAT_PRICE,
   INITIAL_HAIRSTYLES,
   INITIAL_PROMOTIONS,
@@ -11,20 +14,42 @@ import {
 } from '../public/js/data.js';
 import { createApp } from '../server.js';
 
-test('Catalog & pricing data layer is cleared (empty shell, ready for real data)', () => {
-  // All demo/mockup records have been removed; the data layer starts empty.
-  assert.deepEqual(OFFICIAL_PRICE_MATRIX, {});
+test('Catalog & pricing data layer holds real salon prices', () => {
+  // Real Knotless / Box Braids / Twist matrix is populated.
+  assert.equal(OFFICIAL_PRICE_MATRIX.jumbo.midback, 130);
+  assert.equal(OFFICIAL_PRICE_MATRIX.jumbo.butt, 160);
+  assert.equal(OFFICIAL_PRICE_MATRIX.jumbo.knee, 200);
+  assert.equal(OFFICIAL_PRICE_MATRIX.large.midback, 160);
+  assert.equal(OFFICIAL_PRICE_MATRIX.medium.midback, 180);
+  assert.equal(OFFICIAL_PRICE_MATRIX.medium.knee, 300);
+  assert.equal(OFFICIAL_PRICE_MATRIX.smedium.midback, 200);
+  assert.equal(OFFICIAL_PRICE_MATRIX.smedium.knee, 400);
+  assert.equal(OFFICIAL_PRICE_MATRIX.small.midback, 250);
+  assert.equal(OFFICIAL_PRICE_MATRIX.small.knee, 500);
+
+  // Size & length options drive the matrix table.
+  assert.equal(SIZE_OPTIONS.length, 5);
+  assert.equal(LENGTH_OPTIONS.length, 3);
+
+  // Flat specialty rate (Pick n' Drop / Switch / Hardread / Softdread).
+  assert.equal(SPECIALTY_FLAT_PRICE, 250);
+
+  // Photo gallery is present (real hairstyle photos).
+  assert.ok(PHOTO_GALLERY.length >= 1);
+  assert.ok(PHOTO_GALLERY[0].image.endsWith('.jpg'));
+
+  // Demo/mockup records remain cleared.
   assert.equal(INITIAL_HAIRSTYLES.length, 0);
   assert.equal(INITIAL_PROMOTIONS.length, 0);
   assert.equal(INITIAL_BOOKINGS.length, 0);
   assert.equal(INITIAL_THREADS.length, 0);
-  assert.equal(SPECIALTY_FLAT_PRICE, 250);
 
-  // Price calculation degrades gracefully with no data.
+  // Price calculation resolves against the real matrix.
   assert.equal(calculateStylePrice(null, 'medium', 'midback'), 0);
-  assert.equal(calculateStylePrice({}, 'medium', 'midback'), 0);
+  assert.equal(calculateStylePrice({}, 'medium', 'midback'), 180);
+  assert.equal(calculateStylePrice({}, 'small', 'knee'), 500);
 
-  // A flat-price style still resolves without a price matrix.
+  // A flat-price style still resolves.
   const flat = { pricingMode: 'flat', flatPrice: 250 };
   assert.equal(calculateStylePrice(flat, 'medium', 'midback'), 250);
   assert.equal(calculateStylePrice(flat, 'small', 'knee'), 300);

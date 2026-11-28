@@ -3,6 +3,7 @@ import {
   SALON_INFO,
   OFFICIAL_PRICE_MATRIX,
   SPECIALTY_FLAT_PRICE,
+  PHOTO_GALLERY,
   SIZE_OPTIONS,
   LENGTH_OPTIONS,
   HAIR_COLORS,
@@ -393,7 +394,7 @@ function renderServiceDetailModal() {
   });
 }
 
-/* ================= VIEW 2: OFFICIAL PRICE LIST & ESTIMATOR ================= */
+/* ================= VIEW 2: OFFICIAL PRICE LIST & PHOTO GALLERY ================= */
 function renderPricesView() {
   const tbody = document.getElementById('priceMatrixBody');
   if (tbody) {
@@ -405,7 +406,6 @@ function renderPricesView() {
           <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:midback">${formatPula(row.midback)}</button></td>
           <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:butt">${formatPula(row.butt)}</button></td>
           <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:knee">${formatPula(row.knee)}</button></td>
-          <td class="hide-xs muted-text">${esc(PACKS_BY_SIZE[sz.id] || '')}</td>
         </tr>`;
     }).join('');
 
@@ -417,27 +417,43 @@ function renderPricesView() {
     });
   }
 
-  const estSizeSel = document.getElementById('estSizeSelect');
-  const estLenSel = document.getElementById('estLengthSelect');
-  if (estSizeSel && !estSizeSel.options.length) {
-    estSizeSel.innerHTML = SIZE_OPTIONS.map((s) => `<option value="${s.id}">${esc(s.label)}</option>`).join('');
-  }
-  if (estLenSel && !estLenSel.options.length) {
-    estLenSel.innerHTML = LENGTH_OPTIONS.map((l) => `<option value="${l.id}">${esc(l.label)}</option>`).join('');
-  }
-  if (estSizeSel) estSizeSel.value = ui.estSize;
-  if (estLenSel) estLenSel.value = ui.estLength;
+  const flatEl = document.getElementById('flatSpecialtyPrice');
+  if (flatEl) flatEl.textContent = formatPula(SPECIALTY_FLAT_PRICE);
 
-  const estPrice = OFFICIAL_PRICE_MATRIX[ui.estSize]?.[ui.estLength] ?? 0;
-  const estDeposit = Math.round(estPrice * 0.3);
-  const estBox = document.getElementById('estimatorSummaryBox');
-  if (estBox) {
-    estBox.innerHTML = `
-      <div class="est-row"><span>Estimated Duration</span><strong>${DURATION_BY_SIZE[ui.estSize] || ''}</strong></div>
-      <div class="est-row"><span>Hair Packs to Bring</span><strong>${PACKS_BY_SIZE[ui.estSize] || ''}</strong></div>
-      <div class="est-row"><span>30% Chair Deposit</span><strong>${formatPula(estDeposit)}</strong></div>
-      <div class="est-row highlight"><span>Official Salon Price</span><strong>${formatPula(estPrice)}</strong></div>
-    `;
+  const gallery = document.getElementById('pricesPhotoGallery');
+  if (gallery) {
+    gallery.innerHTML = PHOTO_GALLERY.map((item, i) => {
+      const name = item.name || `Hairstyle ${i + 1}`;
+      const price = item.price ? formatPula(item.price) : 'Price on request';
+      const note = item.note ? `<p class="muted-text card-note">${esc(item.note)}</p>` : '';
+      return `
+        <div class="service-card" data-gallery-book="${i}">
+          <div class="service-photo-wrap">
+            <img src="${esc(item.image)}" alt="${esc(name)}" loading="lazy" />
+          </div>
+          <div class="service-body">
+            <h4 class="service-title">${esc(name)}</h4>
+            ${note}
+            <div class="service-footer">
+              <div class="service-price-col">
+                <span>Price</span>
+                <strong>${price}</strong>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" data-gallery-book-btn="${i}">Book This Style</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    gallery.querySelectorAll('[data-gallery-book-btn]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const i = Number(btn.dataset.galleryBookBtn);
+        const item = PHOTO_GALLERY[i];
+        if (!item) return;
+        jumpToBook(item.name ? item.name : `Hairstyle ${i + 1}`, 'medium', 'midback');
+      });
+    });
   }
 }
 
@@ -1320,17 +1336,6 @@ function bindEvents() {
   );
   document.getElementById('bookFlatSpecialtyBtn')?.addEventListener('click', () =>
     jumpToBook('', 'medium', 'midback')
-  );
-  document.getElementById('estSizeSelect')?.addEventListener('change', (e) => {
-    ui.estSize = e.target.value;
-    renderPricesView();
-  });
-  document.getElementById('estLengthSelect')?.addEventListener('change', (e) => {
-    ui.estLength = e.target.value;
-    renderPricesView();
-  });
-  document.getElementById('estBookBtn')?.addEventListener('click', () =>
-    jumpToBook('', ui.estSize, ui.estLength)
   );
 
   // Booking form controls

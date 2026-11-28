@@ -21,15 +21,48 @@ export const SALON_INFO = {
   priceSheetImage: ''
 };
 
-export const SIZE_OPTIONS = [];
+export const SIZE_OPTIONS = [
+  { id: 'jumbo', label: 'Jumbo' },
+  { id: 'large', label: 'Large' },
+  { id: 'medium', label: 'Medium' },
+  { id: 'smedium', label: 'S_Medium' },
+  { id: 'small', label: 'Small' },
+];
 
-export const LENGTH_OPTIONS = [];
+export const LENGTH_OPTIONS = [
+  { id: 'midback', label: 'Midback' },
+  { id: 'butt', label: 'Butt Length' },
+  { id: 'knee', label: 'Knee Length' },
+];
 
 export const HAIR_COLORS = [];
 
-export const OFFICIAL_PRICE_MATRIX = {};
+export const OFFICIAL_PRICE_MATRIX = {
+  jumbo: { midback: 130, butt: 160, knee: 200 },
+  large: { midback: 160, butt: 200, knee: 250 },
+  medium: { midback: 180, butt: 250, knee: 300 },
+  smedium: { midback: 200, butt: 300, knee: 400 },
+  small: { midback: 250, butt: 350, knee: 500 },
+};
 
-export const SPECIALTY_FLAT_PRICE = 250; // Default flat-rate fallback (code default, not demo data)
+export const SPECIALTY_FLAT_PRICE = 250; // Pick n' Drop / Switch / Hardread / Softdread
+
+// Hairstyle photo gallery for the Prices view.
+// Each entry: { image, name, price, note }
+// price uses the real matrix values; name/note to be filled in from the photos.
+export const PHOTO_GALLERY = [
+  { image: 'images/real/real-01.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-02.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-03.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-04.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-05.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-06.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-07.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-08.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-09.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-10.jpg', name: '', price: 0, note: '' },
+  { image: 'images/real/real-11.jpg', name: '', price: 0, note: '' },
+];
 
 export function calculateStylePrice(style, sizeId = 'medium', lengthId = 'midback') {
   if (!style) return 0;
