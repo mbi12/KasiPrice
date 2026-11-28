@@ -47,23 +47,6 @@ export const OFFICIAL_PRICE_MATRIX = {
 
 export const SPECIALTY_FLAT_PRICE = 250; // Pick n' Drop / Switch / Hardread / Softdread
 
-// Hairstyle photo gallery for the Prices view.
-// Each entry: { image, name, price, note }
-// price uses the real matrix values; name/note to be filled in from the photos.
-export const PHOTO_GALLERY = [
-  { image: 'images/real/real-01.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-02.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-03.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-04.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-05.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-06.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-07.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-08.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-09.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-10.jpg', name: '', price: 0, note: '' },
-  { image: 'images/real/real-11.jpg', name: '', price: 0, note: '' },
-];
-
 export function calculateStylePrice(style, sizeId = 'medium', lengthId = 'midback') {
   if (!style) return 0;
   if (style.pricingMode === 'flat') {

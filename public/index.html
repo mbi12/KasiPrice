@@ -260,17 +260,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Hairstyle Photo Gallery with Real Prices -->
-            <div class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Our Hairstyles — Real Photos &amp; Prices</h3>
-                  <p class="muted-text">Browse the gallery and tap a style to book it at the listed price.</p>
-                </div>
-              </div>
-              <div class="services-grid" id="pricesPhotoGallery"></div>
-            </div>
           </div>
         </section>
 
@@ -927,6 +916,13 @@
         <h3 class="mb-12">Edit Service &amp; Price</h3>
         <form id="editStyleForm" class="form-stack">
           <input type="hidden" id="editStyleIdInput" />
+          <div class="photo-upload-box">
+            <img id="editStylePreviewImg" src="" alt="Preview" />
+            <label class="btn btn-secondary btn-sm">
+              <input type="file" id="editStylePhotoInput" accept="image/*" hidden />
+              Change Hairstyle Photo
+            </label>
+          </div>
           <div class="field">
             <label for="editStyleNameInput">Service Name *</label>
             <input type="text" id="editStyleNameInput" class="input-text" required />

@@ -4,7 +4,6 @@ import {
   OFFICIAL_PRICE_MATRIX,
   SIZE_OPTIONS,
   LENGTH_OPTIONS,
-  PHOTO_GALLERY,
   SPECIALTY_FLAT_PRICE,
   INITIAL_HAIRSTYLES,
   INITIAL_PROMOTIONS,
@@ -33,10 +32,6 @@ test('Catalog & pricing data layer holds real salon prices', () => {
 
   // Flat specialty rate (Pick n' Drop / Switch / Hardread / Softdread).
   assert.equal(SPECIALTY_FLAT_PRICE, 250);
-
-  // Photo gallery is present (real hairstyle photos).
-  assert.ok(PHOTO_GALLERY.length >= 1);
-  assert.ok(PHOTO_GALLERY[0].image.endsWith('.jpg'));
 
   // Demo/mockup records remain cleared.
   assert.equal(INITIAL_HAIRSTYLES.length, 0);

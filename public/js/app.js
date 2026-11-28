@@ -3,7 +3,6 @@ import {
   SALON_INFO,
   OFFICIAL_PRICE_MATRIX,
   SPECIALTY_FLAT_PRICE,
-  PHOTO_GALLERY,
   SIZE_OPTIONS,
   LENGTH_OPTIONS,
   HAIR_COLORS,
@@ -57,6 +56,7 @@ const ui = {
   pendingAdminCallback: null,
   // Studio uploads & flyers
   newStyleImage: '',
+  editStyleImage: '',
   lastFlyerBlob: null,
   lastFlyerPromo: null
 };
@@ -419,42 +419,6 @@ function renderPricesView() {
 
   const flatEl = document.getElementById('flatSpecialtyPrice');
   if (flatEl) flatEl.textContent = formatPula(SPECIALTY_FLAT_PRICE);
-
-  const gallery = document.getElementById('pricesPhotoGallery');
-  if (gallery) {
-    gallery.innerHTML = PHOTO_GALLERY.map((item, i) => {
-      const name = item.name || `Hairstyle ${i + 1}`;
-      const price = item.price ? formatPula(item.price) : 'Price on request';
-      const note = item.note ? `<p class="muted-text card-note">${esc(item.note)}</p>` : '';
-      return `
-        <div class="service-card" data-gallery-book="${i}">
-          <div class="service-photo-wrap">
-            <img src="${esc(item.image)}" alt="${esc(name)}" loading="lazy" />
-          </div>
-          <div class="service-body">
-            <h4 class="service-title">${esc(name)}</h4>
-            ${note}
-            <div class="service-footer">
-              <div class="service-price-col">
-                <span>Price</span>
-                <strong>${price}</strong>
-              </div>
-              <button type="button" class="btn btn-primary btn-sm" data-gallery-book-btn="${i}">Book This Style</button>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
-
-    gallery.querySelectorAll('[data-gallery-book-btn]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const i = Number(btn.dataset.galleryBookBtn);
-        const item = PHOTO_GALLERY[i];
-        if (!item) return;
-        jumpToBook(item.name ? item.name : `Hairstyle ${i + 1}`, 'medium', 'midback');
-      });
-    });
-  }
 }
 
 /* ================= VIEW 3: BOOKING & SLOT AVAILABILITY ================= */
@@ -1226,6 +1190,9 @@ function openEditStyleModal(styleId) {
   setVal('editStyleDescInput', s.description || '');
   const activeChk = document.getElementById('editStyleActiveCheck');
   if (activeChk) activeChk.checked = s.active !== false;
+  ui.editStyleImage = '';
+  const previewImg = document.getElementById('editStylePreviewImg');
+  if (previewImg) previewImg.src = s.image || '';
   openModal('editStyleModal');
 }
 
@@ -1616,6 +1583,14 @@ function bindEvents() {
     if (img) img.src = ui.newStyleImage;
   });
 
+  document.getElementById('editStylePhotoInput')?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    ui.editStyleImage = await compressImageFile(file, 920, 0.84);
+    const img = document.getElementById('editStylePreviewImg');
+    if (img) img.src = ui.editStyleImage;
+  });
+
   document.getElementById('addStyleForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!requireAdminAuth()) return;
@@ -1655,6 +1630,7 @@ function bindEvents() {
       name: document.getElementById('editStyleNameInput')?.value.trim(),
       category: document.getElementById('editStyleCategorySelect')?.value,
       badge: document.getElementById('editStyleBadgeInput')?.value.trim(),
+      image: ui.editStyleImage || undefined,
       pricingMode,
       flatPrice: pricingMode === 'flat' ? Math.max(50, num || 250) : undefined,
       priceOffset: pricingMode === 'matrix' ? num : 0,
