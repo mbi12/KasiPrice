@@ -33,8 +33,13 @@ test('Catalog & pricing data layer holds real salon prices', () => {
   // Flat specialty rate (Pick n' Drop / Switch / Hardread / Softdread).
   assert.equal(SPECIALTY_FLAT_PRICE, 250);
 
+  // Real salon hairstyles are seeded (photos added later by the owner).
+  assert.equal(INITIAL_HAIRSTYLES.length, 7);
+  assert.ok(INITIAL_HAIRSTYLES.some((s) => s.id === 'knotless' && s.pricingMode === 'matrix'));
+  assert.ok(INITIAL_HAIRSTYLES.some((s) => s.id === 'softdread' && s.pricingMode === 'flat'));
+  assert.ok(INITIAL_HAIRSTYLES.every((s) => !s.image)); // photos added later
+
   // Demo/mockup records remain cleared.
-  assert.equal(INITIAL_HAIRSTYLES.length, 0);
   assert.equal(INITIAL_PROMOTIONS.length, 0);
   assert.equal(INITIAL_BOOKINGS.length, 0);
   assert.equal(INITIAL_THREADS.length, 0);
@@ -58,12 +63,12 @@ test('REST API endpoints support styles, bookings, promotions & two-way messagin
   const base = `http://127.0.0.1:${port}`;
 
   try {
-    // 1. Health check reflects an empty catalog
+    // 1. Health check reflects the seeded real catalog
     const healthRes = await fetch(`${base}/api/health`);
     assert.equal(healthRes.status, 200);
     const health = await healthRes.json();
     assert.equal(health.ok, true);
-    assert.equal(health.stylesCount, 0);
+    assert.equal(health.stylesCount, 7);
     assert.equal(health.promotionsCount, 0);
     assert.equal(health.bookingsCount, 0);
 

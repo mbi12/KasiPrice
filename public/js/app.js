@@ -75,6 +75,23 @@ function formatPula(amount) {
   return `P${Math.round(Number(amount || 0)).toLocaleString('en-BW')}`;
 }
 
+// Renders a hairstyle photo, or a clean "photo coming soon" placeholder when
+// the owner has not uploaded one yet (they add photos later via the admin panel).
+function photoHtml(src, alt = '', cls = '') {
+  const clsAttr = cls ? ` class="${cls}"` : '';
+  if (src) {
+    return `<img src="${esc(src)}" alt="${esc(alt)}"${clsAttr} loading="lazy" />`;
+  }
+  return `<div class="photo-placeholder"${clsAttr}>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="9" cy="11" r="1.6" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M4.5 17.5l4.2-4 3 3 3.3-3.5 4.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Photo coming soon</span>
+  </div>`;
+}
+
 function getUpcomingDates(days = 14) {
   const out = [];
   const base = new Date();
@@ -271,7 +288,7 @@ function renderServicesCatalog() {
       return `
       <article class="service-card">
         <div class="service-photo-wrap" data-open-detail="${esc(s.id)}">
-          <img src="${esc(s.image)}" alt="${esc(s.name)}" loading="lazy" />
+          ${photoHtml(s.image, s.name)}
           ${s.badge ? `<span class="service-badge">${esc(s.badge)}</span>` : ''}
         </div>
         <div class="service-body">
@@ -324,7 +341,7 @@ function renderServiceDetailModal() {
 
   host.innerHTML = `
     <div class="detail-modal-hero">
-      <img src="${esc(s.image)}" alt="${esc(s.name)}" />
+      ${photoHtml(s.image, s.name)}
       <div>
         <span class="tag-badge">${esc(s.category)}</span>
         <h3 style="margin:6px 0;">${esc(s.name)}</h3>
@@ -429,6 +446,111 @@ function renderPricesView() {
 
   const flatEl = document.getElementById('flatSpecialtyPrice');
   if (flatEl) flatEl.textContent = formatPula(SPECIALTY_FLAT_PRICE);
+
+  renderHairstylesPrices();
+}
+
+// ================= ALL HAIRSTYLES & PRICES (JUMBO → SMALL) =================
+// Renders one card per hairstyle with a photo placeholder (the owner adds
+// photos later from the admin Services panel) and a full size × length
+// price grid driven by the live matrix.
+function renderHairstylesPrices() {
+  const grid = document.getElementById('hairstylesPricesGrid');
+  if (!grid) return;
+
+  const matrix = getPriceMatrix();
+  const sizeEntries = Object.entries(matrix);
+  const lengthKeys = sizeEntries.length ? Object.keys(sizeEntries[0][1]) : [];
+
+  const styles = store.state.styles.filter((s) => s.active !== false);
+  if (!styles.length) {
+    grid.innerHTML = `<p class="muted-text">No hairstyles added yet.</p>`;
+    return;
+  }
+
+  grid.innerHTML = styles
+    .map((s) => {
+      const photo = photoHtml(s.image, s.name);
+
+      const badgeHtml = s.badge ? `<span class="service-badge">${esc(s.badge)}</span>` : '';
+      const meta = `${esc(s.category)} • ${esc(s.duration)} • ${esc(s.packs)}`;
+
+      let priceBlock;
+      if (s.pricingMode === 'flat') {
+        const flat = Number(s.flatPrice || SPECIALTY_FLAT_PRICE);
+        priceBlock = `
+          <div class="hairstyle-flat-price">
+            <div>
+              <span class="muted-text">Flat Rate</span>
+              <strong class="price-big">${formatPula(flat)}</strong>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" data-style-book="${esc(s.id)}">
+              Book This Style
+            </button>
+          </div>`;
+      } else {
+        const rows = sizeEntries
+          .map(([sizeId, row]) => {
+            const cells = lengthKeys
+              .map(
+                (len) =>
+                  `<td><button type="button" class="price-cell-btn" data-style-book="${esc(
+                    s.id
+                  )}:${esc(sizeId)}:${esc(len)}">${formatPula(calculateStylePrice(s, sizeId, len))}</button></td>`
+              )
+              .join('');
+            return `
+            <tr>
+              <td><strong>${esc(sizeLabel(sizeId))}</strong></td>
+              ${cells}
+            </tr>`;
+          })
+          .join('');
+
+        priceBlock = `
+          <div class="table-wrap">
+            <table class="price-table hairstyle-price-table">
+              <thead>
+                <tr>
+                  <th>Braid Size</th>
+                  ${lengthKeys.map((len) => `<th>${esc(lengthLabel(len))}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+      }
+
+      return `
+        <article class="hairstyle-price-card">
+          <div class="hairstyle-photo-wrap" data-open-detail="${esc(s.id)}">
+            ${photo}
+            ${badgeHtml}
+          </div>
+          <div class="hairstyle-body">
+            <div>
+              <h3 class="service-title" data-open-detail="${esc(s.id)}">${esc(s.name)}</h3>
+              <p class="service-meta">${meta}</p>
+            </div>
+            ${priceBlock}
+          </div>
+        </article>`;
+    })
+    .join('');
+
+  grid.querySelectorAll('[data-open-detail]').forEach((el) => {
+    el.addEventListener('click', () => openServiceDetailModal(el.dataset.openDetail));
+  });
+  grid.querySelectorAll('[data-style-book]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const parts = btn.dataset.styleBook.split(':');
+      if (parts.length === 1) {
+        jumpToBook(parts[0], 'medium', 'midback');
+      } else {
+        jumpToBook(parts[0], parts[1], parts[2]);
+      }
+    });
+  });
 }
 
 // Map a size id to a human label (falls back to the raw id).
@@ -502,7 +624,7 @@ function renderBookingView() {
   const preview = document.getElementById('bookSelectedPreview');
   if (preview && style) {
     preview.innerHTML = `
-      <img src="${esc(style.image)}" alt="${esc(style.name)}" />
+      ${photoHtml(style.image, style.name, 'selected-service-photo')}
       <div style="flex:1">
         <strong style="display:block;">${esc(style.name)}</strong>
         <span class="muted-text">${esc(style.duration)} • Bring ${esc(style.packs)}</span>
@@ -912,7 +1034,7 @@ function renderAdminView() {
             (bk) => `
         <div class="admin-row">
           <div class="admin-row-main">
-            <img src="${esc(bk.styleImage || '')}" alt="${esc(bk.styleName)}" />
+            ${photoHtml(bk.styleImage, bk.styleName, 'admin-row-photo')}
             <div>
               <strong>${esc(bk.clientName)} • ${esc(bk.date)} at ${esc(bk.time)}</strong>
               <span>${esc(bk.styleName)} • ${esc(bk.stylistName)} • ${formatPula(bk.total)}</span>
@@ -975,7 +1097,7 @@ function renderAdminView() {
             return `
           <div class="admin-row">
             <div class="admin-row-main">
-              <img src="${esc(bk.styleImage || '')}" alt="${esc(bk.styleName)}" />
+              ${photoHtml(bk.styleImage, bk.styleName, 'admin-row-photo')}
               <div>
                 <strong>${esc(bk.clientName)} (${esc(bk.clientPhone || 'Walk-in')}) • ${esc(bk.id)}</strong>
                 <span>${esc(bk.styleName)} • ${esc(bk.date)} ${esc(bk.time)} • ${esc(bk.stylistName)} • <strong>${formatPula(bk.total)}</strong></span>
@@ -1035,7 +1157,7 @@ function renderAdminView() {
         return `
         <div class="admin-row">
           <div class="admin-row-main">
-            <img src="${esc(s.image)}" alt="${esc(s.name)}" />
+            ${photoHtml(s.image, s.name, 'admin-row-photo')}
             <div>
               <strong>${esc(s.name)} ${!isAvailable ? '(Hidden)' : ''}</strong>
               <span>${esc(s.category)} • ${s.pricingMode === 'flat' ? `Flat ${formatPula(p)}` : `From ${formatPula(p)}`} • ${esc(s.duration)} • ${esc(s.packs)}</span>
@@ -1155,7 +1277,7 @@ function renderAdminView() {
         (p) => `
       <div class="admin-row">
         <div class="admin-row-main">
-          <img src="${esc(p.image)}" alt="${esc(p.title)}" />
+          ${photoHtml(p.image, p.title, 'admin-row-photo')}
           <div>
             <strong>${esc(p.title)} (${esc(p.code)})</strong>
             <span>${p.discountPercent}% OFF • ${p.active ? 'Active' : 'Paused'}</span>

@@ -78,7 +78,15 @@ export function calculateStylePrice(style, sizeId = 'medium', lengthId = 'midbac
   return Math.max(80, matrixPrice + styleOffset);
 }
 
-export const CATEGORIES = [];
+export const CATEGORIES = [
+  'Knotless',
+  'Twists',
+  'Box Braids',
+  'Softdread & Switch',
+  'Boho & Curls',
+  'Updos & Buns',
+  'Cornrows'
+];
 
 export const ADD_ONS = [];
 
@@ -86,7 +94,137 @@ export const STYLISTS = [];
 
 export const TIME_SLOTS = [];
 
-export const INITIAL_HAIRSTYLES = [];
+// Real salon hairstyles — prices come from the live size × length matrix
+// (calculateStylePrice). Photos are intentionally left empty; the owner adds
+// them later from the admin "Services, Prices & Availability" panel.
+export const INITIAL_HAIRSTYLES = [
+  {
+    id: 'knotless',
+    name: 'Knotless',
+    category: 'Knotless',
+    image: '',
+    pricingMode: 'matrix',
+    priceOffset: 0,
+    defaultSize: 'jumbo',
+    defaultLength: 'midback',
+    duration: '4 – 5 hrs',
+    packs: '5–6 packs',
+    description: 'Tension-free knotless braids — clean parting, no scalp pain.',
+    badge: 'Bestseller',
+    active: true,
+    featured: true,
+    rating: 5.0,
+    reviewsCount: 1
+  },
+  {
+    id: 'box-braids',
+    name: 'Box Braids',
+    category: 'Box Braids',
+    image: '',
+    pricingMode: 'matrix',
+    priceOffset: 0,
+    defaultSize: 'large',
+    defaultLength: 'butt',
+    duration: '5 – 6 hrs',
+    packs: '6–8 packs',
+    description: 'Classic box braids — neat, long-lasting and stylish.',
+    badge: '',
+    active: true,
+    featured: true,
+    rating: 5.0,
+    reviewsCount: 1
+  },
+  {
+    id: 'twist',
+    name: 'Twist',
+    category: 'Twists',
+    image: '',
+    pricingMode: 'matrix',
+    priceOffset: 0,
+    defaultSize: 'medium',
+    defaultLength: 'butt',
+    duration: '4 – 5 hrs',
+    packs: '5–7 packs',
+    description: 'Two-strand twists — soft, defined and easy to maintain.',
+    badge: '',
+    active: true,
+    featured: true,
+    rating: 5.0,
+    reviewsCount: 1
+  },
+  {
+    id: 'pick-n-drop',
+    name: "Pick n' Drop",
+    category: 'Softdread & Switch',
+    image: '',
+    pricingMode: 'flat',
+    flatPrice: 250,
+    defaultSize: 'medium',
+    defaultLength: 'midback',
+    duration: '2 – 3 hrs',
+    packs: '3–4 packs',
+    description: 'Quick pick n\' drop style — easy, fast and elegant.',
+    badge: '',
+    active: true,
+    featured: false,
+    rating: 5.0,
+    reviewsCount: 1
+  },
+  {
+    id: 'switch',
+    name: 'Switch',
+    category: 'Softdread & Switch',
+    image: '',
+    pricingMode: 'flat',
+    flatPrice: 250,
+    defaultSize: 'medium',
+    defaultLength: 'midback',
+    duration: '3 – 4 hrs',
+    packs: '4–5 packs',
+    description: 'Switch braids — a protective style with a clean finish.',
+    badge: '',
+    active: true,
+    featured: false,
+    rating: 5.0,
+    reviewsCount: 1
+  },
+  {
+    id: 'hardread',
+    name: 'Hardread',
+    category: 'Softdread & Switch',
+    image: '',
+    pricingMode: 'flat',
+    flatPrice: 250,
+    defaultSize: 'medium',
+    defaultLength: 'midback',
+    duration: '2 – 3 hrs',
+    packs: '3–4 packs',
+    description: 'Hardread style — crisp edges with a polished look.',
+    badge: '',
+    active: true,
+    featured: false,
+    rating: 5.0,
+    reviewsCount: 1
+  },
+  {
+    id: 'softdread',
+    name: 'Softdread',
+    category: 'Softdread & Switch',
+    image: '',
+    pricingMode: 'flat',
+    flatPrice: 250,
+    defaultSize: 'medium',
+    defaultLength: 'midback',
+    duration: '3 – 4 hrs',
+    packs: '4–5 packs',
+    description: 'Softdread — gentle, voluminous and comfortable to wear.',
+    badge: '',
+    active: true,
+    featured: false,
+    rating: 5.0,
+    reviewsCount: 1
+  }
+];
 
 export const INITIAL_PROMOTIONS = [];
 

@@ -1293,6 +1293,121 @@ button {
   flex-shrink: 0;
 }
 
+/* ================= SHARED PHOTO PLACEHOLDER ================= */
+.photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface-2);
+  border: 1px dashed var(--border-hover);
+  border-radius: inherit;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-align: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.photo-placeholder svg {
+  width: 30px;
+  height: 30px;
+  opacity: 0.55;
+}
+
+.selected-service-photo,
+.admin-row-photo {
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.selected-service-photo {
+  width: 52px;
+  height: 52px;
+}
+
+.admin-row-photo {
+  width: 44px;
+  height: 44px;
+}
+
+/* ================= ALL HAIRSTYLES & PRICES GRID ================= */
+.hairstyles-prices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(240px, 30vw, 340px), 1fr));
+  gap: clamp(10px, 1.6vw, 18px);
+}
+
+.hairstyle-price-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.hairstyle-price-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.hairstyle-photo-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--surface-2);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.hairstyle-photo-wrap img,
+.hairstyle-photo-wrap .photo-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.hairstyle-body {
+  padding: clamp(10px, 1.4vw, 15px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.hairstyle-price-table {
+  font-size: 12.5px;
+}
+
+.hairstyle-price-table th,
+.hairstyle-price-table td {
+  padding: 6px 8px;
+}
+
+.hairstyle-flat-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.hairstyle-flat-price .price-big {
+  font-size: 17px;
+}
+
 .price-big {
   font-size: clamp(19px, 1.8vw, 23px);
   font-weight: 800;
