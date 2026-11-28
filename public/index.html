@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0b0d11" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nicole Parlour" />
+    <meta
+      name="description"
+      content="Nicole Beauty Parlour Gaborone — Official BWP braid & twist price list, real-time appointment booking, client messaging & salon management. Call/WhatsApp +267 72 517 904."
+    />
+
+    <title>Nicole Beauty Parlour • Gaborone Salon &amp; Online Booking</title>
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- Preload Animated Logo Layers for Zero-Delay Frame-0 Playback -->
+    <link rel="preload" as="image" href="/images/anim/logo-script.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-idot.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-crown.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-subtitle.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-tagwords.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-heart-left.png" />
+    <link rel="preload" as="image" href="/images/anim/logo-heart-right.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body class="splash-locked">
+    <!-- ================= START-UP ANIMATED LOGO LOADING SCREEN ================= -->
+    <div id="splashLoader" class="splash-screen" role="status" aria-live="polite" aria-label="Loading Nicole Beauty Parlour">
+      <div class="splash-ambient-glow" aria-hidden="true"></div>
+
+      <div class="splash-center">
+        <!-- Authentic 7-Layer Pixel-Exact Animated Nicole Logo (920x598 coordinate space) -->
+        <div class="anim-logo-stage" id="animLogoStage">
+          <img
+            src="/images/anim/logo-script.png"
+            alt=""
+            class="anim-layer layer-script"
+            decoding="sync"
+          />
+          <div class="anim-layer layer-script-sheen" aria-hidden="true"></div>
+
+          <img
+            src="/images/anim/logo-idot.png"
+            alt=""
+            class="anim-layer layer-idot"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-crown.png"
+            alt=""
+            class="anim-layer layer-crown"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-subtitle.png"
+            alt="Nicole Beauty Parlour"
+            class="anim-layer layer-subtitle"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-tagwords.png"
+            alt="Look Good, Feel Good, Be You"
+            class="anim-layer layer-tagwords"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-heart-left.png"
+            alt=""
+            class="anim-layer layer-heart-left"
+            decoding="sync"
+          />
+          <img
+            src="/images/anim/logo-heart-right.png"
+            alt=""
+            class="anim-layer layer-heart-right"
+            decoding="sync"
+          />
+        </div>
+
+        <div class="splash-progress-wrap">
+          <div class="splash-progress-track">
+            <div class="splash-progress-fill" id="splashProgressFill"></div>
+          </div>
+          <div class="splash-meta-row">
+            <span id="splashStatusText">Preparing salon services...</span>
+            <strong id="splashPercentText">0%</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-shell">
+      <!-- ================= CLEAN PROFESSIONAL TOP HEADER ================= -->
+      <header class="topbar">
+        <div class="topbar-inner">
+          <button type="button" class="brand-btn" id="brandHomeBtn" aria-label="Nicole Beauty Parlour Home">
+            <img
+              src="/images/nicole-wordmark-light.png"
+              alt="Nicole Beauty Parlour"
+              class="brand-wordmark"
+            />
+            <span class="open-badge">
+              <span class="status-dot"></span>
+              <span class="hide-sm">Open • 07:30–19:00</span>
+            </span>
+          </button>
+
+          <nav class="desktop-nav" aria-label="Main Navigation">
+            <button type="button" class="nav-link active" data-tab="services">Services</button>
+            <button type="button" class="nav-link" data-tab="prices">Price List</button>
+            <button type="button" class="nav-link" data-tab="book">Book Chair</button>
+            <button type="button" class="nav-link" data-tab="messages">
+              Messages
+              <span id="desktopUnreadBadge" class="count-pill hidden">0</span>
+            </button>
+          </nav>
+
+        </div>
+      </header>
+
+      <!-- ================= MAIN CONTENT ================= -->
+      <main class="main-container">
+        <!-- ==================== VIEW 1: SERVICES & CATALOG ==================== -->
+        <section id="view-services" class="view active" aria-label="Salon Services">
+          <!-- Compact, Professional Salon Banner -->
+          <div class="salon-intro-card">
+            <div class="salon-intro-brand">
+              <img
+                src="/images/nicole-logo-light.png"
+                alt="Nicole Beauty Parlour — Look Good, Feel Good, Be You"
+                class="salon-crest"
+              />
+              <div class="salon-intro-copy">
+                <div class="meta-inline">
+                  <span>Gaborone, Botswana</span>
+                  <span>•</span>
+                  <span>+267 72 517 904</span>
+                </div>
+                <h1>Knotless, Box Braids, Twists &amp; Softdread</h1>
+                <p>
+                  Transparent official BWP pricing, tension-free parting, and real-time chair booking with instant confirmation.
+                </p>
+              </div>
+            </div>
+
+            <div class="salon-intro-cta">
+              <button type="button" class="btn btn-primary" data-goto-tab="book">
+                Book Appointment
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Specials Strip (compact, clean) -->
+          <div id="activeDealsWrap" class="deals-section">
+            <div class="section-bar">
+              <h2>Current Specials</h2>
+              <span class="muted-label">Tap code to apply at checkout</span>
+            </div>
+            <div class="deals-row" id="promoDealsRow"></div>
+          </div>
+
+          <!-- Search, Category Filter & Sort -->
+          <div class="catalog-controls">
+            <div class="search-bar-row">
+              <div class="search-field">
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="9" cy="9" r="5.8" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                <input
+                  type="search"
+                  id="serviceSearchInput"
+                  placeholder="Search knotless, French curl, softdread, pick n' drop, updo..."
+                  autocomplete="off"
+                />
+                <button type="button" id="clearSearchBtn" class="icon-clear hidden" aria-label="Clear search">×</button>
+              </div>
+
+              <select id="serviceSortSelect" class="input-select sort-select" aria-label="Sort hairstyles">
+                <option value="featured">Recommended</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+            </div>
+
+            <div class="category-strip" id="categoryStrip"></div>
+          </div>
+
+          <div class="results-summary-bar">
+            <span id="servicesCountLabel">16 services available</span>
+            <button type="button" class="link-btn" data-goto-tab="prices">Compare Size &amp; Length Matrix →</button>
+          </div>
+
+          <!-- Clean Portrait Service Cards Grid -->
+          <div class="services-grid" id="servicesGrid"></div>
+        </section>
+
+        <!-- ==================== VIEW 2: OFFICIAL PRICE LIST & SALON INFO ==================== -->
+        <section id="view-prices" class="view" aria-label="Official Price List">
+          <div class="page-head">
+            <div>
+              <h2>Official Parlour Price List (BWP)</h2>
+              <p class="muted-text">Exact prices for Knotless, Box Braids, Twists &amp; Specialty styles — no hidden charges.</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="viewPosterPhotoBtn">
+              View Original Price Card
+            </button>
+          </div>
+
+          <div class="prices-layout">
+            <!-- Official Price Matrix Table -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>Knotless • Box Braids • Twists — Real Price Matrix</h3>
+                  <p class="muted-text">Tap any price cell to book that exact size &amp; length.</p>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table class="price-table" id="officialPriceTable">
+                  <thead>
+                    <tr>
+                      <th>Braid Size</th>
+                      <th>Midback</th>
+                      <th>Butt Length</th>
+                      <th>Knee Length</th>
+                    </tr>
+                  </thead>
+                  <tbody id="priceMatrixBody"></tbody>
+                </table>
+              </div>
+
+              <div class="flat-rate-callout">
+                <div>
+                  <span class="tag-badge">FLAT SPECIALTY RATE</span>
+                  <h4>Pick n' Drop • Switch • Hardread • Softdread</h4>
+                  <p class="muted-text">Standard Midback &amp; Butt Length (+P50 for extra-long Knee Length).</p>
+                </div>
+                <div class="flat-rate-right">
+                  <strong class="price-big" id="flatSpecialtyPrice"></strong>
+                  <button type="button" class="btn btn-primary btn-sm" id="bookFlatSpecialtyBtn">Book Specialty</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- All Hairstyles & Prices (Jumbo → Small) -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>All Hairstyles — Prices from Jumbo to Small</h3>
+                  <p class="muted-text">Every style with its full size × length price grid. Tap any price to book that exact option.</p>
+                </div>
+              </div>
+              <div class="hairstyles-prices-grid" id="hairstylesPricesGrid"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 3: BOOK CHAIR & MY BOOKINGS ==================== -->
+        <section id="view-book" class="view" aria-label="Book Appointment">
+          <div class="page-head">
+            <div>
+              <h2>Book Your Appointment</h2>
+              <p class="muted-text">Real-time braider availability — booked slots are automatically locked.</p>
+            </div>
+          </div>
+
+          <div class="booking-grid">
+            <!-- Left: Clean Booking Form -->
+            <form id="bookingForm" class="booking-form-stack">
+              <!-- Step 1: Hairstyle & Size/Length -->
+              <div class="card">
+                <div class="step-header">
+                  <span class="step-badge">1</span>
+                  <h3>Select Service, Size &amp; Length</h3>
+                </div>
+
+                <div class="field">
+                  <label for="bookStyleSelect">Hairstyle</label>
+                  <select id="bookStyleSelect" class="input-select"></select>
+                </div>
+
+                <div id="bookSelectedPreview" class="selected-service-row"></div>
+
+                <div id="bookMatrixSelectors" class="mt-14">
+                  <div class="form-row-2">
+                    <div class="field">
+                      <label for="bookSizeSelect">Braid Size</label>
+                      <select id="bookSizeSelect" class="input-select"></select>
+                    </div>
+                    <div class="field">
+                      <label for="bookLengthSelect">Braid Length</label>
+                      <select id="bookLengthSelect" class="input-select"></select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field mt-12">
+                  <label for="bookColorSelect">Hair Extension Shade</label>
+                  <select id="bookColorSelect" class="input-select"></select>
+                </div>
+              </div>
+
+              <!-- Step 2: Braider, Date & Available Time -->
+              <div class="card">
+                <div class="step-header">
+                  <span class="step-badge">2</span>
+                  <h3>Choose Braider, Date &amp; Available Time</h3>
+                </div>
+
+                <div class="braiders-grid" id="bookStylistGrid"></div>
+
+                <div class="field mt-14">
+                  <label>Appointment Date</label>
+                  <div class="date-strip" id="bookDateStrip"></div>
+                </div>
+
+                <div class="field mt-14">
+                  <label>Available Start Time <span class="muted-inline">(greyed slots are already booked)</span></label>
+                  <div class="slots-grid" id="bookSlotsGrid"></div>
+                </div>
+              </div>
+
+              <!-- Step 3: Optional Extras & Client Info -->
+              <div class="card">
+                <div class="step-header">
+                  <span class="step-badge">3</span>
+                  <h3>Extras, Contact &amp; Payment</h3>
+                </div>
+
+                <div class="field">
+                  <label>Optional Add-Ons</label>
+                  <div class="addons-list" id="bookAddonsList"></div>
+                </div>
+
+                <div class="promo-row mt-12">
+                  <input
+                    type="text"
+                    id="bookPromoInput"
+                    class="input-text"
+                    placeholder="Promo code"
+                    autocomplete="off"
+                  />
+                  <button type="button" class="btn btn-secondary" id="applyPromoBtn">Apply</button>
+                </div>
+                <p id="promoFeedbackText" class="feedback-line"></p>
+
+                <div class="form-row-2 mt-14">
+                  <div class="field">
+                    <label for="clientNameInput">Your Full Name *</label>
+                    <input
+                      type="text"
+                      id="clientNameInput"
+                      class="input-text"
+                      required
+                      placeholder="e.g. Boitumelo K."
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="clientPhoneInput">Mobile / WhatsApp Number *</label>
+                    <input
+                      type="tel"
+                      id="clientPhoneInput"
+                      class="input-text"
+                      required
+                      placeholder="e.g. 72 123 456"
+                    />
+                  </div>
+                </div>
+
+                <div class="field mt-12">
+                  <label for="paymentMethodSelect">Deposit / Payment Method</label>
+                  <select id="paymentMethodSelect" class="input-select">
+                    <option value="Orange Money">Orange Money</option>
+                    <option value="MyZaka">MyZaka</option>
+                    <option value="Smega">Smega</option>
+                    <option value="FNB eWallet">FNB eWallet</option>
+                    <option value="Pay at Salon (Cash / Card)">Pay at Salon (Cash / Card)</option>
+                  </select>
+                </div>
+
+                <div class="field mt-12">
+                  <label for="bookingNotesInput">Notes for Braider (optional)</label>
+                  <textarea
+                    id="bookingNotesInput"
+                    class="input-textarea"
+                    rows="2"
+                    placeholder="Tender edges, house-call address, specific curl blend..."
+                  ></textarea>
+                </div>
+
+                <div class="checkout-summary mt-16" id="bookingSummaryRows"></div>
+
+                <button type="submit" class="btn btn-primary btn-lg full-width mt-14">
+                  Confirm Appointment
+                </button>
+              </div>
+            </form>
+
+            <!-- Right: Client "My Bookings" Lookup by Phone Number -->
+            <aside class="side-stack">
+              <div class="card">
+                <h3>Check My Appointments</h3>
+                <p class="muted-text mb-12">
+                  Enter the phone number used when booking to view your receipt, message the salon, or cancel.
+                </p>
+                <div class="promo-row">
+                  <input
+                    type="tel"
+                    id="lookupPhoneInput"
+                    class="input-text"
+                    placeholder="Enter your phone number"
+                  />
+                  <button type="button" class="btn btn-secondary" id="lookupPhoneBtn">Find</button>
+                </div>
+                <div id="clientBookingsList" class="bookings-mini-stack mt-14"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 4: DIRECT SALON MESSAGES ==================== -->
+        <section id="view-messages" class="view" aria-label="Salon Enquiries and Chat">
+          <div class="chat-shell">
+            <div class="chat-header">
+              <div class="chat-agent">
+                <img src="/icons/icon-192.png" alt="Nicole Beauty Parlour" class="chat-avatar" />
+                <div>
+                  <div class="chat-title-row">
+                    <h3>Nicole Beauty Parlour Desk</h3>
+                    <span id="chatOwnerModeTag" class="tag-badge hidden">Replying as Salon</span>
+                  </div>
+                  <span class="muted-text">Direct line: +267 72 517 904</span>
+                </div>
+              </div>
+
+              <div class="chat-header-actions">
+                <div id="roleModeSwitchWrap" class="segmented-switch hidden">
+                  <button type="button" class="seg-opt active" id="modeClientBtn">Client View</button>
+                  <button type="button" class="seg-opt" id="modeSalonBtn">Reply as Nicole</button>
+                </div>
+                <a href="tel:+26772517904" class="btn btn-secondary btn-sm">Call</a>
+                <a
+                  href="https://wa.me/26772517904"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-primary btn-sm"
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessagesStream"></div>
+
+            <div class="quick-questions" id="chatQuickChips"></div>
+
+            <div id="chatAttachmentBar" class="attachment-bar hidden"></div>
+
+            <form id="chatComposerForm" class="chat-composer">
+              <label class="btn btn-secondary btn-icon" title="Send reference photo">
+                <input type="file" id="chatImageInput" accept="image/*" hidden />
+                <svg viewBox="0 0 20 20" fill="none">
+                  <rect x="2.8" y="4" width="14.4" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="7.2" cy="8.2" r="1.3" fill="currentColor"/>
+                  <path d="M4.2 14.5L8.4 10.6L11.2 13.2L13.5 11.2L16 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </label>
+              <input
+                type="text"
+                id="chatMessageInput"
+                class="input-text"
+                placeholder="Ask about prices, hair packs, or send a reference hairstyle photo..."
+                autocomplete="off"
+              />
+              <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 5: PROTECTED ADMIN PANEL ==================== -->
+        <section id="view-studio" class="view" aria-label="Salon Admin Panel">
+          <!-- STATE A: PHONE NUMBER + PASSWORD LOGIN GATE (SHOWN FIRST) -->
+          <div id="adminLoginGate" class="login-stage">
+            <div class="login-card" id="adminVaultCard">
+              <div class="login-head">
+                <img
+                  src="/images/nicole-logo-light.png"
+                  alt="Nicole Beauty Parlour"
+                  class="login-logo"
+                />
+                <span class="tag-badge">OWNER PORTAL</span>
+                <h2>Admin Sign In</h2>
+                <p class="muted-text">
+                  Enter your salon phone number and password to manage bookings, deposits, prices, clients, and promotions.
+                </p>
+              </div>
+
+              <form id="adminLoginForm" class="login-form" autocomplete="on">
+                <div class="field">
+                  <label for="adminPhoneInput">Phone Number</label>
+                  <div class="phone-input-wrap">
+                    <span class="dial-prefix">+267</span>
+                    <input
+                      type="tel"
+                      id="adminPhoneInput"
+                      name="phone"
+                      inputmode="tel"
+                      autocomplete="username"
+                      required
+                      placeholder="72517904"
+                    />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="adminPasswordInput">Password</label>
+                  <div class="pass-input-wrap">
+                    <input
+                      type="password"
+                      id="adminPasswordInput"
+                      name="password"
+                      autocomplete="current-password"
+                      required
+                      placeholder="Enter password"
+                    />
+                    <button
+                      type="button"
+                      id="toggleAdminPassBtn"
+                      class="eye-toggle"
+                      aria-label="Show or hide password"
+                    >
+                      Show
+                    </button>
+                  </div>
+                </div>
+
+                <div class="login-row-between">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="adminRememberCheckbox" checked />
+                    <span>Keep me signed in</span>
+                  </label>
+                  <button type="button" class="link-btn" id="toggleStarterCredsBtn">
+                    Default Owner Login
+                  </button>
+                </div>
+
+                <div id="starterCredsBox" class="creds-helper hidden">
+                  <div>
+                    <strong>Starter Credentials</strong>
+                    <span>Phone: <code>72517904</code> • Password: <code>Nicole2026</code></span>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" id="fillStarterCredsBtn">
+                    Fill
+                  </button>
+                </div>
+
+                <div id="adminLoginError" class="alert-error hidden" role="alert"></div>
+
+                <button type="submit" id="adminLoginSubmitBtn" class="btn btn-primary btn-lg full-width">
+                  Sign In to Admin Panel
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- STATE B: UNLOCKED SALON MANAGEMENT DASHBOARD -->
+          <div id="adminUnlockedSuite" class="admin-dashboard hidden">
+            <div class="admin-topbar-card">
+              <div>
+                <div class="admin-status-line">
+                  <span class="status-pill status-completed">Signed In</span>
+                  <span id="adminIdentityBadge" class="muted-text">Nicole • +267 72517904</span>
+                </div>
+                <h2>Salon Management</h2>
+              </div>
+
+              <div class="admin-quick-btns">
+                <button type="button" class="btn btn-primary btn-sm" id="adminOpenWalkInBtn">
+                  + Walk-In Booking
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="studioAddStyleBtn">
+                  + Add Service
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="studioLaunchPromoBtn">
+                  + New Promo
+                </button>
+                <button type="button" class="btn btn-danger-outline btn-sm" id="adminLogoutBtn">
+                  Sign Out
+                </button>
+              </div>
+            </div>
+
+            <!-- 5 Practical Business KPI Cards -->
+            <div class="kpi-row" id="studioStatsGrid"></div>
+
+            <!-- 5 Practical Admin Tabs -->
+            <div class="admin-tabs" id="adminSubNav" role="tablist">
+              <button type="button" class="admin-tab active" data-admin-pane="overview">
+                Schedule &amp; Braiders
+              </button>
+              <button type="button" class="admin-tab" data-admin-pane="bookings">
+                Bookings &amp; Deposits <span id="adminTabBookingsCount" class="tab-num">0</span>
+              </button>
+              <button type="button" class="admin-tab" data-admin-pane="styles">
+                Services &amp; Prices <span id="adminTabStylesCount" class="tab-num">16</span>
+              </button>
+              <button type="button" class="admin-tab" data-admin-pane="matrix">
+                Price Matrix
+              </button>
+              <button type="button" class="admin-tab" data-admin-pane="clients">
+                Clients &amp; Inbox
+              </button>
+              <button type="button" class="admin-tab" data-admin-pane="promos">
+                Promos &amp; Security
+              </button>
+            </div>
+
+            <!-- PANE 1: DAILY SCHEDULE & BRAIDER WORKLOAD -->
+            <div class="admin-pane" id="admin-pane-overview">
+              <div class="admin-two-col">
+                <div class="card">
+                  <div class="card-head">
+                    <h3>Upcoming Appointments</h3>
+                    <button type="button" class="link-btn" data-goto-admin-pane="bookings">View All →</button>
+                  </div>
+                  <div id="adminRecentBookingsPreview" class="admin-list"></div>
+                </div>
+
+                <div class="card">
+                  <div class="card-head">
+                    <h3>Braider Chair Workload &amp; Revenue</h3>
+                  </div>
+                  <div id="adminChairAnalytics" class="chair-workload-list"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANE 2: BOOKINGS & DEPOSIT TRACKER -->
+            <div class="admin-pane hidden" id="admin-pane-bookings">
+              <div class="card">
+                <div class="toolbar">
+                  <h3>All Bookings &amp; Deposit Status</h3>
+                  <div class="toolbar-controls">
+                    <input
+                      type="search"
+                      id="adminBookingSearchInput"
+                      class="input-text input-sm"
+                      placeholder="Search name, phone, ref..."
+                    />
+                    <select id="adminBookingStatusFilter" class="input-select input-sm">
+                      <option value="All">All Statuses</option>
+                      <option value="Confirmed">Confirmed</option>
+                      <option value="In Chair">In Chair</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" id="adminWalkInInlineBtn">
+                      + Add Walk-In
+                    </button>
+                  </div>
+                </div>
+
+                <div id="studioBookingsList" class="admin-list"></div>
+              </div>
+            </div>
+
+            <!-- PANE 3: SERVICES & PRICE LIST EDITOR -->
+            <div class="admin-pane hidden" id="admin-pane-styles">
+              <div class="card">
+                <div class="toolbar">
+                  <h3>Services, Prices &amp; Availability</h3>
+                  <div class="toolbar-controls">
+                    <input
+                      type="search"
+                      id="adminStyleSearchInput"
+                      class="input-text input-sm"
+                      placeholder="Search service..."
+                    />
+                    <button type="button" class="btn btn-primary btn-sm" id="studioNewStyleInlineBtn">
+                      + Add Service
+                    </button>
+                  </div>
+                </div>
+                <div id="studioStylesList" class="admin-list"></div>
+              </div>
+            </div>
+
+            <!-- PANE 3B: BRAD SIZE × LENGTH PRICE MATRIX EDITOR -->
+            <div class="admin-pane hidden" id="admin-pane-matrix">
+              <div class="card">
+                <div class="card-head">
+                  <div>
+                    <h3>Braid Size × Length Price Matrix</h3>
+                    <p class="muted-text">Edit the braid sizes, lengths, and exact prices. Changes save instantly and appear on the public Price List.</p>
+                  </div>
+                </div>
+
+                <div class="matrix-editor">
+                  <div class="matrix-editor-head">
+                    <label for="matrixSizeInput">Braid Sizes (one per line)</label>
+                    <textarea id="matrixSizeInput" class="input-textarea" rows="5" placeholder="Jumbo&#10;Large&#10;Medium&#10;S_Medium&#10;Small"></textarea>
+                    <p class="muted-text">Add or remove a size by editing this list — each line is one braid size.</p>
+                  </div>
+
+                  <div class="matrix-editor-head">
+                    <label for="matrixLengthInput">Lengths (one per line)</label>
+                    <textarea id="matrixLengthInput" class="input-textarea" rows="3" placeholder="Midback&#10;Butt Length&#10;Knee Length"></textarea>
+                    <p class="muted-text">The price table columns. Each line is one length option.</p>
+                  </div>
+
+                  <div class="table-wrap">
+                    <table class="price-table matrix-edit-table" id="matrixEditTable">
+                      <thead></thead>
+                      <tbody id="matrixEditBody"></tbody>
+                    </table>
+                  </div>
+
+                  <div class="matrix-editor-actions">
+                    <button type="button" class="btn btn-primary" id="matrixSaveBtn">Save Matrix</button>
+                    <span class="muted-text" id="matrixSaveStatus"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANE 4: CLIENT CRM DIRECTORY & LIVE INBOX -->
+            <div class="admin-pane hidden" id="admin-pane-clients">
+              <div class="admin-two-col">
+                <div class="card">
+                  <div class="card-head">
+                    <div>
+                      <h3>Client Directory (CRM)</h3>
+                      <p class="muted-text">Automatically built from salon appointments.</p>
+                    </div>
+                  </div>
+                  <div id="adminClientsDirectory" class="admin-list"></div>
+                </div>
+
+                <div class="card">
+                  <div class="card-head">
+                    <div>
+                      <h3>Client Messages</h3>
+                      <p class="muted-text">Reply directly to customer enquiries as Nicole.</p>
+                    </div>
+                  </div>
+                  <div id="adminInboxSummary" class="admin-list"></div>
+                  <button type="button" class="btn btn-primary full-width mt-14" id="adminJumpToSalonChatBtn">
+                    Open Messages as Salon Owner →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANE 5: PROMOTIONS, FLYERS & ADMIN SECURITY -->
+            <div class="admin-pane hidden" id="admin-pane-promos">
+              <div class="admin-two-col">
+                <div class="card">
+                  <div class="card-head">
+                    <h3>Promo Codes &amp; Flyers</h3>
+                    <button type="button" class="btn btn-primary btn-sm" id="studioNewAdInlineBtn">
+                      + Create Promo
+                    </button>
+                  </div>
+                  <div id="studioPromosList" class="admin-list"></div>
+                </div>
+
+                <div class="card">
+                  <div class="card-head">
+                    <div>
+                      <h3>Change Admin Phone &amp; Password</h3>
+                      <p class="muted-text">Update the phone number and password used to unlock this panel.</p>
+                    </div>
+                  </div>
+                  <form id="adminCredentialsForm" class="form-stack">
+                    <div class="field">
+                      <label for="credOwnerNameInput">Owner Name</label>
+                      <input type="text" id="credOwnerNameInput" class="input-text" placeholder="Owner name" />
+                    </div>
+                    <div class="field">
+                      <label for="credNewPhoneInput">Login Phone Number *</label>
+                      <input type="tel" id="credNewPhoneInput" class="input-text" required placeholder="72517904" />
+                    </div>
+                    <div class="form-row-2">
+                      <div class="field">
+                        <label for="credCurrentPasswordInput">Current Password *</label>
+                        <input type="password" id="credCurrentPasswordInput" class="input-text" required />
+                      </div>
+                      <div class="field">
+                        <label for="credNewPasswordInput">New Password</label>
+                        <input type="password" id="credNewPasswordInput" class="input-text" placeholder="Min. 6 chars" />
+                      </div>
+                    </div>
+                    <p id="credFeedbackMsg" class="feedback-line"></p>
+                    <button type="submit" class="btn btn-primary full-width">
+                      Update Login Credentials
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- ================= CLEAN MOBILE BOTTOM TAB BAR ================= -->
+      <nav class="bottom-nav" aria-label="Mobile Navigation">
+        <button type="button" class="bottom-tab active" data-tab="services">
+          <svg viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.6" stroke="currentColor" stroke-width="1.7"/><rect x="12" y="3" width="7" height="7" rx="1.6" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="12" width="7" height="7" rx="1.6" stroke="currentColor" stroke-width="1.7"/><rect x="12" y="12" width="7" height="7" rx="1.6" stroke="currentColor" stroke-width="1.7"/></svg>
+          <span>Services</span>
+        </button>
+
+        <button type="button" class="bottom-tab" data-tab="prices">
+          <svg viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="14" height="16" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M7.5 8H14.5M7.5 11.5H14.5M7.5 15H11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span>Prices</span>
+        </button>
+
+        <button type="button" class="bottom-tab" data-tab="book">
+          <svg viewBox="0 0 22 22" fill="none"><rect x="3" y="4.5" width="16" height="14.5" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M7.5 2.8V6M14.5 2.8V6M3 9H19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span>Book</span>
+        </button>
+
+        <button type="button" class="bottom-tab" data-tab="messages">
+          <div class="rel-icon">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M4 5.8C4 4.5 5 3.5 6.3 3.5h9.4C17 3.5 18 4.5 18 5.8v7.4c0 1.3-1 2.3-2.3 2.3H9l-3.8 3v-3C4.5 15.1 4 14.2 4 13.2V5.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            <span id="navUnreadBadge" class="badge-dot hidden">0</span>
+          </div>
+          <span>Messages</span>
+        </button>
+
+        <button type="button" class="bottom-tab" data-tab="studio">
+          <div class="rel-icon">
+            <svg viewBox="0 0 22 22" fill="none"><rect x="4.8" y="9.8" width="12.4" height="9" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M7.5 9.8V7a3.5 3.5 0 0 1 7 0v2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <span id="adminDockBadge" class="admin-dot"></span>
+          </div>
+          <span>Admin</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!--                     CLEAN, PURPOSEFUL MODALS                            -->
+    <!-- ======================================================================= -->
+
+    <!-- 1. SERVICE DETAIL & SIZE/LENGTH SELECTOR MODAL -->
+    <div id="styleDetailModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="styleDetailModal" aria-label="Close">×</button>
+        <div id="styleDetailContent"></div>
+      </div>
+    </div>
+
+    <!-- 2. BOOKING CONFIRMATION RECEIPT MODAL -->
+    <div id="bookingPassModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="bookingPassModal" aria-label="Close">×</button>
+        <div id="bookingPassContent"></div>
+      </div>
+    </div>
+
+    <!-- 3. ORIGINAL PRINTED PRICE CARD MODAL -->
+    <div id="priceSheetModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="priceSheetModal" aria-label="Close">×</button>
+        <h3 class="mb-12">Official Nicole Beauty Parlour Price Card</h3>
+        <img
+          src="/images/price-menu-card.jpg"
+          alt="Nicole Beauty Parlour Official BWP Price Menu"
+          class="price-poster-img"
+        />
+      </div>
+    </div>
+
+    <!-- 4. ADMIN: ADD NEW SERVICE MODAL -->
+    <div id="addStyleModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="addStyleModal" aria-label="Close">×</button>
+        <h3 class="mb-12">Add New Hairstyle Service</h3>
+        <form id="addStyleForm" class="form-stack">
+          <div class="photo-upload-box">
+            <img id="newStylePreviewImg" src="" alt="Preview" />
+            <label class="btn btn-secondary btn-sm">
+              <input type="file" id="newStylePhotoInput" accept="image/*" hidden />
+              Choose Hairstyle Photo
+            </label>
+          </div>
+
+          <div class="field">
+            <label for="newStyleName">Service Name *</label>
+            <input type="text" id="newStyleName" class="input-text" required placeholder="Service name" />
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="newStyleCategory">Category</label>
+              <select id="newStyleCategory" class="input-select">
+                <option value="Knotless">Knotless</option>
+                <option value="Boho & Curls">Boho &amp; Curls</option>
+                <option value="Box Braids">Box Braids</option>
+                <option value="Softdread & Switch">Softdread &amp; Switch</option>
+                <option value="Updos & Buns">Updos &amp; Buns</option>
+                <option value="Cornrows">Cornrows</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="newStyleBadge">Label (optional)</label>
+              <input type="text" id="newStyleBadge" class="input-text" placeholder="e.g. Popular" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="newStylePricingMode">Pricing Type</label>
+              <select id="newStylePricingMode" class="input-select">
+                <option value="matrix">Official Size × Length Matrix</option>
+                <option value="flat">Fixed Flat Price (BWP)</option>
+              </select>
+            </div>
+            <div class="field" id="newStyleFlatPriceWrap">
+              <label for="newStyleFlatPrice">Flat Price (Pula)</label>
+              <input type="number" id="newStyleFlatPrice" class="input-text" min="50" max="3000" value="250" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="newStyleDuration">Duration</label>
+              <input type="text" id="newStyleDuration" class="input-text" value="4 – 5 hrs" />
+            </div>
+            <div class="field">
+              <label for="newStylePacks">Hair Packs Needed</label>
+              <input type="text" id="newStylePacks" class="input-text" value="5–6 packs" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="newStyleDesc">Service Notes</label>
+            <textarea id="newStyleDesc" class="input-textarea" rows="2" placeholder="Clean, pain-free parting..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary full-width">Publish Service</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 5. ADMIN: EDIT SERVICE & PRICING MODAL -->
+    <div id="editStyleModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="editStyleModal" aria-label="Close">×</button>
+        <h3 class="mb-12">Edit Service &amp; Price</h3>
+        <form id="editStyleForm" class="form-stack">
+          <input type="hidden" id="editStyleIdInput" />
+          <div class="photo-upload-box">
+            <img id="editStylePreviewImg" src="" alt="Preview" />
+            <label class="btn btn-secondary btn-sm">
+              <input type="file" id="editStylePhotoInput" accept="image/*" hidden />
+              Change Hairstyle Photo
+            </label>
+          </div>
+          <div class="field">
+            <label for="editStyleNameInput">Service Name *</label>
+            <input type="text" id="editStyleNameInput" class="input-text" required />
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="editStyleCategorySelect">Category</label>
+              <select id="editStyleCategorySelect" class="input-select">
+                <option value="Knotless">Knotless</option>
+                <option value="Boho & Curls">Boho &amp; Curls</option>
+                <option value="Box Braids">Box Braids</option>
+                <option value="Softdread & Switch">Softdread &amp; Switch</option>
+                <option value="Updos & Buns">Updos &amp; Buns</option>
+                <option value="Cornrows">Cornrows</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="editStyleBadgeInput">Tag</label>
+              <input type="text" id="editStyleBadgeInput" class="input-text" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="editStylePricingMode">Pricing Type</label>
+              <select id="editStylePricingMode" class="input-select">
+                <option value="matrix">Size × Length Matrix</option>
+                <option value="flat">Fixed Flat Price (BWP)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="editStyleFlatPriceInput">Flat Rate or Matrix Extra (P)</label>
+              <input type="number" id="editStyleFlatPriceInput" class="input-text" min="0" max="3000" value="250" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="editStyleDurationInput">Duration</label>
+              <input type="text" id="editStyleDurationInput" class="input-text" />
+            </div>
+            <div class="field">
+              <label for="editStylePacksInput">Hair Packs</label>
+              <input type="text" id="editStylePacksInput" class="input-text" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="editStyleDescInput">Description</label>
+            <textarea id="editStyleDescInput" class="input-textarea" rows="2"></textarea>
+          </div>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="editStyleActiveCheck" checked />
+            <span>Available for online client booking</span>
+          </label>
+
+          <button type="submit" class="btn btn-primary full-width">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 6. ADMIN: WALK-IN / PHONE BOOKING MODAL -->
+    <div id="walkInModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="walkInModal" aria-label="Close">×</button>
+        <h3 class="mb-12">Record Walk-In / Phone Booking</h3>
+        <form id="walkInForm" class="form-stack">
+          <div class="form-row-2">
+            <div class="field">
+              <label for="walkInClientName">Client Name *</label>
+              <input type="text" id="walkInClientName" class="input-text" required placeholder="e.g. Neo M." />
+            </div>
+            <div class="field">
+              <label for="walkInClientPhone">Client Phone *</label>
+              <input type="tel" id="walkInClientPhone" class="input-text" required placeholder="72 000 000" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="walkInStyleSelect">Service</label>
+            <select id="walkInStyleSelect" class="input-select"></select>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="walkInStylistSelect">Braider</label>
+              <select id="walkInStylistSelect" class="input-select"></select>
+            </div>
+            <div class="field">
+              <label for="walkInPriceInput">Total Price (BWP) *</label>
+              <input type="number" id="walkInPriceInput" class="input-text" min="50" max="3000" required value="250" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="walkInDateInput">Date *</label>
+              <input type="date" id="walkInDateInput" class="input-text" required />
+            </div>
+            <div class="field">
+              <label for="walkInTimeSelect">Start Time</label>
+              <select id="walkInTimeSelect" class="input-select">
+                <option value="07:30">07:30</option>
+                <option value="09:00">09:00</option>
+                <option value="10:30">10:30</option>
+                <option value="12:30">12:30</option>
+                <option value="14:30">14:30</option>
+                <option value="16:30">16:30</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="walkInStatusSelect">Status</label>
+              <select id="walkInStatusSelect" class="input-select">
+                <option value="In Chair">In Chair Now</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div class="field" style="justify-content:flex-end;">
+              <label class="checkbox-label" style="height:42px;">
+                <input type="checkbox" id="walkInDepositPaidCheck" checked />
+                <span>Deposit / Paid</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary full-width">Save Booking</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 7. ADMIN: CREATE PROMO & FLYER MODAL -->
+    <div id="addPromoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-lg">
+        <button type="button" class="modal-close" data-close-modal="addPromoModal" aria-label="Close">×</button>
+        <h3 class="mb-12">Create Promotion &amp; WhatsApp Flyer</h3>
+        <div class="promo-studio-grid">
+          <form id="addPromoForm" class="form-stack">
+            <div class="field">
+              <label for="promoTitleInput">Offer Headline *</label>
+              <input type="text" id="promoTitleInput" class="input-text" required value="" />
+            </div>
+            <div class="field">
+              <label for="promoSubtitleInput">Details</label>
+              <input type="text" id="promoSubtitleInput" class="input-text" value="" />
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label for="promoCodeInput">Promo Code *</label>
+                <input type="text" id="promoCodeInput" class="input-text" required value="" />
+              </div>
+              <div class="field">
+                <label for="promoDiscountInput">Discount (%)</label>
+                <input type="number" id="promoDiscountInput" class="input-text" min="5" max="75" value="15" />
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label for="promoPriceHighlight">Price Callout</label>
+                <input type="text" id="promoPriceHighlight" class="input-text" value="" />
+              </div>
+              <div class="field">
+                <label for="promoThemeSelect">Flyer Style</label>
+                <select id="promoThemeSelect" class="input-select">
+                  <option value="obsidian-sapphire">Dark Obsidian</option>
+                  <option value="ice-editorial">Clean Ice-Blue</option>
+                  <option value="midnight-cyan">Midnight Sky</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="promoStyleSelect">Featured Hairstyle Photo</label>
+              <select id="promoStyleSelect" class="input-select"></select>
+            </div>
+            <button type="submit" class="btn btn-primary full-width">Publish Offer &amp; Generate Flyer</button>
+          </form>
+
+          <div class="flyer-preview-col">
+            <canvas id="livePromoPreviewCanvas" width="540" height="675"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. FLYER DOWNLOAD / SHARE MODAL -->
+    <div id="flyerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-md">
+        <button type="button" class="modal-close" data-close-modal="flyerModal" aria-label="Close">×</button>
+        <h3 class="mb-12">Promotional Flyer Ready</h3>
+        <img id="flyerPreviewImage" alt="Generated Salon Flyer" class="price-poster-img mb-12" />
+        <div class="form-row-2">
+          <button type="button" class="btn btn-primary full-width" id="downloadFlyerBtn">Download PNG</button>
+          <button type="button" class="btn btn-secondary full-width" id="shareFlyerBtn">Share to WhatsApp</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subtle Toast Notification -->
+    <div id="toastContainer" class="toast-stack" aria-live="polite"></div>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

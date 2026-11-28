@@ -1,0 +1,21 @@
+{
+  "appId": "com.nicolebeautyparlour.app",
+  "appName": "Nicole Beauty Parlour",
+  "webDir": "public",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#0B1628",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0B1628",
+    "preferredContentMode": "mobile"
+  },
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  }
+}

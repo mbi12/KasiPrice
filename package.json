@@ -1,0 +1,31 @@
+{
+  "name": "nicole-beauty-parlour",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Nicole Beauty Parlour — Look Good, Feel Good, Be You. Botswana Hair Braiding Marketplace, Booking, Messaging & Promo Studio (Web, PWA, Android Play Store & iOS).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "node scripts/verify-build.mjs",
+    "test": "node scripts/verify-build.mjs && node --test test/*.test.mjs",
+    "cap:sync": "cap sync",
+    "android:sync": "cap sync android",
+    "ios:sync": "cap sync ios",
+    "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug",
+    "android:playstore": "npm run android:sync && cd android && ./gradlew bundleRelease"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.3",
+    "@capacitor/core": "^8.6.3",
+    "@capacitor/ios": "^8.6.3",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.3"
+  }
+}

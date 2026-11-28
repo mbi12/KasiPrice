@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nicole Beauty Parlour</string>
+    <string name="title_activity_main">Nicole Beauty Parlour</string>
+    <string name="package_name">com.nicolebeautyparlour.app</string>
+    <string name="custom_url_scheme">com.nicolebeautyparlour.app</string>
+</resources>
