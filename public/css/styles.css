@@ -1147,6 +1147,62 @@ button {
   margin-top: 8px;
 }
 
+/* ================= PRICE MATRIX EDITOR (ADMIN) ================= */
+.matrix-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.matrix-editor-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.matrix-editor-head label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.matrix-edit-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.matrix-edit-table th,
+.matrix-edit-table td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.matrix-edit-table th {
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.matrix-edit-table td:first-child {
+  text-align: left;
+  background: var(--surface-2);
+}
+
+.matrix-edit-table .matrix-price-input {
+  width: 100%;
+  min-width: 80px;
+  text-align: center;
+}
+
+.matrix-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 /* ================= VIEW 2: OFFICIAL PRICE TABLE & SALON INFO ================= */
 .prices-layout {
   display: grid;

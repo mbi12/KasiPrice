@@ -84,6 +84,7 @@ function createInitialDb() {
       passwordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
       updatedAt: new Date().toISOString()
     },
+    matrix: structuredClone(OFFICIAL_PRICE_MATRIX),
     styles: structuredClone(INITIAL_HAIRSTYLES),
     promotions: structuredClone(INITIAL_PROMOTIONS),
     bookings: structuredClone(INITIAL_BOOKINGS),
@@ -98,6 +99,9 @@ function loadDb() {
       if (parsed && Array.isArray(parsed.styles)) {
         if (!parsed.admin || !parsed.admin.passwordHash) {
           parsed.admin = createInitialDb().admin;
+        }
+        if (!parsed.matrix || typeof parsed.matrix !== 'object') {
+          parsed.matrix = structuredClone(OFFICIAL_PRICE_MATRIX);
         }
         return parsed;
       }
@@ -121,6 +125,7 @@ function saveDb() {
 
 function publicStatePayload() {
   return {
+    matrix: db.matrix,
     styles: db.styles,
     promotions: db.promotions,
     bookings: db.bookings,
@@ -251,9 +256,36 @@ export function createApp() {
   app.get('/api/pricing', (_req, res) => {
     res.json({
       currency: SALON_INFO.currency,
-      matrix: OFFICIAL_PRICE_MATRIX,
+      matrix: db.matrix,
       specialtyFlat: 250
     });
+  });
+
+  app.patch('/api/pricing', (req, res) => {
+    const authHeader = String(req.headers.authorization || '');
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    const decoded = verifyAdminToken(token);
+    if (!decoded) {
+      return res.status(401).json({ error: 'Admin authentication required.' });
+    }
+    const { matrix } = req.body || {};
+    if (!matrix || typeof matrix !== 'object') {
+      return res.status(400).json({ error: 'Matrix object is required.' });
+    }
+    // Sanitize: keep only numeric price values per size/length.
+    const clean = {};
+    for (const [size, row] of Object.entries(matrix)) {
+      if (row && typeof row === 'object') {
+        clean[size] = {};
+        for (const [len, val] of Object.entries(row)) {
+          const n = Number(val);
+          if (Number.isFinite(n) && n >= 0) clean[size][len] = Math.round(n);
+        }
+      }
+    }
+    db.matrix = clean;
+    saveDb();
+    res.json({ ok: true, matrix: db.matrix });
   });
 
   app.get('/api/state', (_req, res) => {

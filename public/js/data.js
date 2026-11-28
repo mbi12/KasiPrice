@@ -45,6 +45,20 @@ export const OFFICIAL_PRICE_MATRIX = {
   small: { midback: 250, butt: 350, knee: 500 },
 };
 
+// Live matrix — starts as the static default, then updated from the server
+// or by the admin Price Matrix editor. calculateStylePrice reads this.
+let liveMatrix = structuredClone(OFFICIAL_PRICE_MATRIX);
+
+export function setPriceMatrix(matrix) {
+  if (matrix && typeof matrix === 'object') {
+    liveMatrix = structuredClone(matrix);
+  }
+}
+
+export function getPriceMatrix() {
+  return structuredClone(liveMatrix);
+}
+
 export const SPECIALTY_FLAT_PRICE = 250; // Pick n' Drop / Switch / Hardread / Softdread
 
 export function calculateStylePrice(style, sizeId = 'medium', lengthId = 'midback') {
@@ -57,7 +71,7 @@ export function calculateStylePrice(style, sizeId = 'medium', lengthId = 'midbac
   if (style.customMatrix && style.customMatrix[sizeId]?.[lengthId]) {
     return Number(style.customMatrix[sizeId][lengthId]);
   }
-  const sizeRow = OFFICIAL_PRICE_MATRIX[sizeId] || OFFICIAL_PRICE_MATRIX.medium;
+  const sizeRow = liveMatrix[sizeId] || liveMatrix.medium;
   if (!sizeRow) return 0;
   const matrixPrice = sizeRow[lengthId] ?? sizeRow.midback;
   const styleOffset = Number(style.priceOffset || 0);

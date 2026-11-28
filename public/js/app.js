@@ -3,6 +3,7 @@ import {
   SALON_INFO,
   OFFICIAL_PRICE_MATRIX,
   SPECIALTY_FLAT_PRICE,
+  getPriceMatrix,
   SIZE_OPTIONS,
   LENGTH_OPTIONS,
   HAIR_COLORS,
@@ -394,20 +395,29 @@ function renderServiceDetailModal() {
   });
 }
 
-/* ================= VIEW 2: OFFICIAL PRICE LIST & PHOTO GALLERY ================= */
+/* ================= VIEW 2: OFFICIAL PRICE LIST ================= */
 function renderPricesView() {
+  const matrix = getPriceMatrix();
+  const sizeEntries = Object.entries(matrix);
+  const lengthKeys = sizeEntries.length ? Object.keys(sizeEntries[0][1]) : [];
+
   const tbody = document.getElementById('priceMatrixBody');
   if (tbody) {
-    tbody.innerHTML = SIZE_OPTIONS.map((sz) => {
-      const row = OFFICIAL_PRICE_MATRIX[sz.id];
-      return `
+    tbody.innerHTML = sizeEntries
+      .map(([sizeId, row]) => {
+        const cells = lengthKeys
+          .map(
+            (len) =>
+              `<td><button type="button" class="price-cell-btn" data-matrix-book="${esc(sizeId)}:${esc(len)}">${formatPula(row[len])}</button></td>`
+          )
+          .join('');
+        return `
         <tr>
-          <td><strong>${esc(sz.label)}</strong></td>
-          <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:midback">${formatPula(row.midback)}</button></td>
-          <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:butt">${formatPula(row.butt)}</button></td>
-          <td><button type="button" class="price-cell-btn" data-matrix-book="${sz.id}:knee">${formatPula(row.knee)}</button></td>
+          <td><strong>${esc(sizeLabel(sizeId))}</strong></td>
+          ${cells}
         </tr>`;
-    }).join('');
+      })
+      .join('');
 
     tbody.querySelectorAll('[data-matrix-book]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -419,6 +429,18 @@ function renderPricesView() {
 
   const flatEl = document.getElementById('flatSpecialtyPrice');
   if (flatEl) flatEl.textContent = formatPula(SPECIALTY_FLAT_PRICE);
+}
+
+// Map a size id to a human label (falls back to the raw id).
+function sizeLabel(sizeId) {
+  const found = SIZE_OPTIONS.find((s) => s.id === sizeId);
+  return found ? found.label : sizeId;
+}
+
+// Map a length id to a human label (falls back to the raw id).
+function lengthLabel(lenId) {
+  const found = LENGTH_OPTIONS.find((l) => l.id === lenId);
+  return found ? found.label : lenId;
 }
 
 /* ================= VIEW 3: BOOKING & SLOT AVAILABILITY ================= */
@@ -1167,6 +1189,102 @@ function renderAdminView() {
       });
     });
   }
+
+  // Pane 3B: Braid Size × Length Price Matrix Editor
+  renderMatrixEditor();
+}
+
+function renderMatrixEditor() {
+  const sizeInput = document.getElementById('matrixSizeInput');
+  const lengthInput = document.getElementById('matrixLengthInput');
+  const thead = document.querySelector('#matrixEditTable thead');
+  const tbody = document.getElementById('matrixEditBody');
+  const statusEl = document.getElementById('matrixSaveStatus');
+  if (!sizeInput || !lengthInput || !thead || !tbody) return;
+
+  const matrix = getPriceMatrix();
+  const sizeEntries = Object.entries(matrix);
+  const lengthKeys = sizeEntries.length ? Object.keys(sizeEntries[0][1]) : [];
+
+  // Size names textarea — one label per line, indexed by size key.
+  sizeInput.value = sizeEntries.map(([id]) => sizeLabel(id)).join('\n');
+  // Length names textarea — one label per line, indexed by length key.
+  lengthInput.value = lengthKeys.map((k) => lengthLabel(k)).join('\n');
+
+  // Build the edit table header (length labels).
+  thead.innerHTML = `
+    <tr>
+      <th>Braid Size</th>
+      ${lengthKeys.map((k) => `<th>${esc(lengthLabel(k))}</th>`).join('')}
+    </tr>`;
+
+  // Build editable price cells.
+  tbody.innerHTML = sizeEntries
+    .map(
+      ([sizeId, row]) => `
+      <tr>
+        <td><strong>${esc(sizeLabel(sizeId))}</strong></td>
+        ${lengthKeys
+          .map(
+            (len) =>
+              `<td><input type="number" class="input-text matrix-price-input" data-size="${esc(sizeId)}" data-length="${esc(len)}" min="0" max="5000" value="${Number(row[len] || 0)}" /></td>`
+          )
+          .join('')}
+      </tr>`
+    )
+    .join('');
+}
+
+function saveMatrixEditor() {
+  if (!requireAdminAuth()) return;
+  const sizeInput = document.getElementById('matrixSizeInput');
+  const lengthInput = document.getElementById('matrixLengthInput');
+  const tbody = document.getElementById('matrixEditBody');
+  const statusEl = document.getElementById('matrixSaveStatus');
+  if (!sizeInput || !lengthInput || !tbody) return;
+
+  const sizeLabels = sizeInput.value.split('\n').map((s) => s.trim()).filter(Boolean);
+  const lengthLabels = lengthInput.value.split('\n').map((s) => s.trim()).filter(Boolean);
+
+  // Gather current matrix from the table inputs, keyed by current size/length ids.
+  const matrix = {};
+  tbody.querySelectorAll('.matrix-price-input').forEach((inp) => {
+    const sizeId = inp.dataset.size;
+    const len = inp.dataset.length;
+    const val = Math.max(0, Math.round(Number(inp.value) || 0));
+    if (!matrix[sizeId]) matrix[sizeId] = {};
+    matrix[sizeId][len] = val;
+  });
+
+  // Re-key the matrix to the new size labels and length labels (preserves order).
+  const currentSizeIds = Object.keys(matrix);
+  const currentLenIds = currentSizeIds.length ? Object.keys(matrix[currentSizeIds[0]]) : [];
+  const newMatrix = {};
+  sizeLabels.forEach((label, i) => {
+    const srcId = currentSizeIds[i];
+    newMatrix[label] = {};
+    lengthLabels.forEach((ll, j) => {
+      const srcLen = currentLenIds[j];
+      newMatrix[label][ll] = srcId && matrix[srcId] ? Number(matrix[srcId][srcLen] || 0) : 0;
+    });
+  });
+
+  store
+    .updateMatrix(newMatrix)
+    .then(() => {
+      if (statusEl) {
+        statusEl.textContent = '✓ Matrix saved — live on the Price List.';
+        statusEl.style.color = 'var(--success)';
+      }
+      showToast('Price matrix saved');
+      renderAll();
+    })
+    .catch(() => {
+      if (statusEl) {
+        statusEl.textContent = 'Saved locally (server unreachable).';
+        statusEl.style.color = 'var(--text-muted)';
+      }
+    });
 }
 
 function openEditStyleModal(styleId) {
@@ -1550,6 +1668,7 @@ function bindEvents() {
       renderAdminView();
     });
   });
+  document.getElementById('matrixSaveBtn')?.addEventListener('click', saveMatrixEditor);
   document.querySelectorAll('[data-goto-admin-pane]').forEach((btn) => {
     btn.addEventListener('click', () => {
       ui.adminPane = btn.dataset.gotoAdminPane;

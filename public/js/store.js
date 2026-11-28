@@ -1,10 +1,12 @@
 // Hybrid Persistent Store: LocalStorage + REST API + Admin Phone/Password Auth + BroadcastChannel Sync
 import {
   SALON_INFO,
+  OFFICIAL_PRICE_MATRIX,
   INITIAL_HAIRSTYLES,
   INITIAL_PROMOTIONS,
   INITIAL_BOOKINGS,
-  INITIAL_THREADS
+  INITIAL_THREADS,
+  setPriceMatrix
 } from './data.js';
 
 const STORAGE_KEY = 'nicole_beauty_parlour_state_v4';
@@ -42,6 +44,7 @@ function clone(val) {
 
 function getDefaultState() {
   return {
+    matrix: structuredClone(OFFICIAL_PRICE_MATRIX),
     styles: clone(INITIAL_HAIRSTYLES),
     promotions: clone(INITIAL_PROMOTIONS),
     bookings: clone(INITIAL_BOOKINGS),
@@ -294,12 +297,16 @@ export class SalonStore {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && Array.isArray(parsed.styles) && parsed.styles.length) {
+          if (parsed.matrix && typeof parsed.matrix === 'object') {
+            setPriceMatrix(parsed.matrix);
+          }
           return parsed;
         }
       }
     } catch {
       // Ignore storage errors
     }
+    setPriceMatrix(OFFICIAL_PRICE_MATRIX);
     return getDefaultState();
   }
 
@@ -349,6 +356,10 @@ export class SalonStore {
       this.state.styles = mergeById(this.state.styles, serverData.styles);
       this.state.promotions = mergeById(this.state.promotions, serverData.promotions);
       this.state.bookings = mergeById(this.state.bookings, serverData.bookings);
+      if (serverData.matrix && typeof serverData.matrix === 'object') {
+        this.state.matrix = serverData.matrix;
+        setPriceMatrix(serverData.matrix);
+      }
       if (!this.state.threads?.length && Array.isArray(serverData.threads)) {
         this.state.threads = serverData.threads;
       }
@@ -431,6 +442,22 @@ export class SalonStore {
       // Synced locally
     }
     return item;
+  }
+
+  async updateMatrix(matrix) {
+    this.state.matrix = matrix;
+    setPriceMatrix(matrix);
+    this.saveLocal();
+    try {
+      await fetch('/api/pricing', {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ matrix })
+      });
+    } catch {
+      // Saved locally
+    }
+    return this.state.matrix;
   }
 
   async deleteStyle(styleId) {

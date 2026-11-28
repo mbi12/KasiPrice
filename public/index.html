@@ -612,6 +612,9 @@
               <button type="button" class="admin-tab" data-admin-pane="styles">
                 Services &amp; Prices <span id="adminTabStylesCount" class="tab-num">16</span>
               </button>
+              <button type="button" class="admin-tab" data-admin-pane="matrix">
+                Price Matrix
+              </button>
               <button type="button" class="admin-tab" data-admin-pane="clients">
                 Clients &amp; Inbox
               </button>
@@ -687,6 +690,44 @@
                   </div>
                 </div>
                 <div id="studioStylesList" class="admin-list"></div>
+              </div>
+            </div>
+
+            <!-- PANE 3B: BRAD SIZE × LENGTH PRICE MATRIX EDITOR -->
+            <div class="admin-pane hidden" id="admin-pane-matrix">
+              <div class="card">
+                <div class="card-head">
+                  <div>
+                    <h3>Braid Size × Length Price Matrix</h3>
+                    <p class="muted-text">Edit the braid sizes, lengths, and exact prices. Changes save instantly and appear on the public Price List.</p>
+                  </div>
+                </div>
+
+                <div class="matrix-editor">
+                  <div class="matrix-editor-head">
+                    <label for="matrixSizeInput">Braid Sizes (one per line)</label>
+                    <textarea id="matrixSizeInput" class="input-textarea" rows="5" placeholder="Jumbo&#10;Large&#10;Medium&#10;S_Medium&#10;Small"></textarea>
+                    <p class="muted-text">Add or remove a size by editing this list — each line is one braid size.</p>
+                  </div>
+
+                  <div class="matrix-editor-head">
+                    <label for="matrixLengthInput">Lengths (one per line)</label>
+                    <textarea id="matrixLengthInput" class="input-textarea" rows="3" placeholder="Midback&#10;Butt Length&#10;Knee Length"></textarea>
+                    <p class="muted-text">The price table columns. Each line is one length option.</p>
+                  </div>
+
+                  <div class="table-wrap">
+                    <table class="price-table matrix-edit-table" id="matrixEditTable">
+                      <thead></thead>
+                      <tbody id="matrixEditBody"></tbody>
+                    </table>
+                  </div>
+
+                  <div class="matrix-editor-actions">
+                    <button type="button" class="btn btn-primary" id="matrixSaveBtn">Save Matrix</button>
+                    <span class="muted-text" id="matrixSaveStatus"></span>
+                  </div>
+                </div>
               </div>
             </div>
 
